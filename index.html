@@ -21,8 +21,24 @@
       <button id="syncStatusBtn" class="sync-status sync-offline" type="button" aria-label="Cloud synchronization status">
         <span class="sync-dot"></span><span id="syncStatusText">Cloud not connected</span>
       </button>
-      <button id="headerSignOutBtn" class="secondary-btn header-icon-action hidden" type="button" aria-label="Sign out of cloud account" title="Sign out"><span class="header-action-icon" aria-hidden="true">⇥</span><span class="header-action-label">Sign out</span></button>
-      <button id="themeToggle" class="secondary-btn theme-btn header-icon-action" type="button" aria-label="Switch to dark mode" title="Dark mode"><span id="themeToggleIcon" class="header-action-icon" aria-hidden="true">☾</span><span id="themeToggleLabel" class="header-action-label">Dark mode</span></button>
+      <div class="account-menu-wrap">
+        <button id="headerSignOutBtn" class="secondary-btn header-icon-action hidden" type="button" aria-label="Open account menu" title="Account">
+          <span class="header-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0"/></svg>
+          </span><span class="header-action-label">Account</span>
+        </button>
+        <div id="accountMenu" class="account-menu hidden" role="menu" aria-label="Account menu">
+          <div class="account-menu-user"><span>Signed in as</span><strong id="accountMenuEmail">—</strong></div>
+          <button id="accountSyncBtn" type="button" role="menuitem"><span aria-hidden="true">↻</span> Sync now</button>
+          <button id="accountSignOutBtn" type="button" role="menuitem" class="account-signout"><span aria-hidden="true">↪</span> Sign out</button>
+        </div>
+      </div>
+      <button id="themeToggle" class="secondary-btn theme-btn header-icon-action" type="button" aria-label="Switch to dark mode" title="Dark mode">
+        <span id="themeToggleIcon" class="header-action-icon theme-icon" aria-hidden="true">
+          <svg class="moon-icon" viewBox="0 0 24 24" focusable="false"><path d="M20.2 15.4A8.4 8.4 0 0 1 8.6 3.8 8.7 8.7 0 1 0 20.2 15.4Z"/></svg>
+          <svg class="sun-icon" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
+        </span><span id="themeToggleLabel" class="header-action-label">Dark mode</span>
+      </button>
     </div>
   </header>
 
