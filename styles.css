@@ -366,98 +366,21 @@ body.dark .theme-icon .sun-icon{display:block}
   .app-header .header-icon-action{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.18);box-shadow:none}
 }
 
-
-/* Final integrated iPhone header: tiny symbols as part of the practice branding */
-@media (max-width: 767px) {
-  .app-header {
-    min-height: 66px;
-    padding: max(7px, env(safe-area-inset-top)) 12px 7px;
-    gap: 8px;
+/* Refined iPhone header controls: compact, clearly circular, and non-distracting */
+@media(max-width:767px){
+  .header-actions{gap:8px}
+  .app-header .header-icon-action{
+    width:32px;height:32px;min-width:32px;padding:0;border-radius:999px;
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.38);
+    box-shadow:none;
   }
-  .brand-block {
-    flex: 1 1 auto;
-    gap: 10px;
-    min-width: 0;
-  }
-  .hospital-logo {
-    width: 50px;
-    height: 50px;
-    flex: 0 0 50px;
-    border-radius: 14px;
-    box-shadow: 0 5px 13px rgba(0,0,0,.14);
-  }
-  .app-header .eyebrow {
-    font-size: .59rem;
-    letter-spacing: .105em;
-    white-space: nowrap;
-  }
-  .app-header h1 {
-    margin: 2px 0 0;
-    font-size: clamp(.93rem, 4.2vw, 1.13rem);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .app-header .subtitle { display: none; }
-
-  .header-actions {
-    align-self: flex-end;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 7px;
-    margin: 0 1px 3px 0;
-  }
-  .sync-status { display: none; }
-  .header-actions .theme-btn { order: 1; }
-  .header-actions .account-menu-wrap { order: 2; }
-  .app-header .header-icon-action {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    color: rgba(255,255,255,.72);
-    opacity: .9;
-  }
-  .app-header .header-icon-action:hover,
-  .app-header .header-icon-action:focus-visible,
-  .app-header .header-icon-action:active {
-    background: transparent;
-    color: #fff;
-    opacity: 1;
-    transform: none;
-    outline: none;
-  }
-  .header-action-label { display: none; }
-  .header-action-icon,
-  .header-action-icon svg {
-    width: 16px;
-    height: 16px;
-  }
-  .header-action-icon svg {
-    stroke-width: 1.65;
-  }
-  .header-action-icon .more-icon circle {
-    fill: currentColor;
-    stroke: none;
-  }
-  .account-menu {
-    top: calc(env(safe-area-inset-top, 0px) + 59px);
-    right: 8px;
-  }
+  .app-header .header-icon-action:active{background:rgba(255,255,255,.20)}
+  .header-action-icon svg{width:16px;height:16px;stroke-width:1.8}
+  /* Keep automatic sync active, but remove the flashing/status control from the small header. */
+  .app-header #syncStatusBtn{display:none!important}
 }
-
-@media (max-width: 390px) {
-  .app-header { padding-left: 9px; padding-right: 9px; }
-  .hospital-logo { width: 46px; height: 46px; flex-basis: 46px; }
-  .brand-block { gap: 8px; }
-  .app-header .eyebrow { font-size: .54rem; }
-  .app-header h1 { font-size: .91rem; }
-  .header-actions { gap: 5px; }
-  .app-header .header-icon-action { width: 22px; height: 22px; min-width: 22px; }
-  .header-action-icon, .header-action-icon svg { width: 15px; height: 15px; }
+@media(max-width:390px){
+  .app-header .header-icon-action{width:30px;height:30px;min-width:30px}
+  .header-action-icon svg{width:15px;height:15px}
 }
