@@ -365,22 +365,3 @@ body.dark .theme-icon .sun-icon{display:block}
   .account-menu{position:fixed;top:calc(env(safe-area-inset-top,0px) + 64px);right:10px}
   .app-header .header-icon-action{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.18);box-shadow:none}
 }
-
-/* Refined iPhone header controls: compact, clearly circular, and non-distracting */
-@media(max-width:767px){
-  .header-actions{gap:8px}
-  .app-header .header-icon-action{
-    width:32px;height:32px;min-width:32px;padding:0;border-radius:999px;
-    background:rgba(255,255,255,.10);
-    border:1px solid rgba(255,255,255,.38);
-    box-shadow:none;
-  }
-  .app-header .header-icon-action:active{background:rgba(255,255,255,.20)}
-  .header-action-icon svg{width:16px;height:16px;stroke-width:1.8}
-  /* Keep automatic sync active, but remove the flashing/status control from the small header. */
-  .app-header #syncStatusBtn{display:none!important}
-}
-@media(max-width:390px){
-  .app-header .header-icon-action{width:30px;height:30px;min-width:30px}
-  .header-action-icon svg{width:15px;height:15px}
-}

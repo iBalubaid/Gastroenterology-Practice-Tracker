@@ -59,3 +59,15 @@ The original localStorage keys are unchanged and remain the offline cache. Never
 ## Switching accounts
 
 Use the **Sign out** button in the header or in Private → Sync. The tracker creates a local backup, clears the signed-in user's device cache, and returns to the login screen. Cloud records are not deleted. Sign in with another Supabase account to load only that user's data.
+
+## Stable synchronization mode
+
+This version intentionally disables focus-triggered, reconnect-triggered, and Supabase Realtime full-database synchronization.
+
+Synchronization now occurs only:
+- once after sign-in/opening the authenticated app,
+- after an individual save, edit, delete, or clear operation,
+- when **Sync Now** is pressed,
+- when **Upload local data** is deliberately selected for initial migration.
+
+When signed in, destructive actions and saves require an internet connection so cloud confirmation occurs before the local cache is changed. This prevents deleted records from returning during a later refresh.
