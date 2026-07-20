@@ -18,26 +18,11 @@
       </div>
     </div>
     <div class="header-actions">
-      <button id="syncStatusBtn" class="sync-status sync-offline" type="button" aria-label="Cloud synchronization status">
-        <span class="sync-dot"></span><span id="syncStatusText">Cloud not connected</span>
-      </button>
-      <div class="account-menu-wrap">
-        <button id="headerSignOutBtn" class="secondary-btn header-icon-action hidden" type="button" aria-label="Open account menu" title="Account">
-          <span class="header-action-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" focusable="false"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0"/></svg>
-          </span><span class="header-action-label">Account</span>
-        </button>
-        <div id="accountMenu" class="account-menu hidden" role="menu" aria-label="Account menu">
-          <div class="account-menu-user"><span>Signed in as</span><strong id="accountMenuEmail">—</strong></div>
-          <button id="accountSyncBtn" type="button" role="menuitem"><span aria-hidden="true">↻</span> Sync now</button>
-          <button id="accountSignOutBtn" type="button" role="menuitem" class="account-signout"><span aria-hidden="true">↪</span> Sign out</button>
-        </div>
-      </div>
       <button id="themeToggle" class="secondary-btn theme-btn header-icon-action" type="button" aria-label="Switch to dark mode" title="Dark mode">
         <span id="themeToggleIcon" class="header-action-icon theme-icon" aria-hidden="true">
           <svg class="moon-icon" viewBox="0 0 24 24" focusable="false"><path d="M20.2 15.4A8.4 8.4 0 0 1 8.6 3.8 8.7 8.7 0 1 0 20.2 15.4Z"/></svg>
           <svg class="sun-icon" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
-        </span><span id="themeToggleLabel" class="header-action-label">Dark mode</span>
+        </span>
       </button>
     </div>
   </header>
@@ -249,7 +234,6 @@
             <button class="private-nav-btn" type="button" data-private-view="hospitals">Hospitals</button>
             <button class="private-nav-btn" type="button" data-private-view="fees">Fees</button>
             <button class="private-nav-btn" type="button" data-private-view="backup">Backup</button>
-            <button class="private-nav-btn" type="button" data-private-view="sync">Sync</button>
           </nav>
         </section>
 
@@ -363,50 +347,11 @@
             </article>
           </div>
         </section>
-
-        <section class="card private-view hidden" data-private-section="sync">
-          <div class="section-heading"><div><p class="eyebrow">Cloud synchronization</p><h2>Mac &amp; iPhone Sync</h2><p class="section-help">Clinic records, endoscopy records, target, fee settings, private password hash, and theme are synchronized through your Supabase account.</p></div></div>
-          <div class="sync-dashboard-grid">
-            <article class="backup-panel">
-              <h3>Account</h3>
-              <div class="backup-status"><div><span>Status</span><strong id="privateSyncStatus">Not signed in</strong></div><div><span>Signed in as</span><strong id="syncUserEmail">—</strong></div><div><span>Last sync</span><strong id="lastSupabaseSync">Never</strong></div></div>
-              <div class="backup-actions"><button id="syncNowBtn" class="primary-btn" type="button">Sync now</button><button id="signOutBtn" class="secondary-btn" type="button">Sign out</button></div>
-              <div id="syncMessage" class="form-message"></div>
-            </article>
-            <article class="backup-panel">
-              <h3>Existing device data</h3>
-              <p class="section-help">Use this once on the device that contains your complete records. The upload merges records by ID and never clears the local copy.</p>
-              <div class="backup-status"><div><span>Local clinic records</span><strong id="syncLocalClinicCount">0</strong></div><div><span>Local procedure records</span><strong id="syncLocalProcedureCount">0</strong></div><div><span>Cloud clinic records</span><strong id="syncCloudClinicCount">0</strong></div><div><span>Cloud procedure records</span><strong id="syncCloudProcedureCount">0</strong></div></div>
-              <div class="backup-actions"><button id="uploadLocalDataBtn" class="secondary-btn" type="button">Upload local data</button><button id="downloadCloudDataBtn" class="secondary-btn" type="button">Download cloud data</button></div>
-              <p class="backup-note">Always keep a downloaded JSON backup before the first migration. Cloud and local records are merged using each record’s ID and most recent update time.</p>
-            </article>
-          </div>
-        </section>
-
-      </div>
+</div>
     </section>
 
   </main>
-  <div id="cloudAuthOverlay" class="cloud-auth-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="cloudAuthTitle">
-    <section class="cloud-auth-card">
-      <img src="hmg-logo.webp" alt="" class="cloud-auth-logo" />
-      <p class="eyebrow">Secure cloud sync</p>
-      <h2 id="cloudAuthTitle">Sign in to synchronize</h2>
-      <p class="section-help">Use the same Supabase account on your Mac and iPhone. Your existing device records remain stored locally.</p>
-      <form id="cloudAuthForm" class="password-form">
-        <label><span>Email</span><input id="cloudEmail" type="email" autocomplete="email" required /></label>
-        <label><span>Password</span><input id="cloudPassword" type="password" minlength="6" autocomplete="current-password" required /></label>
-        <div id="cloudAuthMessage" class="form-message"></div>
-        <button id="cloudSignInBtn" class="primary-btn" type="submit">Sign in</button>
-      </form>
-      <div class="cloud-auth-actions">
-        <button id="cloudCreateAccountBtn" class="text-btn" type="button">Create account</button>
-        <button id="cloudOfflineBtn" class="text-btn" type="button">Continue on this device only</button>
-      </div>
-      <p class="security-note">The publishable key is safe for browser use only when Row Level Security is enabled. Never place a service-role key in this webpage.</p>
-    </section>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script src="app.js"></script>
 </body>
 </html>
