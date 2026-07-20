@@ -379,3 +379,19 @@ body.dark #themeToggle .sun-icon{display:block}
 .private-lock-btn.unlocked .lock-closed-icon{display:none}
 .private-lock-btn.unlocked .lock-open-icon{display:block}
 @media(max-width:760px){.private-lock-btn{width:28px;height:28px;min-width:28px}.private-lock-btn .header-action-icon,.private-lock-btn svg{width:13px;height:13px}}
+
+
+/* iPhone layout refinements */
+.reset-private-password-btn{margin-top:10px;padding:8px 4px;font-size:.84rem}
+@media(max-width:760px){
+  .module-nav-row{display:block;width:100%;margin-bottom:14px}
+  .module-nav-row .module-tabs{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}
+  .module-tab{width:100%;min-width:0;justify-content:center;text-align:center;min-height:50px;padding:10px 8px;border-radius:14px}
+  .module-tab .tab-icon{display:none}
+  .module-tab span:last-child{display:block}
+  .module-tab small{display:none}
+  .module-tab strong{font-size:.95rem}
+  #themeToggle,.private-lock-btn{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;max-width:30px!important;max-height:30px!important;aspect-ratio:1/1;flex:0 0 30px;padding:0!important;border-radius:50%!important;line-height:1}
+  #themeToggle .header-action-icon,#themeToggle svg,.private-lock-btn .header-action-icon,.private-lock-btn svg{width:14px!important;height:14px!important}
+  .header-actions{gap:7px;align-self:center}
+}

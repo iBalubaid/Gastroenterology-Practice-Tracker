@@ -285,6 +285,22 @@ function openPrivateAccess(){
   $('incomeDashboard').classList.add('hidden');
   setTimeout(()=>$('incomePassword')?.focus(),50);
 }
+
+function resetPrivatePasswordOnDevice(){
+  if(!hasIncomePassword()){
+    configureIncomeLock();
+    msg('incomePasswordMessage','No password is currently saved on this device. Create a new password above.');
+    return;
+  }
+  if(!confirm('Reset the private dashboard password on this device? Your clinic, endoscopy, income, and fee data will not be deleted.'))return;
+  createAutomaticLocalBackup('Before password reset');
+  localStorage.removeItem(INCOME_PASSWORD_KEY);
+  incomeUnlocked=false;
+  configureIncomeLock();
+  msg('incomePasswordMessage','Password reset. Create a new password for this device.');
+  setTimeout(()=>$('incomePassword')?.focus(),50);
+}
+
 function initIncome(){
   incomeUnlocked=false;
   $('incomeMonth').value=currentMonthKey();
@@ -295,6 +311,7 @@ function initIncome(){
   updatePrivateAccessButton();
   $('privateAccessBtn').onclick=openPrivateAccess;
   $('incomePasswordForm').addEventListener('submit',submitIncomePassword);
+  $('resetPrivatePasswordBtn').onclick=resetPrivatePasswordOnDevice;
   $('lockIncomeBtn').onclick=lockIncome;
   $('incomeMonth').onchange=()=>{renderIncomeDashboard();renderPrivateOverview();renderPrivateHospitalCards()};
   $('saveIncomeTargetBtn').onclick=saveIncomeTarget;
