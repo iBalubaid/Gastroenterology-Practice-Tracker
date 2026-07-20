@@ -257,7 +257,12 @@ function configureIncomeLock(){
   $('incomePasswordConfirm').required=setup;
   $('incomePassword').autocomplete=setup?'new-password':'current-password';
   $('incomePassword').value='';$('incomePasswordConfirm').value='';$('incomePasswordMessage').textContent='';
+  $('forgotPrivatePasswordBtn')?.classList.toggle('hidden',setup);
+  $('forgotPasswordPanel')?.classList.add('hidden');
+  if($('forgotPasswordConfirmText'))$('forgotPasswordConfirmText').value='';
+  if($('forgotPasswordMessage'))$('forgotPasswordMessage').textContent='';
 }
+
 async function submitIncomePassword(e){
   e.preventDefault();const pass=$('incomePassword').value;
   if(pass.length<4)return msg('incomePasswordMessage','Password must contain at least 4 characters.');
@@ -268,6 +273,40 @@ async function submitIncomePassword(e){
   if(await hashPassword(pass)!==localStorage.getItem(INCOME_PASSWORD_KEY))return msg('incomePasswordMessage','Incorrect password.');
   unlockIncome();
 }
+
+async function changePrivatePassword(){
+  const current=$('currentPrivatePassword')?.value||'', next=$('newPrivatePassword')?.value||'', confirmNext=$('confirmNewPrivatePassword')?.value||'';
+  msg('changePrivatePasswordMessage','');
+  if(!hasIncomePassword())return msg('changePrivatePasswordMessage','No private password is currently set. Lock the dashboard and create one first.');
+  if(await hashPassword(current)!==localStorage.getItem(INCOME_PASSWORD_KEY))return msg('changePrivatePasswordMessage','Current password is incorrect.');
+  if(next.length<4)return msg('changePrivatePasswordMessage','New password must contain at least 4 characters.');
+  if(next!==confirmNext)return msg('changePrivatePasswordMessage','New passwords do not match.');
+  createAutomaticLocalBackup('Before password change');
+  localStorage.setItem(INCOME_PASSWORD_KEY,await hashPassword(next));
+  createAutomaticLocalBackup('Private password changed');
+  $('currentPrivatePassword').value='';$('newPrivatePassword').value='';$('confirmNewPrivatePassword').value='';
+  msg('changePrivatePasswordMessage','Password changed successfully.');
+}
+function openForgotPasswordPanel(){
+  $('forgotPasswordPanel')?.classList.remove('hidden');
+  $('forgotPasswordConfirmText')?.focus();
+}
+function closeForgotPasswordPanel(){
+  $('forgotPasswordPanel')?.classList.add('hidden');
+  if($('forgotPasswordConfirmText'))$('forgotPasswordConfirmText').value='';
+  if($('forgotPasswordMessage'))$('forgotPasswordMessage').textContent='';
+}
+function resetForgottenPrivatePassword(){
+  if(($('forgotPasswordConfirmText')?.value||'').trim().toUpperCase()!=='RESET')return msg('forgotPasswordMessage','Type RESET exactly to continue.');
+  createAutomaticLocalBackup('Before forgotten-password reset');
+  localStorage.removeItem(INCOME_PASSWORD_KEY);
+  createAutomaticLocalBackup('Private password reset');
+  closeForgotPasswordPanel();
+  configureIncomeLock();
+  msg('incomePasswordMessage','Password reset. Create a new password.');
+  $('incomePassword')?.focus();
+}
+
 function unlockIncome(){incomeUnlocked=true;$('incomeTab').classList.remove('hidden');$('privateAccessBtn')?.classList.add('hidden');$('incomeLockScreen').classList.add('hidden');$('incomeDashboard').classList.remove('hidden');$('incomePasswordForm').reset();activateModule('incomeModule',$('incomeTab'));setPrivateView('overview');renderIncomeDashboard();renderPerformanceDashboard();renderPrivateOverview();renderPrivateHospitalCards()}
 function lockIncome(){incomeUnlocked=false;$('incomeDashboard').classList.add('hidden');$('incomeLockScreen').classList.remove('hidden');$('incomeTab').classList.add('hidden');$('privateAccessBtn')?.classList.remove('hidden');configureIncomeLock();activateModule('clinicModule')}
 function initIncome(){
@@ -287,7 +326,12 @@ function initIncome(){
   }
   document.querySelectorAll('.private-nav-btn').forEach(btn=>btn.onclick=()=>setPrivateView(btn.dataset.privateView));
   $('privateDashboardLockBtn')?.addEventListener('click',lockIncome);
+  $('changePrivatePasswordBtn')?.addEventListener('click',changePrivatePassword);
+  $('forgotPrivatePasswordBtn')?.addEventListener('click',openForgotPasswordPanel);
+  $('cancelForgotPasswordBtn')?.addEventListener('click',closeForgotPasswordPanel);
+  $('confirmForgotPasswordBtn')?.addEventListener('click',resetForgottenPrivatePassword);
 }
+
 function renderFeeSettings(){
   $('feeSettingsGrid').innerHTML=Object.keys(DEFAULT_FEES).map((name,i)=>`<label><span>${esc(name)}</span><input class="fee-input" data-fee="${esc(name)}" type="number" min="0" step="1" value="${Number(incomeSettings.fees[name]||0)}" /></label>`).join('');
 }

@@ -218,6 +218,13 @@
           <div id="incomePasswordMessage" class="form-message"></div>
           <button class="primary-btn" type="submit"><span id="incomePasswordButton">Unlock</span></button>
         </form>
+        <button id="forgotPrivatePasswordBtn" class="text-action-btn hidden" type="button">Forgot password?</button>
+        <div id="forgotPasswordPanel" class="password-reset-panel hidden">
+          <p>Because this tracker is stored only on this device, identity cannot be verified by email. Type <strong>RESET</strong> to remove the private password. Your clinic and procedure records will not be deleted.</p>
+          <label><span>Confirmation</span><input id="forgotPasswordConfirmText" type="text" autocomplete="off" placeholder="Type RESET" /></label>
+          <div class="backup-actions"><button id="confirmForgotPasswordBtn" class="danger-btn" type="button">Reset password</button><button id="cancelForgotPasswordBtn" class="secondary-btn" type="button">Cancel</button></div>
+          <div id="forgotPasswordMessage" class="form-message"></div>
+        </div>
         <p class="security-note">The password protects this section from casual access on this browser. Because this is an offline webpage, it is not equivalent to server-based authentication.</p>
       </section>
 
@@ -346,6 +353,17 @@
               <p class="backup-note">Google requires a free OAuth client ID for your GitHub Pages address. The backup file is saved in your Drive as <strong>Gastroenterology Practice Tracker Backup.json</strong>. The password itself is never stored—only its existing hash.</p>
             </article>
           </div>
+          <article class="backup-panel password-management-panel">
+            <h3>Private password</h3>
+            <p class="section-help">Change the password used to open the Private Dashboard.</p>
+            <div class="password-change-grid">
+              <label><span>Current password</span><input id="currentPrivatePassword" type="password" autocomplete="current-password" /></label>
+              <label><span>New password</span><input id="newPrivatePassword" type="password" minlength="4" autocomplete="new-password" /></label>
+              <label><span>Confirm new password</span><input id="confirmNewPrivatePassword" type="password" minlength="4" autocomplete="new-password" /></label>
+            </div>
+            <button id="changePrivatePasswordBtn" class="primary-btn settings-save" type="button">Change password</button>
+            <div id="changePrivatePasswordMessage" class="form-message"></div>
+          </article>
         </section>
 </div>
     </section>
