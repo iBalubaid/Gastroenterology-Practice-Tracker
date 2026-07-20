@@ -1,8 +1,7 @@
 # Changelog
 
-## 2.1.0
-- Added separate Pending Endoscopy queues for Fayhaa and Mohammadiya.
-- Start a pending patient to prefill the Endoscopy form.
-- Direct Endoscopy entry remains available.
-- Completing a pending case moves it into the Endoscopy log.
-- Pending records are included in backup and restore.
+## 2.3.0
+- Added optional Face ID / platform biometric unlock for the Private Dashboard using WebAuthn.
+- Password remains available as a fallback.
+- Face ID is enabled separately on each device and is not transferred in backups.
+- Requires HTTPS, such as GitHub Pages.

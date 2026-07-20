@@ -1,5 +1,12 @@
 const CLINIC_KEY="dailyClinicTrackerEntriesV1", ENDO_KEY="hmgEndoscopyEntriesV1", PENDING_KEY="practicePendingEndoscopyV1", THEME_KEY="dailyClinicTrackerTheme", INCOME_SETTINGS_KEY="practiceIncomeSettingsV1", INCOME_PASSWORD_KEY="practiceIncomePasswordHashV1";
 const LOCAL_BACKUPS_KEY="practiceAutomaticBackupsV1";
+const GOOGLE_CLIENT_ID_KEY="practiceGoogleDriveClientIdV1";
+const GOOGLE_DRIVE_LAST_BACKUP_KEY="practiceGoogleDriveLastBackupV1";
+const GOOGLE_DRIVE_AUTO_KEY="practiceGoogleDriveAutoBackupV1";
+const GOOGLE_DRIVE_FILE_NAME="gastroenterology-practice-tracker-latest.json";
+const FACE_ID_CREDENTIAL_KEY="practiceFaceIdCredentialV1";
+const FACE_ID_ENABLED_KEY="practiceFaceIdEnabledV1";
+const GOOGLE_DRIVE_SCOPE="https://www.googleapis.com/auth/drive.appdata";
 const clinicState={entries:load(CLINIC_KEY),search:"",filter:""};
 const endoState={entries:load(ENDO_KEY),search:"",filter:""};
 const pendingState={entries:load(PENDING_KEY),hospital:"HMG Fayhaa",search:""};
@@ -264,6 +271,49 @@ async function hashPassword(value){
   return btoa(unescape(encodeURIComponent(value)))
 }
 function hasIncomePassword(){return Boolean(localStorage.getItem(INCOME_PASSWORD_KEY))}
+function base64UrlEncode(bytes){return btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function base64UrlDecode(value){const pad='='.repeat((4-value.length%4)%4),base64=(value+pad).replace(/-/g,'+').replace(/_/g,'/');const raw=atob(base64);return Uint8Array.from(raw,c=>c.charCodeAt(0))}
+function randomBytes(length=32){const bytes=new Uint8Array(length);crypto.getRandomValues(bytes);return bytes}
+function isFaceIdSupported(){return Boolean(window.PublicKeyCredential&&navigator.credentials&&window.isSecureContext)}
+function isFaceIdEnabled(){return localStorage.getItem(FACE_ID_ENABLED_KEY)==='true'&&Boolean(localStorage.getItem(FACE_ID_CREDENTIAL_KEY))}
+function setFaceIdMessage(text,isError=false){const el=$('faceIdMessage');if(!el)return;el.textContent=text;el.classList.toggle('error',Boolean(isError))}
+function renderFaceIdStatus(){
+  const supported=isFaceIdSupported(),enabled=isFaceIdEnabled();
+  if($('faceIdStatus'))$('faceIdStatus').textContent=enabled?'Enabled':'Not enabled';
+  if($('faceIdDeviceStatus'))$('faceIdDeviceStatus').textContent=supported?'Supported':'Unavailable';
+  if($('enableFaceIdBtn'))$('enableFaceIdBtn').disabled=!supported||enabled;
+  if($('disableFaceIdBtn'))$('disableFaceIdBtn').disabled=!enabled;
+}
+async function enableFaceId(){
+  if(!incomeUnlocked)return setFaceIdMessage('Unlock the Private Dashboard with your password first.',true);
+  if(!isFaceIdSupported())return setFaceIdMessage('Face ID is unavailable. Open the tracker from its HTTPS GitHub Pages address in Safari.',true);
+  setFaceIdMessage('Waiting for Face ID…');
+  try{
+    const userId=randomBytes(16);
+    const credential=await navigator.credentials.create({publicKey:{challenge:randomBytes(32),rp:{name:'Gastroenterology Practice Tracker'},user:{id:userId,name:'private-dashboard',displayName:'Private Dashboard'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',residentKey:'preferred',userVerification:'required'},timeout:60000,attestation:'none'}});
+    if(!credential)throw new Error('Face ID setup was cancelled.');
+    localStorage.setItem(FACE_ID_CREDENTIAL_KEY,base64UrlEncode(credential.rawId));
+    localStorage.setItem(FACE_ID_ENABLED_KEY,'true');
+    createAutomaticLocalBackup('Face ID enabled');
+    renderFaceIdStatus();setFaceIdMessage('Face ID enabled on this device.');
+  }catch(err){setFaceIdMessage(err?.message||'Unable to enable Face ID.',true)}
+}
+function disableFaceId(){
+  if(!confirm('Disable Face ID unlock on this device? Your password will still work.'))return;
+  localStorage.removeItem(FACE_ID_CREDENTIAL_KEY);localStorage.removeItem(FACE_ID_ENABLED_KEY);
+  createAutomaticLocalBackup('Face ID disabled');renderFaceIdStatus();setFaceIdMessage('Face ID disabled.');
+}
+async function tryFaceIdUnlock(){
+  if(!isFaceIdEnabled()||!isFaceIdSupported())return false;
+  try{
+    const id=base64UrlDecode(localStorage.getItem(FACE_ID_CREDENTIAL_KEY));
+    const result=await navigator.credentials.get({publicKey:{challenge:randomBytes(32),allowCredentials:[{id,type:'public-key',transports:['internal']}],userVerification:'required',timeout:60000}});
+    if(result){unlockIncome();return true}
+  }catch(err){
+    if(err?.name!=='NotAllowedError')console.warn('Face ID unlock failed',err);
+  }
+  return false;
+}
 function configureIncomeLock(){
   const setup=!hasIncomePassword();
   $('incomeLockTitle').textContent=setup?'Create Income Dashboard Password':'Unlock Income Dashboard';
@@ -294,12 +344,13 @@ function updatePrivateAccessButton(){
   button.setAttribute('aria-label',incomeUnlocked?'Lock private dashboard':'Open private dashboard');
   button.title=incomeUnlocked?'Lock private dashboard':'Private dashboard';
 }
-function openPrivateAccess(){
+async function openPrivateAccess(){
   if(incomeUnlocked){lockIncome();return;}
-  configureIncomeLock();
   activateModule('incomeModule');
-  $('incomeLockScreen').classList.remove('hidden');
   $('incomeDashboard').classList.add('hidden');
+  if(await tryFaceIdUnlock())return;
+  configureIncomeLock();
+  $('incomeLockScreen').classList.remove('hidden');
   setTimeout(()=>$('incomePassword')?.focus(),50);
 }
 
@@ -329,6 +380,9 @@ function initIncome(){
   $('privateAccessBtn').onclick=openPrivateAccess;
   $('incomePasswordForm').addEventListener('submit',submitIncomePassword);
   $('resetPrivatePasswordBtn').onclick=resetPrivatePasswordOnDevice;
+  if($('enableFaceIdBtn'))$('enableFaceIdBtn').onclick=enableFaceId;
+  if($('disableFaceIdBtn'))$('disableFaceIdBtn').onclick=disableFaceId;
+  renderFaceIdStatus();
   $('lockIncomeBtn').onclick=lockIncome;
   $('incomeMonth').onchange=()=>{renderIncomeDashboard();renderPrivateOverview();renderPrivateHospitalCards()};
   $('saveIncomeTargetBtn').onclick=saveIncomeTarget;
@@ -467,7 +521,7 @@ function downloadBackup(){
   const data=JSON.stringify(backupPayload(),null,2),url=URL.createObjectURL(new Blob([data],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=`gastroenterology-practice-backup-${today()}.json`;a.click();URL.revokeObjectURL(url);
 }
 function restoreBackupFile(file){
-  const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(data.format!=='gastroenterology-practice-tracker-backup')throw new Error('Not a valid tracker backup.');if(!confirm('Restore this backup? Current tracker data will be replaced.'))return;createAutomaticLocalBackup('Before restore');localStorage.setItem(CLINIC_KEY,JSON.stringify(data.clinicRecords||[]));localStorage.setItem(ENDO_KEY,JSON.stringify(data.procedureRecords||[]));localStorage.setItem(PENDING_KEY,JSON.stringify(data.pendingRecords||[]));localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(data.incomeSettings||{}));if(data.passwordHash)localStorage.setItem(INCOME_PASSWORD_KEY,data.passwordHash);else localStorage.removeItem(INCOME_PASSWORD_KEY);if(data.theme)localStorage.setItem(THEME_KEY,data.theme);location.reload()}catch(err){alert(err.message||'Unable to restore this file.')}};reader.readAsText(file);
+  const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(data.format!=='gastroenterology-practice-tracker-backup')throw new Error('Not a valid tracker backup.');if(!confirm('Restore this backup? Current tracker data will be replaced.'))return;createAutomaticLocalBackup('Before restore');localStorage.setItem(CLINIC_KEY,JSON.stringify(data.clinicRecords||[]));localStorage.setItem(ENDO_KEY,JSON.stringify(data.procedureRecords||[]));localStorage.setItem(PENDING_KEY,JSON.stringify(data.pendingRecords||[]));localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(data.incomeSettings||{}));if(data.passwordHash)localStorage.setItem(INCOME_PASSWORD_KEY,data.passwordHash);else localStorage.removeItem(INCOME_PASSWORD_KEY);if(data.theme)localStorage.setItem(THEME_KEY,data.theme);localStorage.removeItem(FACE_ID_CREDENTIAL_KEY);localStorage.removeItem(FACE_ID_ENABLED_KEY);location.reload()}catch(err){alert(err.message||'Unable to restore this file.')}};reader.readAsText(file);
 }
 function initBackups(){
   if(!loadLocalBackups().length)createAutomaticLocalBackup('Initial backup');else renderBackupStatus();
@@ -476,12 +530,91 @@ function initBackups(){
   $('restoreBackupFile').onchange=e=>{if(e.target.files[0])restoreBackupFile(e.target.files[0]);e.target.value=''};
 }
 
+
+// Optional Google Drive backup. Local storage remains the primary database.
+let googleTokenClient=null,googleAccessToken='',googleTokenExpiresAt=0,googleDriveOperation=null;
+function setGoogleDriveMessage(text,isError=false){const el=$('googleDriveMessage');if(el){el.textContent=text||'';el.classList.toggle('error',!!isError)}}
+function renderGoogleDriveStatus(){
+  const connected=!!googleAccessToken&&Date.now()<googleTokenExpiresAt;
+  if($('googleDriveStatus'))$('googleDriveStatus').textContent=connected?'Connected':'Not connected';
+  if($('lastGoogleDriveBackup'))$('lastGoogleDriveBackup').textContent=formatBackupTime(localStorage.getItem(GOOGLE_DRIVE_LAST_BACKUP_KEY));
+  if($('connectGoogleDriveBtn'))$('connectGoogleDriveBtn').textContent=connected?'Reconnect':'Connect';
+}
+function waitForGoogleIdentity(timeout=8000){return new Promise((resolve,reject)=>{const start=Date.now(),timer=setInterval(()=>{if(window.google?.accounts?.oauth2){clearInterval(timer);resolve()}else if(Date.now()-start>timeout){clearInterval(timer);reject(new Error('Google sign-in library did not load. Check your internet connection.'))}},100)})}
+async function initializeGoogleTokenClient(){
+  const clientId=($('googleClientId')?.value||localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||'').trim();
+  if(!clientId)throw new Error('Enter your Google OAuth Web Client ID first.');
+  if(!clientId.endsWith('.apps.googleusercontent.com'))throw new Error('The Google Client ID format does not look correct.');
+  localStorage.setItem(GOOGLE_CLIENT_ID_KEY,clientId);
+  await waitForGoogleIdentity();
+  googleTokenClient=google.accounts.oauth2.initTokenClient({client_id:clientId,scope:GOOGLE_DRIVE_SCOPE,callback:response=>{
+    if(response?.error){setGoogleDriveMessage(response.error_description||response.error,true);googleDriveOperation=null;return}
+    googleAccessToken=response.access_token;googleTokenExpiresAt=Date.now()+Math.max(60,Number(response.expires_in||3600)-60)*1000;renderGoogleDriveStatus();setGoogleDriveMessage('Google Drive connected.');
+    const operation=googleDriveOperation;googleDriveOperation=null;if(operation)operation().catch(err=>setGoogleDriveMessage(err.message||'Google Drive operation failed.',true));else maybeRunDailyGoogleBackup();
+  }});
+}
+async function requestGoogleDriveAccess(operation=null){
+  googleDriveOperation=operation;await initializeGoogleTokenClient();googleTokenClient.requestAccessToken({prompt:googleAccessToken?'':'consent'});
+}
+async function withGoogleDriveToken(operation){
+  if(googleAccessToken&&Date.now()<googleTokenExpiresAt)return operation();
+  await requestGoogleDriveAccess(operation);
+}
+async function driveFetch(url,options={}){
+  const headers=new Headers(options.headers||{});headers.set('Authorization','Bearer '+googleAccessToken);
+  const response=await fetch(url,{...options,headers});
+  if(response.status===401){googleAccessToken='';googleTokenExpiresAt=0;renderGoogleDriveStatus();throw new Error('Google Drive authorization expired. Tap Connect and try again.')}
+  if(!response.ok){let detail='';try{detail=(await response.json())?.error?.message||''}catch{}throw new Error(detail||`Google Drive error (${response.status}).`)}
+  return response;
+}
+async function findLatestDriveBackup(){
+  const q=encodeURIComponent(`name='${GOOGLE_DRIVE_FILE_NAME}' and trashed=false`);
+  const url=`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&orderBy=modifiedTime%20desc&pageSize=1&fields=files(id,name,modifiedTime,size)`;
+  const data=await (await driveFetch(url)).json();return data.files?.[0]||null;
+}
+async function uploadGoogleDriveBackup(){
+  setGoogleDriveMessage('Backing up to Google Drive…');createAutomaticLocalBackup('Before Google Drive backup');
+  const json=JSON.stringify(backupPayload(),null,2),existing=await findLatestDriveBackup();
+  if(existing){await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(existing.id)}?uploadType=media`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:json});}
+  else{
+    const boundary='gp_tracker_'+Date.now();
+    const metadata=JSON.stringify({name:GOOGLE_DRIVE_FILE_NAME,parents:['appDataFolder'],mimeType:'application/json'});
+    const body=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${json}\r\n--${boundary}--`;
+    await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime',{method:'POST',headers:{'Content-Type':`multipart/related; boundary=${boundary}`},body});
+  }
+  const stamp=new Date().toISOString();localStorage.setItem(GOOGLE_DRIVE_LAST_BACKUP_KEY,stamp);renderGoogleDriveStatus();setGoogleDriveMessage('Google Drive backup completed successfully.');
+}
+async function restoreLatestGoogleDriveBackup(){
+  setGoogleDriveMessage('Checking Google Drive…');const file=await findLatestDriveBackup();if(!file)throw new Error('No Google Drive backup was found.');
+  const data=await (await driveFetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(file.id)}?alt=media`)).json();
+  if(data.format!=='gastroenterology-practice-tracker-backup')throw new Error('The Google Drive file is not a valid tracker backup.');
+  const summary=`${(data.clinicRecords||[]).length} clinic, ${(data.pendingRecords||[]).length} pending, and ${(data.procedureRecords||[]).length} procedure records`;
+  if(!confirm(`Restore the latest Google Drive backup (${summary})? Current tracker data on this device will be replaced.`))return;
+  createAutomaticLocalBackup('Before Google Drive restore');localStorage.setItem(CLINIC_KEY,JSON.stringify(data.clinicRecords||[]));localStorage.setItem(ENDO_KEY,JSON.stringify(data.procedureRecords||[]));localStorage.setItem(PENDING_KEY,JSON.stringify(data.pendingRecords||[]));localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(data.incomeSettings||{}));if(data.passwordHash)localStorage.setItem(INCOME_PASSWORD_KEY,data.passwordHash);else localStorage.removeItem(INCOME_PASSWORD_KEY);if(data.theme)localStorage.setItem(THEME_KEY,data.theme);localStorage.removeItem(FACE_ID_CREDENTIAL_KEY);localStorage.removeItem(FACE_ID_ENABLED_KEY);location.reload();
+}
+function disconnectGoogleDrive(){
+  if(googleAccessToken&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(googleAccessToken,()=>{});googleAccessToken='';googleTokenExpiresAt=0;googleTokenClient=null;googleDriveOperation=null;renderGoogleDriveStatus();setGoogleDriveMessage('Disconnected from Google Drive.');
+}
+function isGoogleBackupDue(){const last=localStorage.getItem(GOOGLE_DRIVE_LAST_BACKUP_KEY);return !last||last.slice(0,10)!==new Date().toISOString().slice(0,10)}
+function maybeRunDailyGoogleBackup(){if(localStorage.getItem(GOOGLE_DRIVE_AUTO_KEY)==='true'&&googleAccessToken&&Date.now()<googleTokenExpiresAt&&isGoogleBackupDue())uploadGoogleDriveBackup().catch(err=>setGoogleDriveMessage(err.message,true))}
+function initGoogleDriveBackup(){
+  if(!$('googleClientId'))return;$('googleClientId').value=localStorage.getItem(GOOGLE_CLIENT_ID_KEY)||'';$('googleDriveAutoBackup').checked=localStorage.getItem(GOOGLE_DRIVE_AUTO_KEY)==='true';renderGoogleDriveStatus();
+  $('googleClientId').onchange=e=>{localStorage.setItem(GOOGLE_CLIENT_ID_KEY,e.target.value.trim());googleTokenClient=null;googleAccessToken='';googleTokenExpiresAt=0;renderGoogleDriveStatus()};
+  $('googleDriveAutoBackup').onchange=e=>{localStorage.setItem(GOOGLE_DRIVE_AUTO_KEY,String(e.target.checked));if(e.target.checked)maybeRunDailyGoogleBackup()};
+  $('connectGoogleDriveBtn').onclick=()=>requestGoogleDriveAccess().catch(err=>setGoogleDriveMessage(err.message,true));
+  $('googleDriveBackupNowBtn').onclick=()=>withGoogleDriveToken(uploadGoogleDriveBackup).catch(err=>setGoogleDriveMessage(err.message,true));
+  $('googleDriveRestoreBtn').onclick=()=>withGoogleDriveToken(restoreLatestGoogleDriveBackup).catch(err=>setGoogleDriveMessage(err.message,true));
+  $('disconnectGoogleDriveBtn').onclick=disconnectGoogleDrive;
+  setInterval(maybeRunDailyGoogleBackup,60000);
+}
+
 initStatsFilters();
 initClinic();
 initPending();
 initEndo();
 initIncome();
 initBackups();
+initGoogleDriveBackup();
 
 // Monthly clinic trend tabs
 document.querySelectorAll('[data-clinic-trend]').forEach(btn=>btn.addEventListener('click',()=>setClinicTrendView(btn.dataset.clinicTrend)));

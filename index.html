@@ -362,6 +362,27 @@
               <div class="backup-actions"><button id="downloadBackupBtn" class="secondary-btn" type="button">Download backup</button><button id="restoreBackupBtn" class="secondary-btn" type="button">Restore file</button><input id="restoreBackupFile" class="hidden" type="file" accept="application/json,.json" /></div>
               <div id="localBackupHistory" class="backup-history"></div>
             </article>
+
+            <article class="backup-panel faceid-panel">
+              <h3>Face ID unlock</h3>
+              <p class="section-help">Use Face ID on this iPhone to unlock the Private Dashboard. Your password remains available as a fallback.</p>
+              <div class="backup-status"><div><span>Face ID status</span><strong id="faceIdStatus">Not enabled</strong></div><div><span>Device</span><strong id="faceIdDeviceStatus">Checking…</strong></div></div>
+              <div class="backup-actions"><button id="enableFaceIdBtn" class="primary-btn" type="button">Enable Face ID</button><button id="disableFaceIdBtn" class="secondary-btn" type="button">Disable Face ID</button></div>
+              <div id="faceIdMessage" class="form-message" aria-live="polite"></div>
+              <p class="estimate-disclaimer">Face ID works only when the tracker is opened from an HTTPS address such as GitHub Pages. It is enabled separately on each device.</p>
+            </article>
+            <article class="backup-panel google-drive-panel">
+              <h3>Google Drive backup</h3>
+              <p class="section-help">Optional cloud backup only. Your tracker continues to use local storage and does not synchronize records between devices.</p>
+              <label class="field-label" for="googleClientId">Google OAuth Web Client ID</label>
+              <input id="googleClientId" class="text-input" type="text" inputmode="text" autocomplete="off" placeholder="...apps.googleusercontent.com" />
+              <p class="section-help compact-help">Enter this once after creating a Google OAuth Web Client ID and enabling the Google Drive API.</p>
+              <div class="backup-status"><div><span>Drive status</span><strong id="googleDriveStatus">Not connected</strong></div><div><span>Last Drive backup</span><strong id="lastGoogleDriveBackup">Never</strong></div></div>
+              <label class="drive-auto-row"><input id="googleDriveAutoBackup" type="checkbox" /> <span>Daily backup while the tracker is open and Google Drive is connected</span></label>
+              <div class="backup-actions google-drive-actions"><button id="connectGoogleDriveBtn" class="secondary-btn" type="button">Connect</button><button id="googleDriveBackupNowBtn" class="primary-btn" type="button">Backup now</button><button id="googleDriveRestoreBtn" class="secondary-btn" type="button">Restore latest</button><button id="disconnectGoogleDriveBtn" class="text-btn" type="button">Disconnect</button></div>
+              <div id="googleDriveMessage" class="form-message" aria-live="polite"></div>
+              <p class="estimate-disclaimer">A static iPhone webpage cannot back up while Safari is fully closed. A missed daily backup is attempted after you reconnect and open the tracker.</p>
+            </article>
           </div>
         </section>
 </div>
@@ -369,7 +390,8 @@
 
   </main>
 
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="app.js"></script>
-<div class="version-stamp" aria-label="Application version">v2.1.0 Pending Queue</div>
+<div class="version-stamp" aria-label="Application version">v2.3.0 Face ID</div>
 </body>
 </html>
