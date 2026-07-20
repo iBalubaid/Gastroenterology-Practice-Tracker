@@ -18,6 +18,7 @@
       </div>
     </div>
     <div class="header-actions">
+      <div id="saveStatus" class="save-status saved" role="status" aria-live="polite" title="All changes saved"><span></span><b>Saved</b></div>
       <button id="themeToggle" class="secondary-btn theme-btn header-icon-action" type="button" aria-label="Switch to dark mode" title="Dark mode">
         <span id="themeToggleIcon" class="header-action-icon theme-icon" aria-hidden="true">
           <svg class="moon-icon" viewBox="0 0 24 24" focusable="false"><path d="M20.2 15.4A8.4 8.4 0 0 1 8.6 3.8 8.7 8.7 0 1 0 20.2 15.4Z"/></svg>
@@ -68,20 +69,41 @@
 
     <section id="clinicModule" class="module-panel active">
       <section class="card form-card">
-        <div class="section-heading"><div><p class="eyebrow">New entry</p><h2>Add daily clinic activity</h2><p class="section-help">Required fields are marked by the browser. The day is filled automatically.</p></div><button id="resetFormBtn" class="text-btn" type="button">Clear form</button></div>
+        <div class="section-heading"><div><p class="eyebrow">Quick clinic entry</p><h2>Record clinic activity</h2><p class="section-help">Choose outpatient or inpatient, select the hospital, and enter the consultation count.</p></div><button id="resetFormBtn" class="text-btn" type="button">Clear form</button></div>
         <form id="trackerForm">
           <input id="editingId" type="hidden" />
-          <div class="form-grid">
-            <label><span>Date</span><input id="date" type="date" required /></label>
-            <label><span>Day</span><input id="day" type="text" readonly /></label>
-            <label><span>Clinic / Service</span><select id="clinic" required><option value="">Select clinic or service</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option><option>Inpatient Consultation HMG Fayhaa</option><option>Inpatient Consultation HMG Mohammadiya</option></select></label>
-            <label id="durationGroup"><span>Clinic duration (hours)</span><input id="duration" type="number" min="0.5" step="0.5" /></label>
-            <label id="totalPatientsGroup"><span>Total number of patients</span><input id="totalPatients" type="number" min="0" step="1" readonly aria-describedby="totalPatientsHelp" /><small id="totalPatientsHelp">Calculated automatically: new consultations + follow-up patients.</small></label>
-            <label><span>New consultations</span><input id="newConsultations" type="number" min="0" step="1" value="0" required /></label>
-            <label><span>Follow-up patients</span><input id="followUps" type="number" min="0" step="1" value="0" required /></label>
+          <div class="clinic-mode-row">
+            <span class="field-label">Consultation type</span>
+            <div class="clinic-type-buttons" role="group" aria-label="Consultation type">
+              <button type="button" class="clinic-type-btn active" data-consultation-type="outpatient">Outpatient</button>
+              <button type="button" class="clinic-type-btn" data-consultation-type="inpatient">Inpatient</button>
+            </div>
+            <input id="consultationType" type="hidden" value="outpatient" />
           </div>
+          <div class="clinic-quick-form">
+            <label class="clinic-date-field"><span>Date</span><input id="date" type="date" required /></label>
+            <div class="clinic-hospital-field">
+              <span class="field-label">Hospital</span>
+              <div class="clinic-hospital-buttons" role="group" aria-label="Clinic hospital">
+                <button type="button" class="clinic-hospital-btn" data-clinic-hospital="HMG Fayhaa">Fayhaa</button>
+                <button type="button" class="clinic-hospital-btn" data-clinic-hospital="HMG Mohammadiya">Mohammadiya</button>
+              </div>
+              <select id="clinic" required class="visually-hidden-select" aria-hidden="true" tabindex="-1"><option value="">Select hospital</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option><option>Inpatient Consultation HMG Fayhaa</option><option>Inpatient Consultation HMG Mohammadiya</option></select>
+            </div>
+            <div id="outpatientClinicFields" class="clinic-count-fields">
+              <label class="clinic-count-field"><span>New consultations</span><input id="newConsultations" type="number" inputmode="numeric" min="0" step="1" value="0" /></label>
+              <label class="clinic-count-field"><span>Follow-up patients</span><input id="followUps" type="number" inputmode="numeric" min="0" step="1" value="0" /></label>
+            </div>
+            <div id="inpatientClinicFields" class="clinic-count-fields hidden">
+              <label class="clinic-count-field"><span>Inpatient consultations</span><input id="inpatientConsultations" type="number" inputmode="numeric" min="0" step="1" value="0" /></label>
+            </div>
+            <div class="clinic-total-preview"><span id="clinicTotalLabel">Total patients</span><strong id="clinicTotalPreview">0</strong></div>
+          </div>
+          <input id="day" type="hidden" />
+          <input id="duration" type="hidden" />
+          <input id="totalPatients" type="hidden" />
           <div id="formMessage" class="form-message"></div>
-          <div class="form-actions"><button class="primary-btn" type="submit"><span id="submitLabel">Save entry</span></button></div>
+          <div class="form-actions"><button class="primary-btn" type="submit"><span id="submitLabel">Save clinic</span></button></div>
         </form>
       </section>
 
@@ -159,13 +181,49 @@
             <label><span>Date</span><input id="endoscopyDate" type="date" required /></label>
             <label><span>Day</span><input id="endoscopyDay" type="text" readonly /></label>
             <label><span>MRN</span><input id="mrn" type="text" inputmode="numeric" placeholder="Enter MRN" required /></label>
-            <label><span>Hospital</span><select id="hospital" required><option value="">Select hospital</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select></label>
+            <div class="endoscopy-hospital-field">
+              <span class="field-label">Hospital</span>
+              <div class="endoscopy-hospital-buttons" role="group" aria-label="Endoscopy hospital">
+                <button type="button" class="endoscopy-hospital-btn" data-endoscopy-hospital="HMG Fayhaa">Fayhaa</button>
+                <button type="button" class="endoscopy-hospital-btn" data-endoscopy-hospital="HMG Mohammadiya">Mohammadiya</button>
+              </div>
+              <select id="hospital" required class="visually-hidden-select" aria-hidden="true" tabindex="-1"><option value="">Select hospital</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select>
+            </div>
+          </div>
+
+          <div class="quick-entry-panel" aria-label="Quick procedure selection">
+            <div class="quick-entry-heading"><strong>Quick select</strong><span>Choose a common procedure, then save or add details.</span></div>
+            <div class="quick-procedure-buttons">
+              <button type="button" class="quick-procedure-btn" data-procedures="EGD">EGD</button>
+              <button type="button" class="quick-procedure-btn" data-procedures="Colonoscopy">Colonoscopy</button>
+              <button type="button" class="quick-procedure-btn" data-procedures="EGD|Colonoscopy">EGD + Colonoscopy</button>
+              <button type="button" class="quick-procedure-btn" data-procedures="EUS">EUS</button>
+              <button type="button" class="quick-procedure-btn" data-procedures="ERCP">ERCP</button>
+            </div>
+          </div>
+
+          <div class="quick-intervention-panel" aria-label="Quick billable interventions">
+            <div class="quick-entry-heading"><strong>Quick interventions</strong><span>Tap the number performed. Use More details for uncommon interventions.</span></div>
+            <div class="quick-intervention-row">
+              <span>Polypectomy</span>
+              <div class="quick-count-group" data-target="polypectomy" role="group" aria-label="Polypectomy count">
+                <button type="button" data-count="0" class="active">0</button><button type="button" data-count="1">1</button><button type="button" data-count="2">2</button><button type="button" data-count="3">3</button><button type="button" data-count="4">4+</button>
+              </div>
+            </div>
+            <div class="quick-intervention-row">
+              <span>Clip</span>
+              <div class="quick-count-group" data-target="clipping" role="group" aria-label="Clip count">
+                <button type="button" data-count="0" class="active">0</button><button type="button" data-count="1">1</button><button type="button" data-count="2">2</button><button type="button" data-count="3">3</button><button type="button" data-count="4">4+</button>
+              </div>
+            </div>
           </div>
 
           <fieldset><legend>Main procedures — select one or more</legend><div class="choice-grid" id="procedureChoices">
             <label class="check-card"><input type="checkbox" value="EGD" /> EGD</label><label class="check-card"><input type="checkbox" value="Colonoscopy" /> Colonoscopy</label><label class="check-card"><input type="checkbox" value="Flex Sig" /> Flex Sig</label><label class="check-card"><input type="checkbox" value="EUS" /> EUS</label><label class="check-card"><input type="checkbox" value="ERCP" /> ERCP</label><label class="check-card"><input type="checkbox" value="Fibroscan" /> Fibroscan</label>
           </div></fieldset>
 
+          <details id="endoscopyMoreDetails" class="more-details-panel">
+            <summary>More details and interventions</summary>
           <fieldset><legend>Additional procedures</legend><div class="intervention-grid" id="additionalProcedureChoices">
             <label class="check-card"><input type="checkbox" value="PEG Tube Insertion" /> PEG Tube Insertion</label>
             <label class="check-card"><input type="checkbox" value="PEG Tube Replacement" /> PEG Tube Replacement</label>
@@ -182,6 +240,7 @@
           </div></fieldset>
 
           <label class="full-width-field"><span>Patient note (optional)</span><textarea id="endoscopyNote" rows="4" maxlength="1000" placeholder="Add a brief note for this patient or procedure"></textarea></label>
+          </details>
           <div id="endoscopyMessage" class="form-message"></div>
           <div class="form-actions"><button class="primary-btn" type="submit"><span id="endoscopySubmitLabel">Save procedure</span></button></div>
         </form>
@@ -390,8 +449,9 @@
 
   </main>
 
+  <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-atomic="true"></div>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="app.js"></script>
-<div class="version-stamp" aria-label="Application version">v2.3.0 Face ID</div>
+<div class="version-stamp" aria-label="Application version">v3.0.0 iPhone Optimized</div>
 </body>
 </html>

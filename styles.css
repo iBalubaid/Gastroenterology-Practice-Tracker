@@ -416,3 +416,43 @@ body.dark #themeToggle .sun-icon{display:block}
 .faceid-panel .backup-actions{margin-top:1rem;display:flex;gap:.65rem;flex-wrap:wrap}
 .faceid-panel button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:767px){.faceid-panel .backup-actions{display:grid;grid-template-columns:1fr 1fr}.faceid-panel .backup-actions button{width:100%;min-width:0}}
+
+
+/* v3.0 iPhone-first interaction polish */
+.app-toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:1000;max-width:calc(100vw - 32px);padding:11px 16px;border-radius:999px;background:rgba(20,28,38,.94);color:#fff;font-weight:850;font-size:.9rem;box-shadow:0 12px 34px rgba(0,0,0,.28);opacity:0;transform:translate(-50%,12px);pointer-events:none;transition:opacity .16s ease,transform .16s ease}.app-toast.show{opacity:1;transform:translate(-50%,0)}.app-toast.error{background:#9f1d26}.app-toast.delete{background:#4c2b2b}
+.quick-entry-panel{margin:4px 0 18px;padding:14px;border:1px solid var(--border);border-radius:16px;background:var(--surface-2)}.quick-entry-heading{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}.quick-entry-heading span{color:var(--muted);font-size:.8rem}.quick-procedure-buttons{display:flex;gap:8px;flex-wrap:wrap}.quick-procedure-btn{min-height:42px;padding:9px 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-weight:850}.quick-procedure-btn.active{border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+.more-details-panel{margin:18px 0 0;border:1px solid var(--border);border-radius:16px;background:var(--surface-2);overflow:hidden}.more-details-panel>summary{cursor:pointer;list-style:none;padding:15px 16px;font-weight:900;color:var(--text);display:flex;align-items:center;justify-content:space-between}.more-details-panel>summary::-webkit-details-marker{display:none}.more-details-panel>summary::after{content:'+';font-size:1.25rem;color:var(--primary)}.more-details-panel[open]>summary::after{content:'−'}.more-details-panel>fieldset,.more-details-panel>.full-width-field{margin-left:14px;margin-right:14px}.more-details-panel>.full-width-field{display:block;margin-bottom:14px}
+@media(max-width:767px){
+  input,select,textarea,button{font-size:16px}
+  .quick-procedure-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick-procedure-btn{width:100%;padding:10px 7px;font-size:.82rem}
+  #trackerForm .form-actions,#pendingForm .form-actions,#endoscopyForm>.form-actions{position:sticky;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:40;margin:18px -7px -8px;padding:9px 7px;background:linear-gradient(to top,var(--surface) 72%,transparent);border-radius:14px}
+  #trackerForm .form-actions .primary-btn,#pendingForm .form-actions .primary-btn,#endoscopyForm>.form-actions .primary-btn{min-height:52px;box-shadow:0 10px 28px rgba(0,0,0,.18)}
+  .check-card{min-height:48px;display:flex;align-items:center}.check-card input{width:22px;height:22px;flex:0 0 22px}
+  .form-grid label>span,.full-width-field>span{font-size:.82rem}
+  .app-toast{bottom:calc(82px + env(safe-area-inset-bottom,0px))}
+}
+@media(prefers-reduced-motion:reduce){.app-toast{transition:none}}
+
+/* v3.1 payslip-focused quick entry */
+.quick-intervention-panel{margin:14px 0;padding:14px;border:1px solid var(--border);border-radius:16px;background:var(--surface-soft)}
+.quick-intervention-row{display:grid;grid-template-columns:minmax(105px,1fr) minmax(0,2fr);gap:12px;align-items:center;margin-top:12px}
+.quick-intervention-row>span{font-weight:700}
+.quick-count-group{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.quick-count-group button{min-height:42px;border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--text);font-weight:700;padding:0}
+.quick-count-group button.active{background:var(--primary);border-color:var(--primary);color:#fff}
+@media(max-width:700px){
+  .quick-intervention-row{grid-template-columns:1fr;gap:7px}
+  .quick-count-group button{min-height:46px}
+}
+
+
+/* Simplified clinic entry and three-level save feedback */
+.save-status{display:flex;align-items:center;gap:7px;min-width:74px;color:rgba(255,255,255,.9);font-size:.72rem;font-weight:850;white-space:nowrap}.save-status span{width:9px;height:9px;border-radius:50%;background:#65d7a5;box-shadow:0 0 0 3px rgba(101,215,165,.16)}.save-status.saving span{background:#ffd166}.save-status.error span{background:#ff8f87}.save-status b{font:inherit}.clinic-quick-form{display:grid;grid-template-columns:1fr 1.4fr 1fr 1fr auto;gap:16px;align-items:end}.field-label{display:block;margin-bottom:8px;color:var(--muted);font-size:.88rem;font-weight:750}.clinic-hospital-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.clinic-hospital-btn{min-height:46px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);color:var(--text);font-weight:850}.clinic-hospital-btn.active{border-color:var(--primary);background:var(--primary);color:#fff;box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 22%,transparent)}.visually-hidden-select{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}.clinic-count-field input{text-align:center;font-size:1.25rem;font-weight:900}.clinic-total-preview{min-width:110px;min-height:76px;padding:11px 14px;border:1px solid var(--border);border-radius:14px;background:var(--primary-soft);display:grid;align-content:center;text-align:center}.clinic-total-preview span{color:var(--muted);font-size:.72rem;font-weight:800}.clinic-total-preview strong{font-size:1.55rem;line-height:1.15}.primary-btn[disabled]{opacity:.68;cursor:wait;transform:none!important;filter:none!important}
+@media(max-width:900px){.clinic-quick-form{grid-template-columns:1fr 1fr}.clinic-total-preview{grid-column:1/-1}}
+@media(max-width:767px){.save-status b{display:none}.save-status{min-width:auto}.clinic-quick-form{grid-template-columns:1fr}.clinic-hospital-buttons{grid-template-columns:1fr 1fr}.clinic-total-preview{grid-column:auto;min-height:62px}.clinic-count-field input{min-height:58px;font-size:1.5rem}.clinic-hospital-btn{min-height:52px}.form-actions .primary-btn{width:100%;min-height:52px}}
+
+
+/* v3.3 consultation type and segmented hospital selectors */
+.clinic-mode-row{margin-bottom:16px}.clinic-type-buttons,.endoscopy-hospital-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.clinic-type-btn,.endoscopy-hospital-btn{min-height:46px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);color:var(--text);font-weight:850}.clinic-type-btn.active,.endoscopy-hospital-btn.active{border-color:var(--primary);background:var(--primary);color:#fff;box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 22%,transparent)}.clinic-count-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}.clinic-count-fields.hidden{display:none!important}.endoscopy-hospital-field{align-self:end}.endoscopy-hospital-buttons{min-width:260px}
+@media(max-width:900px){.clinic-count-fields{grid-template-columns:1fr 1fr}}
+@media(max-width:767px){.clinic-type-btn,.endoscopy-hospital-btn{min-height:52px}.clinic-count-fields{grid-template-columns:1fr}.endoscopy-hospital-buttons{min-width:0;width:100%}.endoscopy-hospital-field{width:100%}}

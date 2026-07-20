@@ -13,3 +13,9 @@ Clinic and Endoscopy are directly accessible. The Practice Dashboard, including 
 7. In the tracker, unlock the private dashboard, open **Backup**, paste the Client ID, and tap **Connect**.
 
 Google Drive is used for backup/restore only. The tracker remains local-first. Daily backup runs only while the webpage is open and Drive authorization is active; otherwise tap Connect/Backup Now after reopening.
+
+
+## Version 3.0 update safety
+This release preserves the existing clinic, endoscopy, pending, income, password, theme, Google Drive, and Face ID storage keys. Export a JSON backup before replacing GitHub files as an additional safeguard.
+
+Haptic vibration uses the browser vibration API when available. iPhone Safari may not expose vibration to webpages; toast feedback always remains available.
