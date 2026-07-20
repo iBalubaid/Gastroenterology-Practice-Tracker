@@ -24,6 +24,12 @@
           <svg class="sun-icon" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
         </span>
       </button>
+      <button id="privateAccessBtn" class="header-icon-action private-lock-btn" type="button" aria-label="Open private dashboard" title="Private dashboard">
+        <span class="header-action-icon" aria-hidden="true">
+          <svg class="lock-closed-icon" viewBox="0 0 24 24" focusable="false"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <svg class="lock-open-icon" viewBox="0 0 24 24" focusable="false"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M9 10V7a4 4 0 0 1 7.5-2"/></svg>
+        </span>
+      </button>
     </div>
   </header>
 
@@ -32,9 +38,7 @@
       <nav class="module-tabs" aria-label="Modules">
         <button class="module-tab active" data-module="clinicModule" type="button"><span class="tab-icon">01</span><span><strong>Clinic</strong><small>Daily activity & consultations</small></span></button>
         <button class="module-tab" data-module="endoscopyModule" type="button"><span class="tab-icon">02</span><span><strong>Endoscopy</strong><small>Procedures & interventions</small></span></button>
-        <button id="incomeTab" class="module-tab income-tab hidden" data-module="incomeModule" type="button"><span class="tab-icon">03</span><span><strong>Private</strong><small>Password-protected dashboard</small></span><span class="lock-mark">🔒</span></button>
       </nav>
-      <button id="privateAccessBtn" class="private-access-btn" type="button" aria-label="Open private area" title="Private area">🔒</button>
     </div>
 
         <div class="dashboard-filter-bar">
@@ -207,7 +211,7 @@
     </section>
 
     <section id="incomeModule" class="module-panel">
-      <section id="incomeLockScreen" class="card income-lock-card">
+      <section id="incomeLockScreen" class="card income-lock-card hidden">
         <div class="lock-icon">🔒</div>
         <p class="eyebrow">Private area</p>
         <h2 id="incomeLockTitle" class="hidden">Unlock Private Dashboard</h2>
@@ -218,22 +222,13 @@
           <div id="incomePasswordMessage" class="form-message"></div>
           <button class="primary-btn" type="submit"><span id="incomePasswordButton">Unlock</span></button>
         </form>
-        <button id="forgotPrivatePasswordBtn" class="text-action-btn hidden" type="button">Forgot password?</button>
-        <div id="forgotPasswordPanel" class="password-reset-panel hidden">
-          <p>Set a new private password on this device. This changes only the Private Dashboard password and does not delete clinic or procedure records.</p>
-          <label><span>New password</span><input id="forgotNewPassword" type="password" minlength="4" autocomplete="new-password" /></label>
-          <label><span>Confirm new password</span><input id="forgotConfirmPassword" type="password" minlength="4" autocomplete="new-password" /></label>
-          <div class="backup-actions"><button id="confirmForgotPasswordBtn" class="primary-btn" type="button">Set new password</button><button id="cancelForgotPasswordBtn" class="secondary-btn" type="button">Cancel</button></div>
-          <div id="forgotPasswordMessage" class="form-message"></div>
-        </div>
         <p class="security-note">The password protects this section from casual access on this browser. Because this is an offline webpage, it is not equivalent to server-based authentication.</p>
       </section>
 
-      <div id="incomeDashboard" class="hidden">
+      <div id="incomeDashboard">
         <section class="private-dashboard-shell">
           <div class="private-dashboard-topbar">
-            <div><p class="eyebrow">Private area</p><h2>Private Dashboard</h2></div>
-            <button id="privateDashboardLockBtn" class="secondary-btn" type="button">Lock</button>
+            <div><p class="eyebrow">Private area</p><h2>Practice Dashboard</h2></div>
           </div>
           <nav class="private-dashboard-nav" aria-label="Private dashboard sections">
             <button class="private-nav-btn active" type="button" data-private-view="overview">Overview</button>
@@ -246,7 +241,7 @@
         </section>
 
         <section class="card private-view" data-private-section="overview">
-          <div class="section-heading"><div><p class="eyebrow">Overview</p><h2>Practice at a glance</h2><p class="section-help">Private monthly income and productivity summary.</p></div></div>
+          <div class="section-heading"><div><p class="eyebrow">Overview</p><h2>Practice at a glance</h2><p class="section-help">Monthly income and productivity summary.</p></div></div>
           <div class="income-kpi-grid">
             <article class="income-kpi"><span>Target income</span><strong id="privateOverviewTarget">SAR 0</strong></article>
             <article class="income-kpi"><span>Estimated income</span><strong id="privateOverviewIncome">SAR 0</strong></article>
@@ -258,7 +253,7 @@
         </section>
         <section class="card performance-hero private-view hidden" data-private-section="performance">
           <div class="section-heading">
-            <div><p class="eyebrow">Private analytics</p><h2>Performance Dashboard</h2><p class="section-help">Read-only metrics calculated from your existing clinic and endoscopy records for the selected statistics period.</p></div>
+            <div><p class="eyebrow">Practice analytics</p><h2>Performance Dashboard</h2><p class="section-help">Read-only metrics calculated from your existing clinic and endoscopy records for the selected statistics period.</p></div>
           </div>
           <div class="performance-kpi-grid">
             <article class="performance-kpi"><span>Clinic sessions</span><strong id="perfSessions">0</strong></article>
@@ -343,28 +338,7 @@
               <div class="backup-actions"><button id="downloadBackupBtn" class="secondary-btn" type="button">Download backup</button><button id="restoreBackupBtn" class="secondary-btn" type="button">Restore file</button><input id="restoreBackupFile" class="hidden" type="file" accept="application/json,.json" /></div>
               <div id="localBackupHistory" class="backup-history"></div>
             </article>
-            <article class="backup-panel">
-              <h3>Google Drive daily backup</h3>
-              <p class="section-help">Backs up once daily at or after 12:00 AM Saudi time while the webpage is open. A missed backup runs when the page is next opened.</p>
-              <label><span>Google OAuth Client ID</span><input id="googleClientId" type="text" placeholder="Paste your Web OAuth client ID" /></label>
-              <label class="backup-toggle"><input id="dailyCloudBackupEnabled" type="checkbox" /><span>Enable daily Google Drive backup</span></label>
-              <div class="backup-status"><div><span>Google Drive</span><strong id="googleDriveStatus">Not connected</strong></div><div><span>Last cloud backup</span><strong id="lastCloudBackup">Never</strong></div></div>
-              <div class="backup-actions"><button id="connectGoogleDriveBtn" class="primary-btn" type="button">Connect Google Drive</button><button id="cloudBackupNowBtn" class="secondary-btn" type="button">Backup now</button></div>
-              <div id="backupMessage" class="form-message"></div>
-              <p class="backup-note">Google requires a free OAuth client ID for your GitHub Pages address. The backup file is saved in your Drive as <strong>Gastroenterology Practice Tracker Backup.json</strong>. The password itself is never stored—only its existing hash.</p>
-            </article>
           </div>
-          <article class="backup-panel password-management-panel">
-            <h3>Private password</h3>
-            <p class="section-help">Change the password used to open the Private Dashboard.</p>
-            <div class="password-change-grid">
-              <label><span>Current password</span><input id="currentPrivatePassword" type="password" autocomplete="current-password" /></label>
-              <label><span>New password</span><input id="newPrivatePassword" type="password" minlength="4" autocomplete="new-password" /></label>
-              <label><span>Confirm new password</span><input id="confirmNewPrivatePassword" type="password" minlength="4" autocomplete="new-password" /></label>
-            </div>
-            <button id="changePrivatePasswordBtn" class="primary-btn settings-save" type="button">Change password</button>
-            <div id="changePrivatePasswordMessage" class="form-message"></div>
-          </article>
         </section>
 </div>
     </section>
@@ -372,5 +346,6 @@
   </main>
 
   <script src="app.js"></script>
+<div class="version-stamp" aria-label="Application version">v2.0.0 Stable</div>
 </body>
 </html>

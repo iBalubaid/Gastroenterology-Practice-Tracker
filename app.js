@@ -1,5 +1,5 @@
 const CLINIC_KEY="dailyClinicTrackerEntriesV1", ENDO_KEY="hmgEndoscopyEntriesV1", THEME_KEY="dailyClinicTrackerTheme", INCOME_SETTINGS_KEY="practiceIncomeSettingsV1", INCOME_PASSWORD_KEY="practiceIncomePasswordHashV1";
-const LOCAL_BACKUPS_KEY="practiceAutomaticBackupsV1", GOOGLE_BACKUP_SETTINGS_KEY="practiceGoogleBackupSettingsV1", GOOGLE_DRIVE_FILE_ID_KEY="practiceGoogleDriveBackupFileIdV1";
+const LOCAL_BACKUPS_KEY="practiceAutomaticBackupsV1";
 const clinicState={entries:load(CLINIC_KEY),search:"",filter:""};
 const endoState={entries:load(ENDO_KEY),search:"",filter:""};
 const statsState={period:'all',hospital:'all',from:'',to:''};
@@ -243,20 +243,8 @@ let incomeSettings=loadIncomeSettings();
 function money(v){return new Intl.NumberFormat('en-SA',{style:'currency',currency:'SAR',maximumFractionDigits:0}).format(Number(v)||0)}
 function currentMonthKey(){return today().slice(0,7)}
 async function hashPassword(value){
-  const text=String(value??'');
-  if(window.crypto?.subtle){
-    const data=new TextEncoder().encode(text);
-    const hash=await crypto.subtle.digest('SHA-256',data);
-    return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
-  }
-  return btoa(unescape(encodeURIComponent(text)));
-}
-function legacyPasswordHash(value){
-  try{return btoa(unescape(encodeURIComponent(String(value??''))))}catch{return''}
-}
-async function passwordMatches(value,stored=localStorage.getItem(INCOME_PASSWORD_KEY)||''){
-  if(!stored)return false;
-  return stored===await hashPassword(value)||stored===legacyPasswordHash(value);
+  if(window.crypto?.subtle){const data=new TextEncoder().encode(value);const hash=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+  return btoa(unescape(encodeURIComponent(value)))
 }
 function hasIncomePassword(){return Boolean(localStorage.getItem(INCOME_PASSWORD_KEY))}
 function configureIncomeLock(){
@@ -269,13 +257,7 @@ function configureIncomeLock(){
   $('incomePasswordConfirm').required=setup;
   $('incomePassword').autocomplete=setup?'new-password':'current-password';
   $('incomePassword').value='';$('incomePasswordConfirm').value='';$('incomePasswordMessage').textContent='';
-  $('forgotPrivatePasswordBtn')?.classList.toggle('hidden',setup);
-  $('forgotPasswordPanel')?.classList.add('hidden');
-  if($('forgotNewPassword'))$('forgotNewPassword').value='';
-  if($('forgotConfirmPassword'))$('forgotConfirmPassword').value='';
-  if($('forgotPasswordMessage'))$('forgotPasswordMessage').textContent='';
 }
-
 async function submitIncomePassword(e){
   e.preventDefault();const pass=$('incomePassword').value;
   if(pass.length<4)return msg('incomePasswordMessage','Password must contain at least 4 characters.');
@@ -283,81 +265,42 @@ async function submitIncomePassword(e){
     if(pass!==$('incomePasswordConfirm').value)return msg('incomePasswordMessage','Passwords do not match.');
     localStorage.setItem(INCOME_PASSWORD_KEY,await hashPassword(pass));createAutomaticLocalBackup('Password saved');unlockIncome();return;
   }
-  if(!await passwordMatches(pass))return msg('incomePasswordMessage','Incorrect password.');
+  if(await hashPassword(pass)!==localStorage.getItem(INCOME_PASSWORD_KEY))return msg('incomePasswordMessage','Incorrect password.');
   unlockIncome();
 }
-
-async function changePrivatePassword(){
-  const current=$('currentPrivatePassword')?.value||'', next=$('newPrivatePassword')?.value||'', confirmNext=$('confirmNewPrivatePassword')?.value||'';
-  msg('changePrivatePasswordMessage','');
-  if(!hasIncomePassword())return msg('changePrivatePasswordMessage','No private password is currently set. Lock the dashboard and create one first.');
-  if(!await passwordMatches(current))return msg('changePrivatePasswordMessage','Current password is incorrect.');
-  if(next.length<4)return msg('changePrivatePasswordMessage','New password must contain at least 4 characters.');
-  if(next!==confirmNext)return msg('changePrivatePasswordMessage','New passwords do not match.');
-  createAutomaticLocalBackup('Before password change');
-  localStorage.setItem(INCOME_PASSWORD_KEY,await hashPassword(next));
-  createAutomaticLocalBackup('Private password changed');
-  $('currentPrivatePassword').value='';$('newPrivatePassword').value='';$('confirmNewPrivatePassword').value='';
-  msg('changePrivatePasswordMessage','Password changed successfully.');
+function unlockIncome(){incomeUnlocked=true;$('incomeLockScreen').classList.add('hidden');$('incomeDashboard').classList.remove('hidden');$('incomePasswordForm').reset();updatePrivateAccessButton();activateModule('incomeModule');setPrivateView('overview');renderIncomeDashboard();renderPerformanceDashboard();renderPrivateOverview();renderPrivateHospitalCards()}
+function lockIncome(){incomeUnlocked=false;$('incomeDashboard').classList.add('hidden');$('incomeLockScreen').classList.remove('hidden');configureIncomeLock();updatePrivateAccessButton();activateModule('clinicModule')}
+function updatePrivateAccessButton(){
+  const button=$('privateAccessBtn');
+  if(!button)return;
+  button.classList.toggle('unlocked',incomeUnlocked);
+  button.setAttribute('aria-label',incomeUnlocked?'Lock private dashboard':'Open private dashboard');
+  button.title=incomeUnlocked?'Lock private dashboard':'Private dashboard';
 }
-function openForgotPasswordPanel(){
-  const panel=$('forgotPasswordPanel');
-  if(!panel)return;
-  panel.classList.remove('hidden');
-  if($('forgotNewPassword'))$('forgotNewPassword').value='';
-  if($('forgotConfirmPassword'))$('forgotConfirmPassword').value='';
-  msg('forgotPasswordMessage','');
-  setTimeout(()=>$('forgotNewPassword')?.focus(),50);
+function openPrivateAccess(){
+  if(incomeUnlocked){lockIncome();return;}
+  configureIncomeLock();
+  activateModule('incomeModule');
+  $('incomeLockScreen').classList.remove('hidden');
+  $('incomeDashboard').classList.add('hidden');
+  setTimeout(()=>$('incomePassword')?.focus(),50);
 }
-function closeForgotPasswordPanel(){
-  $('forgotPasswordPanel')?.classList.add('hidden');
-  if($('forgotNewPassword'))$('forgotNewPassword').value='';
-  if($('forgotConfirmPassword'))$('forgotConfirmPassword').value='';
-  msg('forgotPasswordMessage','');
-}
-async function resetForgottenPrivatePassword(){
-  try{
-    const next=$('forgotNewPassword')?.value||'';
-    const confirmNext=$('forgotConfirmPassword')?.value||'';
-    msg('forgotPasswordMessage','');
-    if(next.length<4)return msg('forgotPasswordMessage','New password must contain at least 4 characters.');
-    if(next!==confirmNext)return msg('forgotPasswordMessage','Passwords do not match.');
-    createAutomaticLocalBackup('Before private password reset');
-    localStorage.setItem(INCOME_PASSWORD_KEY,await hashPassword(next));
-    createAutomaticLocalBackup('Private password reset');
-    closeForgotPasswordPanel();
-    configureIncomeLock();
-    msg('incomePasswordMessage','Password reset successfully. Enter your new password to unlock.');
-    $('incomePassword')?.focus();
-  }catch(err){
-    console.error('Password reset failed',err);
-    msg('forgotPasswordMessage','Unable to reset the password on this browser. Please reload the page and try again.');
-  }
-}
-
-function unlockIncome(){incomeUnlocked=true;$('incomeTab').classList.remove('hidden');$('privateAccessBtn')?.classList.add('hidden');$('incomeLockScreen').classList.add('hidden');$('incomeDashboard').classList.remove('hidden');$('incomePasswordForm').reset();activateModule('incomeModule',$('incomeTab'));setPrivateView('overview');renderIncomeDashboard();renderPerformanceDashboard();renderPrivateOverview();renderPrivateHospitalCards()}
-function lockIncome(){incomeUnlocked=false;$('incomeDashboard').classList.add('hidden');$('incomeLockScreen').classList.remove('hidden');$('incomeTab').classList.add('hidden');$('privateAccessBtn')?.classList.remove('hidden');configureIncomeLock();activateModule('clinicModule')}
 function initIncome(){
-  $('incomeMonth').value=currentMonthKey();configureIncomeLock();renderFeeSettings();
-  $('incomeTab').classList.add('hidden');
-  $('incomePasswordForm').onsubmit=submitIncomePassword;$('lockIncomeBtn').onclick=lockIncome;
-  $('incomeMonth').onchange=()=>{renderIncomeDashboard();renderPrivateOverview();renderPrivateHospitalCards()};$('saveIncomeTargetBtn').onclick=saveIncomeTarget;$('saveFeeSettingsBtn').onclick=saveFeeSettings;
-
-  // Private access: a discreet lock-only button opens the password screen.
-  const privateAccessBtn=$('privateAccessBtn');
-  if(privateAccessBtn){
-    privateAccessBtn.onclick=()=>{
-      configureIncomeLock();
-      activateModule('incomeModule');
-      setTimeout(()=>$('incomePassword')?.focus(),50);
-    };
-  }
+  incomeUnlocked=false;
+  $('incomeMonth').value=currentMonthKey();
+  renderFeeSettings();
+  $('incomeLockScreen').classList.remove('hidden');
+  $('incomeDashboard').classList.add('hidden');
+  configureIncomeLock();
+  updatePrivateAccessButton();
+  $('privateAccessBtn').onclick=openPrivateAccess;
+  $('incomePasswordForm').addEventListener('submit',submitIncomePassword);
+  $('lockIncomeBtn').onclick=lockIncome;
+  $('incomeMonth').onchange=()=>{renderIncomeDashboard();renderPrivateOverview();renderPrivateHospitalCards()};
+  $('saveIncomeTargetBtn').onclick=saveIncomeTarget;
+  $('saveFeeSettingsBtn').onclick=saveFeeSettings;
   document.querySelectorAll('.private-nav-btn').forEach(btn=>btn.onclick=()=>setPrivateView(btn.dataset.privateView));
-  $('privateDashboardLockBtn')?.addEventListener('click',lockIncome);
-  $('changePrivatePasswordBtn')?.addEventListener('click',changePrivatePassword);
-  $('forgotPrivatePasswordBtn')?.addEventListener('click',openForgotPasswordPanel);
-  $('cancelForgotPasswordBtn')?.addEventListener('click',closeForgotPasswordPanel);
-  $('confirmForgotPasswordBtn')?.addEventListener('click',resetForgottenPrivatePassword);
+  setPrivateView('overview');
 }
 
 function renderFeeSettings(){
@@ -467,76 +410,42 @@ function load(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch{return
 
 
 
-// Automatic local and Google Drive backups
-let googleTokenClient=null, googleAccessToken='', cloudBackupTimer=null;
+// Automatic local backups
 function backupPayload(){
-  return {format:'gastroenterology-practice-tracker-backup',version:1,createdAt:new Date().toISOString(),clinicRecords:load(CLINIC_KEY),procedureRecords:load(ENDO_KEY),incomeSettings:JSON.parse(localStorage.getItem(INCOME_SETTINGS_KEY)||'{}'),passwordHash:localStorage.getItem(INCOME_PASSWORD_KEY)||'',theme:localStorage.getItem(THEME_KEY)||'light'};
+  return {format:'gastroenterology-practice-tracker-backup',version:2,createdAt:new Date().toISOString(),clinicRecords:load(CLINIC_KEY),procedureRecords:load(ENDO_KEY),incomeSettings:JSON.parse(localStorage.getItem(INCOME_SETTINGS_KEY)||'{}'),passwordHash:localStorage.getItem(INCOME_PASSWORD_KEY)||'',theme:localStorage.getItem(THEME_KEY)||'light'};
 }
 function loadLocalBackups(){try{return JSON.parse(localStorage.getItem(LOCAL_BACKUPS_KEY)||'[]')}catch{return[]}}
 function createAutomaticLocalBackup(reason='Data saved'){
   try{
-    const backups=loadLocalBackups(), snapshot=backupPayload();snapshot.reason=reason;
+    const backups=loadLocalBackups(),snapshot=backupPayload();snapshot.reason=reason;
     backups.unshift(snapshot);localStorage.setItem(LOCAL_BACKUPS_KEY,JSON.stringify(backups.slice(0,20)));renderBackupStatus();
   }catch(err){console.warn('Local backup failed',err)}
 }
 function formatBackupTime(value){if(!value)return'Never';try{return new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value))}catch{return value}}
 function renderBackupStatus(){
-  const backups=loadLocalBackups(), settings=loadGoogleBackupSettings();
+  const backups=loadLocalBackups();
   if($('lastLocalBackup'))$('lastLocalBackup').textContent=backups.length?formatBackupTime(backups[0].createdAt):'Never';
   if($('localBackupCount'))$('localBackupCount').textContent=backups.length;
-  if($('lastCloudBackup'))$('lastCloudBackup').textContent=settings.lastCloudBackupAt?formatBackupTime(settings.lastCloudBackupAt):'Never';
-  if($('googleClientId'))$('googleClientId').value=settings.clientId||'';
-  if($('dailyCloudBackupEnabled'))$('dailyCloudBackupEnabled').checked=!!settings.enabled;
   if($('localBackupHistory'))$('localBackupHistory').innerHTML=backups.slice(0,5).map(b=>`<div class="backup-history-item"><div><strong>${esc(b.reason||'Automatic backup')}</strong><br><small>${formatBackupTime(b.createdAt)}</small></div><small>${(b.clinicRecords||[]).length} clinic · ${(b.procedureRecords||[]).length} procedures</small></div>`).join('')||'<small>No local backups yet.</small>';
 }
 function downloadBackup(){
+  createAutomaticLocalBackup('Manual export');
   const data=JSON.stringify(backupPayload(),null,2),url=URL.createObjectURL(new Blob([data],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=`gastroenterology-practice-backup-${today()}.json`;a.click();URL.revokeObjectURL(url);
 }
 function restoreBackupFile(file){
-  const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(data.format!=='gastroenterology-practice-tracker-backup')throw new Error('Not a valid tracker backup.');if(!confirm('Restore this backup? Current tracker data will be replaced.'))return;localStorage.setItem(CLINIC_KEY,JSON.stringify(data.clinicRecords||[]));localStorage.setItem(ENDO_KEY,JSON.stringify(data.procedureRecords||[]));localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(data.incomeSettings||{}));if(data.passwordHash)localStorage.setItem(INCOME_PASSWORD_KEY,data.passwordHash);else localStorage.removeItem(INCOME_PASSWORD_KEY);if(data.theme)localStorage.setItem(THEME_KEY,data.theme);createAutomaticLocalBackup('Before restore');location.reload()}catch(err){alert(err.message||'Unable to restore this file.')}};reader.readAsText(file);
+  const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(data.format!=='gastroenterology-practice-tracker-backup')throw new Error('Not a valid tracker backup.');if(!confirm('Restore this backup? Current tracker data will be replaced.'))return;createAutomaticLocalBackup('Before restore');localStorage.setItem(CLINIC_KEY,JSON.stringify(data.clinicRecords||[]));localStorage.setItem(ENDO_KEY,JSON.stringify(data.procedureRecords||[]));localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(data.incomeSettings||{}));if(data.passwordHash)localStorage.setItem(INCOME_PASSWORD_KEY,data.passwordHash);else localStorage.removeItem(INCOME_PASSWORD_KEY);if(data.theme)localStorage.setItem(THEME_KEY,data.theme);location.reload()}catch(err){alert(err.message||'Unable to restore this file.')}};reader.readAsText(file);
 }
-function loadGoogleBackupSettings(){try{return {...JSON.parse(localStorage.getItem(GOOGLE_BACKUP_SETTINGS_KEY)||'{}')}}catch{return{}}}
-function saveGoogleBackupSettings(patch){const next={...loadGoogleBackupSettings(),...patch};localStorage.setItem(GOOGLE_BACKUP_SETTINGS_KEY,JSON.stringify(next));renderBackupStatus();return next}
-function loadGoogleIdentityScript(){return new Promise((resolve,reject)=>{if(window.google?.accounts?.oauth2)return resolve();const existing=document.querySelector('script[data-google-identity]');if(existing){existing.addEventListener('load',resolve,{once:true});existing.addEventListener('error',reject,{once:true});return}const script=document.createElement('script');script.src='https://accounts.google.com/gsi/client';script.async=true;script.defer=true;script.dataset.googleIdentity='true';script.onload=resolve;script.onerror=reject;document.head.appendChild(script)})}
-async function configureGoogleTokenClient(){
-  const settings=loadGoogleBackupSettings();if(!settings.clientId)throw new Error('Add your Google OAuth Client ID first.');await loadGoogleIdentityScript();
-  googleTokenClient=google.accounts.oauth2.initTokenClient({client_id:settings.clientId,scope:'https://www.googleapis.com/auth/drive.file',callback:()=>{}});
-}
-async function requestGoogleToken(interactive=true){
-  await configureGoogleTokenClient();return new Promise((resolve,reject)=>{googleTokenClient.callback=resp=>{if(resp.error)return reject(new Error(resp.error));googleAccessToken=resp.access_token;$('googleDriveStatus').textContent='Connected';resolve(googleAccessToken)};googleTokenClient.requestAccessToken({prompt:interactive?'consent':''})});
-}
-async function uploadBackupToGoogleDrive(interactive=false){
-  const settings=loadGoogleBackupSettings();if(!settings.enabled&&!interactive)return;
-  try{
-    msg('backupMessage','Preparing Google Drive backup…');if(!googleAccessToken)await requestGoogleToken(interactive);
-    const content=JSON.stringify(backupPayload(),null,2),fileId=localStorage.getItem(GOOGLE_DRIVE_FILE_ID_KEY);let response;
-    if(fileId){
-      response=await fetch(`https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(fileId)}?uploadType=media`,{method:'PATCH',headers:{Authorization:`Bearer ${googleAccessToken}`,'Content-Type':'application/json'},body:content});
-      if(response.status===404)localStorage.removeItem(GOOGLE_DRIVE_FILE_ID_KEY);
-    }
-    if(!fileId||response?.status===404){
-      const boundary='backup_'+Math.random().toString(36).slice(2),metadata={name:'Gastroenterology Practice Tracker Backup.json',mimeType:'application/json'};
-      const body=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${content}\r\n--${boundary}--`;
-      response=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{Authorization:`Bearer ${googleAccessToken}`,'Content-Type':`multipart/related; boundary=${boundary}`},body});
-    }
-    if(!response.ok){if(response.status===401){googleAccessToken='';throw new Error('Google authorization expired. Click Connect Google Drive again.')}throw new Error(`Google Drive backup failed (${response.status}).`)}
-    const result=await response.json().catch(()=>({}));if(result.id)localStorage.setItem(GOOGLE_DRIVE_FILE_ID_KEY,result.id);
-    const now=new Date().toISOString();saveGoogleBackupSettings({lastCloudBackupAt:now,lastCloudBackupDate:saudiDateKey()});msg('backupMessage','Google Drive backup completed.');$('googleDriveStatus').textContent='Connected';scheduleNextCloudBackup();
-  }catch(err){msg('backupMessage',err.message||'Google Drive backup failed.');$('googleDriveStatus').textContent='Needs connection';if(!interactive)console.warn(err)}
-}
-function saudiDateKey(date=new Date()){const shifted=new Date(date.getTime()+3*3600000);return shifted.toISOString().slice(0,10)}
-function millisecondsToNextSaudiMidnight(){const now=new Date(),shifted=new Date(now.getTime()+3*3600000);const nextShifted=Date.UTC(shifted.getUTCFullYear(),shifted.getUTCMonth(),shifted.getUTCDate()+1,0,0,5);return Math.max(1000,nextShifted-3*3600000-now.getTime())}
-function scheduleNextCloudBackup(){if(cloudBackupTimer)clearTimeout(cloudBackupTimer);const settings=loadGoogleBackupSettings();if(!settings.enabled)return;cloudBackupTimer=setTimeout(()=>uploadBackupToGoogleDrive(false),millisecondsToNextSaudiMidnight())}
-function checkMissedDailyCloudBackup(){const settings=loadGoogleBackupSettings();if(settings.enabled&&settings.clientId&&settings.lastCloudBackupDate!==saudiDateKey())setTimeout(()=>uploadBackupToGoogleDrive(false),1500);scheduleNextCloudBackup()}
 function initBackups(){
   if(!loadLocalBackups().length)createAutomaticLocalBackup('Initial backup');else renderBackupStatus();
-  $('downloadBackupBtn').onclick=downloadBackup;$('restoreBackupBtn').onclick=()=>$('restoreBackupFile').click();$('restoreBackupFile').onchange=e=>{if(e.target.files[0])restoreBackupFile(e.target.files[0]);e.target.value=''};
-  $('googleClientId').onchange=e=>{saveGoogleBackupSettings({clientId:e.target.value.trim()});googleTokenClient=null;googleAccessToken='';$('googleDriveStatus').textContent='Not connected'};
-  $('dailyCloudBackupEnabled').onchange=e=>{saveGoogleBackupSettings({enabled:e.target.checked});if(e.target.checked)checkMissedDailyCloudBackup();else scheduleNextCloudBackup()};
-  $('connectGoogleDriveBtn').onclick=async()=>{try{await requestGoogleToken(true);msg('backupMessage','Google Drive connected.');if($('dailyCloudBackupEnabled').checked)await uploadBackupToGoogleDrive(false)}catch(err){msg('backupMessage',err.message||'Unable to connect Google Drive.')}};
-  $('cloudBackupNowBtn').onclick=()=>uploadBackupToGoogleDrive(true);checkMissedDailyCloudBackup();
+  $('downloadBackupBtn').onclick=downloadBackup;
+  $('restoreBackupBtn').onclick=()=>$('restoreBackupFile').click();
+  $('restoreBackupFile').onchange=e=>{if(e.target.files[0])restoreBackupFile(e.target.files[0]);e.target.value=''};
 }
 
+initStatsFilters();
+initClinic();
+initEndo();
+initIncome();
 initBackups();
 
 // Monthly clinic trend tabs
