@@ -1,8 +1,8 @@
 # Changelog
 
-## 2.0.1-private
-- Restored password protection for the complete Practice Dashboard.
-- Clinic and Endoscopy remain publicly accessible.
-- Dashboard tab remains visible and opens a password screen.
-- First use asks the user to create and confirm a password.
-- Lock button returns to the public Clinic module.
+## 2.1.0
+- Added separate Pending Endoscopy queues for Fayhaa and Mohammadiya.
+- Start a pending patient to prefill the Endoscopy form.
+- Direct Endoscopy entry remains available.
+- Completing a pending case moves it into the Endoscopy log.
+- Pending records are included in backup and restore.

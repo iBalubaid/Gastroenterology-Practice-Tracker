@@ -37,7 +37,8 @@
     <div class="module-nav-row">
       <nav class="module-tabs" aria-label="Modules">
         <button class="module-tab active" data-module="clinicModule" type="button"><span class="tab-icon">01</span><span><strong>Clinic</strong><small>Daily activity & consultations</small></span></button>
-        <button class="module-tab" data-module="endoscopyModule" type="button"><span class="tab-icon">02</span><span><strong>Endoscopy</strong><small>Procedures & interventions</small></span></button>
+        <button class="module-tab" data-module="pendingModule" type="button"><span class="tab-icon">02</span><span><strong>Pending</strong><small>Planned endoscopy queue</small></span></button>
+        <button class="module-tab" data-module="endoscopyModule" type="button"><span class="tab-icon">03</span><span><strong>Endoscopy</strong><small>Procedures & interventions</small></span></button>
       </nav>
     </div>
 
@@ -127,9 +128,31 @@
       </section>
     </section>
 
+    <section id="pendingModule" class="module-panel">
+      <section class="module-intro">
+        <div><p class="eyebrow">Planned procedures</p><h2>Pending Endoscopy</h2><p>Separate queues for Fayhaa and Mohammadiya. Start a case with hospital and planned procedures already selected.</p></div>
+      </section>
+      <section class="card pending-card">
+        <div class="pending-hospital-tabs" role="tablist">
+          <button class="pending-hospital-tab active" type="button" data-pending-hospital="HMG Fayhaa">Fayhaa <span id="pendingFayhaaCount">0</span></button>
+          <button class="pending-hospital-tab" type="button" data-pending-hospital="HMG Mohammadiya">Mohammadiya <span id="pendingMohammadiyaCount">0</span></button>
+        </div>
+        <form id="pendingForm" class="tracker-form">
+          <input id="pendingEditingId" type="hidden" /><input id="pendingHospital" type="hidden" value="HMG Fayhaa" />
+          <div class="section-heading"><div><p class="eyebrow">Add to queue</p><h2 id="pendingFormTitle">Pending – Fayhaa</h2></div><button id="resetPendingBtn" class="text-btn" type="button">Clear form</button></div>
+          <div class="form-grid"><label><span>Date</span><input id="pendingDate" type="date" required /></label><label><span>MRN</span><input id="pendingMrn" type="text" inputmode="numeric" maxlength="30" placeholder="Enter MRN" required /></label></div>
+          <fieldset><legend>Planned procedures — select one or more</legend><div class="choice-grid" id="pendingProcedureChoices">
+            <label class="check-card"><input type="checkbox" value="EGD" /> EGD</label><label class="check-card"><input type="checkbox" value="Colonoscopy" /> Colonoscopy</label><label class="check-card"><input type="checkbox" value="Flex Sig" /> Flex Sig</label><label class="check-card"><input type="checkbox" value="EUS" /> EUS</label><label class="check-card"><input type="checkbox" value="ERCP" /> ERCP</label><label class="check-card"><input type="checkbox" value="Fibroscan" /> Fibroscan</label><label class="check-card"><input type="checkbox" value="PEG Tube Insertion" /> PEG Tube Insertion</label><label class="check-card"><input type="checkbox" value="PEG Tube Replacement" /> PEG Tube Replacement</label><label class="check-card"><input type="checkbox" value="Foreign Body Removal" /> Foreign Body Removal</label><label class="check-card"><input type="checkbox" value="pH Monitoring" /> pH Monitoring</label>
+          </div></fieldset>
+          <label class="full-width-field"><span>Note (optional)</span><textarea id="pendingNote" rows="3" maxlength="500" placeholder="Brief reminder"></textarea></label><div id="pendingMessage" class="form-message"></div><div class="form-actions"><button class="primary-btn" type="submit"><span id="pendingSubmitLabel">Add to pending</span></button></div>
+        </form>
+      </section>
+      <section class="card"><div class="section-heading filters-heading"><div><p class="eyebrow">Queue</p><h2 id="pendingQueueTitle">Pending – Fayhaa</h2></div><div class="toolbar"><input id="pendingSearch" type="search" placeholder="Search MRN or procedure" /><button id="clearPendingBtn" class="danger-btn" type="button">Clear queue</button></div></div><div id="pendingList" class="pending-list"></div><div id="pendingEmptyState" class="empty-state"><strong>No pending patients</strong><span>Add a planned patient above.</span></div></section>
+    </section>
+
     <section id="endoscopyModule" class="module-panel">
       <section class="card form-card">
-        <div class="section-heading"><div><p class="eyebrow">HMG Endoscopy</p><h2>Endoscopy Procedure Log</h2><p class="section-help">Select all procedures performed during the same session.</p></div><button id="resetEndoscopyBtn" class="text-btn" type="button">Clear form</button></div>
+        <div class="section-heading"><div><p class="eyebrow">HMG Endoscopy</p><h2>Endoscopy Procedure Log</h2><p class="section-help">Select all procedures performed during the same session.</p></div><div class="heading-actions"><button id="fromPendingBtn" class="secondary-btn" type="button">From Pending</button><button id="resetEndoscopyBtn" class="text-btn" type="button">Clear form</button></div></div>
         <form id="endoscopyForm">
           <input id="endoscopyEditingId" type="hidden" />
           <div class="form-grid">
@@ -347,6 +370,6 @@
   </main>
 
   <script src="app.js"></script>
-<div class="version-stamp" aria-label="Application version">v2.0.0 Stable</div>
+<div class="version-stamp" aria-label="Application version">v2.1.0 Pending Queue</div>
 </body>
 </html>
