@@ -243,8 +243,20 @@ let incomeSettings=loadIncomeSettings();
 function money(v){return new Intl.NumberFormat('en-SA',{style:'currency',currency:'SAR',maximumFractionDigits:0}).format(Number(v)||0)}
 function currentMonthKey(){return today().slice(0,7)}
 async function hashPassword(value){
-  if(window.crypto?.subtle){const data=new TextEncoder().encode(value);const hash=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('')}
-  return btoa(unescape(encodeURIComponent(value)))
+  const text=String(value??'');
+  if(window.crypto?.subtle){
+    const data=new TextEncoder().encode(text);
+    const hash=await crypto.subtle.digest('SHA-256',data);
+    return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  return btoa(unescape(encodeURIComponent(text)));
+}
+function legacyPasswordHash(value){
+  try{return btoa(unescape(encodeURIComponent(String(value??''))))}catch{return''}
+}
+async function passwordMatches(value,stored=localStorage.getItem(INCOME_PASSWORD_KEY)||''){
+  if(!stored)return false;
+  return stored===await hashPassword(value)||stored===legacyPasswordHash(value);
 }
 function hasIncomePassword(){return Boolean(localStorage.getItem(INCOME_PASSWORD_KEY))}
 function configureIncomeLock(){
@@ -259,7 +271,8 @@ function configureIncomeLock(){
   $('incomePassword').value='';$('incomePasswordConfirm').value='';$('incomePasswordMessage').textContent='';
   $('forgotPrivatePasswordBtn')?.classList.toggle('hidden',setup);
   $('forgotPasswordPanel')?.classList.add('hidden');
-  if($('forgotPasswordConfirmText'))$('forgotPasswordConfirmText').value='';
+  if($('forgotNewPassword'))$('forgotNewPassword').value='';
+  if($('forgotConfirmPassword'))$('forgotConfirmPassword').value='';
   if($('forgotPasswordMessage'))$('forgotPasswordMessage').textContent='';
 }
 
@@ -270,7 +283,7 @@ async function submitIncomePassword(e){
     if(pass!==$('incomePasswordConfirm').value)return msg('incomePasswordMessage','Passwords do not match.');
     localStorage.setItem(INCOME_PASSWORD_KEY,await hashPassword(pass));createAutomaticLocalBackup('Password saved');unlockIncome();return;
   }
-  if(await hashPassword(pass)!==localStorage.getItem(INCOME_PASSWORD_KEY))return msg('incomePasswordMessage','Incorrect password.');
+  if(!await passwordMatches(pass))return msg('incomePasswordMessage','Incorrect password.');
   unlockIncome();
 }
 
@@ -278,7 +291,7 @@ async function changePrivatePassword(){
   const current=$('currentPrivatePassword')?.value||'', next=$('newPrivatePassword')?.value||'', confirmNext=$('confirmNewPrivatePassword')?.value||'';
   msg('changePrivatePasswordMessage','');
   if(!hasIncomePassword())return msg('changePrivatePasswordMessage','No private password is currently set. Lock the dashboard and create one first.');
-  if(await hashPassword(current)!==localStorage.getItem(INCOME_PASSWORD_KEY))return msg('changePrivatePasswordMessage','Current password is incorrect.');
+  if(!await passwordMatches(current))return msg('changePrivatePasswordMessage','Current password is incorrect.');
   if(next.length<4)return msg('changePrivatePasswordMessage','New password must contain at least 4 characters.');
   if(next!==confirmNext)return msg('changePrivatePasswordMessage','New passwords do not match.');
   createAutomaticLocalBackup('Before password change');
@@ -288,23 +301,38 @@ async function changePrivatePassword(){
   msg('changePrivatePasswordMessage','Password changed successfully.');
 }
 function openForgotPasswordPanel(){
-  $('forgotPasswordPanel')?.classList.remove('hidden');
-  $('forgotPasswordConfirmText')?.focus();
+  const panel=$('forgotPasswordPanel');
+  if(!panel)return;
+  panel.classList.remove('hidden');
+  if($('forgotNewPassword'))$('forgotNewPassword').value='';
+  if($('forgotConfirmPassword'))$('forgotConfirmPassword').value='';
+  msg('forgotPasswordMessage','');
+  setTimeout(()=>$('forgotNewPassword')?.focus(),50);
 }
 function closeForgotPasswordPanel(){
   $('forgotPasswordPanel')?.classList.add('hidden');
-  if($('forgotPasswordConfirmText'))$('forgotPasswordConfirmText').value='';
-  if($('forgotPasswordMessage'))$('forgotPasswordMessage').textContent='';
+  if($('forgotNewPassword'))$('forgotNewPassword').value='';
+  if($('forgotConfirmPassword'))$('forgotConfirmPassword').value='';
+  msg('forgotPasswordMessage','');
 }
-function resetForgottenPrivatePassword(){
-  if(($('forgotPasswordConfirmText')?.value||'').trim().toUpperCase()!=='RESET')return msg('forgotPasswordMessage','Type RESET exactly to continue.');
-  createAutomaticLocalBackup('Before forgotten-password reset');
-  localStorage.removeItem(INCOME_PASSWORD_KEY);
-  createAutomaticLocalBackup('Private password reset');
-  closeForgotPasswordPanel();
-  configureIncomeLock();
-  msg('incomePasswordMessage','Password reset. Create a new password.');
-  $('incomePassword')?.focus();
+async function resetForgottenPrivatePassword(){
+  try{
+    const next=$('forgotNewPassword')?.value||'';
+    const confirmNext=$('forgotConfirmPassword')?.value||'';
+    msg('forgotPasswordMessage','');
+    if(next.length<4)return msg('forgotPasswordMessage','New password must contain at least 4 characters.');
+    if(next!==confirmNext)return msg('forgotPasswordMessage','Passwords do not match.');
+    createAutomaticLocalBackup('Before private password reset');
+    localStorage.setItem(INCOME_PASSWORD_KEY,await hashPassword(next));
+    createAutomaticLocalBackup('Private password reset');
+    closeForgotPasswordPanel();
+    configureIncomeLock();
+    msg('incomePasswordMessage','Password reset successfully. Enter your new password to unlock.');
+    $('incomePassword')?.focus();
+  }catch(err){
+    console.error('Password reset failed',err);
+    msg('forgotPasswordMessage','Unable to reset the password on this browser. Please reload the page and try again.');
+  }
 }
 
 function unlockIncome(){incomeUnlocked=true;$('incomeTab').classList.remove('hidden');$('privateAccessBtn')?.classList.add('hidden');$('incomeLockScreen').classList.add('hidden');$('incomeDashboard').classList.remove('hidden');$('incomePasswordForm').reset();activateModule('incomeModule',$('incomeTab'));setPrivateView('overview');renderIncomeDashboard();renderPerformanceDashboard();renderPrivateOverview();renderPrivateHospitalCards()}

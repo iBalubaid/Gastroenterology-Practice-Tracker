@@ -220,9 +220,10 @@
         </form>
         <button id="forgotPrivatePasswordBtn" class="text-action-btn hidden" type="button">Forgot password?</button>
         <div id="forgotPasswordPanel" class="password-reset-panel hidden">
-          <p>Because this tracker is stored only on this device, identity cannot be verified by email. Type <strong>RESET</strong> to remove the private password. Your clinic and procedure records will not be deleted.</p>
-          <label><span>Confirmation</span><input id="forgotPasswordConfirmText" type="text" autocomplete="off" placeholder="Type RESET" /></label>
-          <div class="backup-actions"><button id="confirmForgotPasswordBtn" class="danger-btn" type="button">Reset password</button><button id="cancelForgotPasswordBtn" class="secondary-btn" type="button">Cancel</button></div>
+          <p>Set a new private password on this device. This changes only the Private Dashboard password and does not delete clinic or procedure records.</p>
+          <label><span>New password</span><input id="forgotNewPassword" type="password" minlength="4" autocomplete="new-password" /></label>
+          <label><span>Confirm new password</span><input id="forgotConfirmPassword" type="password" minlength="4" autocomplete="new-password" /></label>
+          <div class="backup-actions"><button id="confirmForgotPasswordBtn" class="primary-btn" type="button">Set new password</button><button id="cancelForgotPasswordBtn" class="secondary-btn" type="button">Cancel</button></div>
           <div id="forgotPasswordMessage" class="form-message"></div>
         </div>
         <p class="security-note">The password protects this section from casual access on this browser. Because this is an offline webpage, it is not equivalent to server-based authentication.</p>
