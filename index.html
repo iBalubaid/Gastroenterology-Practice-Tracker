@@ -69,7 +69,7 @@
 
     <section id="clinicModule" class="module-panel active">
       <section class="card form-card">
-        <div class="section-heading"><div><p class="eyebrow">Quick clinic entry</p><h2>Record clinic activity</h2><p class="section-help">Choose outpatient or inpatient, select the hospital, and enter the consultation count.</p></div><button id="resetFormBtn" class="text-btn" type="button">Clear form</button></div>
+        <div class="section-heading"><div><p class="eyebrow">Quick clinic entry</p><h2>Record clinic activity</h2></div><button id="resetFormBtn" class="text-btn" type="button">Clear form</button></div>
         <form id="trackerForm">
           <input id="editingId" type="hidden" />
           <div class="clinic-mode-row">
@@ -90,6 +90,25 @@
               </div>
               <select id="clinic" required class="visually-hidden-select" aria-hidden="true" tabindex="-1"><option value="">Select hospital</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option><option>Inpatient Consultation HMG Fayhaa</option><option>Inpatient Consultation HMG Mohammadiya</option></select>
             </div>
+            <div id="clinicDurationField" class="clinic-duration-field">
+              <span class="field-label">Clinic duration <small>(optional)</small></span>
+              <div class="duration-chip-row" role="group" aria-label="Clinic duration in hours">
+                <button type="button" class="duration-chip" data-duration="">Not recorded</button>
+                <button type="button" class="duration-chip" data-duration="0.5">0.5h</button>
+                <button type="button" class="duration-chip" data-duration="1">1h</button>
+                <button type="button" class="duration-chip" data-duration="1.5">1.5h</button>
+                <button type="button" class="duration-chip" data-duration="2">2h</button>
+                <button type="button" class="duration-chip" data-duration="2.5">2.5h</button>
+                <button type="button" class="duration-chip" data-duration="3">3h</button>
+                <button type="button" class="duration-chip" data-duration="3.5">3.5h</button>
+                <button type="button" class="duration-chip active" data-duration="4">4h</button>
+                <button type="button" class="duration-chip" data-duration="4.5">4.5h</button>
+                <button type="button" class="duration-chip" data-duration="5">5h</button>
+                <button type="button" class="duration-chip" data-duration="5.5">5.5h</button>
+                <button type="button" class="duration-chip" data-duration="6">6h</button>
+              </div>
+              <input id="duration" type="hidden" value="4" />
+            </div>
             <div id="outpatientClinicFields" class="clinic-count-fields">
               <label class="clinic-count-field"><span>New consultations</span><input id="newConsultations" type="number" inputmode="numeric" min="0" step="1" value="0" /></label>
               <label class="clinic-count-field"><span>Follow-up patients</span><input id="followUps" type="number" inputmode="numeric" min="0" step="1" value="0" /></label>
@@ -100,7 +119,6 @@
             <div class="clinic-total-preview"><span id="clinicTotalLabel">Total patients</span><strong id="clinicTotalPreview">0</strong></div>
           </div>
           <input id="day" type="hidden" />
-          <input id="duration" type="hidden" />
           <input id="totalPatients" type="hidden" />
           <div id="formMessage" class="form-message"></div>
           <div class="form-actions"><button class="primary-btn" type="submit"><span id="submitLabel">Save clinic</span></button></div>
@@ -151,13 +169,13 @@
     </section>
 
     <section id="pendingModule" class="module-panel">
-      <section class="module-intro">
-        <div><p class="eyebrow">Planned procedures</p><h2>Pending Endoscopy</h2><p>Separate queues for Fayhaa and Mohammadiya. Start a case with hospital and planned procedures already selected.</p></div>
-      </section>
       <section class="card pending-card">
-        <div class="pending-hospital-tabs" role="tablist">
-          <button class="pending-hospital-tab active" type="button" data-pending-hospital="HMG Fayhaa">Fayhaa <span id="pendingFayhaaCount">0</span></button>
-          <button class="pending-hospital-tab" type="button" data-pending-hospital="HMG Mohammadiya">Mohammadiya <span id="pendingMohammadiyaCount">0</span></button>
+        <div class="pending-hospital-field">
+          <span class="field-label">Hospital</span>
+          <div class="pending-hospital-buttons" role="tablist" aria-label="Pending hospital queue">
+            <button class="pending-hospital-btn active" type="button" data-pending-hospital="HMG Fayhaa" aria-selected="true">Fayhaa <span id="pendingFayhaaCount">0</span></button>
+            <button class="pending-hospital-btn" type="button" data-pending-hospital="HMG Mohammadiya" aria-selected="false">Mohammadiya <span id="pendingMohammadiyaCount">0</span></button>
+          </div>
         </div>
         <form id="pendingForm" class="tracker-form">
           <input id="pendingEditingId" type="hidden" /><input id="pendingHospital" type="hidden" value="HMG Fayhaa" />
@@ -174,7 +192,7 @@
 
     <section id="endoscopyModule" class="module-panel">
       <section class="card form-card">
-        <div class="section-heading"><div><p class="eyebrow">HMG Endoscopy</p><h2>Endoscopy Procedure Log</h2><p class="section-help">Select all procedures performed during the same session.</p></div><div class="heading-actions"><button id="fromPendingBtn" class="secondary-btn" type="button">From Pending</button><button id="resetEndoscopyBtn" class="text-btn" type="button">Clear form</button></div></div>
+        <div class="section-heading"><div><p class="eyebrow">HMG Endoscopy</p><h2>Endoscopy Procedure Log</h2></div><div class="heading-actions"><button id="fromPendingBtn" class="secondary-btn" type="button">From Pending</button><button id="resetEndoscopyBtn" class="text-btn" type="button">Clear form</button></div></div>
         <form id="endoscopyForm">
           <input id="endoscopyEditingId" type="hidden" />
           <div class="form-grid">
@@ -218,25 +236,27 @@
             </div>
           </div>
 
-          <fieldset><legend>Main procedures — select one or more</legend><div class="choice-grid" id="procedureChoices">
+          <fieldset><legend>Main procedures — select one or more</legend><div class="choice-grid compact-choice-grid" id="procedureChoices">
             <label class="check-card"><input type="checkbox" value="EGD" /> EGD</label><label class="check-card"><input type="checkbox" value="Colonoscopy" /> Colonoscopy</label><label class="check-card"><input type="checkbox" value="Flex Sig" /> Flex Sig</label><label class="check-card"><input type="checkbox" value="EUS" /> EUS</label><label class="check-card"><input type="checkbox" value="ERCP" /> ERCP</label><label class="check-card"><input type="checkbox" value="Fibroscan" /> Fibroscan</label>
           </div></fieldset>
 
           <details id="endoscopyMoreDetails" class="more-details-panel">
             <summary>More details and interventions</summary>
-          <fieldset><legend>Additional procedures</legend><div class="intervention-grid" id="additionalProcedureChoices">
-            <label class="check-card"><input type="checkbox" value="PEG Tube Insertion" /> PEG Tube Insertion</label>
-            <label class="check-card"><input type="checkbox" value="PEG Tube Replacement" /> PEG Tube Replacement</label>
-            <label class="check-card"><input type="checkbox" value="Foreign Body Removal" /> Foreign Body Removal</label>
-            <label class="check-card"><input type="checkbox" value="pH Monitoring" /> pH Monitoring</label>
+          <fieldset><legend>Additional procedures</legend><div class="intervention-grid compact-choice-grid" id="additionalProcedureChoices">
             <label><span>Polypectomy count</span><input id="polypectomy" type="number" min="0" step="1" value="0" /></label>
             <label><span>Clipping count</span><input id="clipping" type="number" min="0" step="1" value="0" /></label>
             <label class="check-card"><input id="sclerotherapy" type="checkbox" /> Sclerotherapy</label>
             <label class="check-card"><input id="varicealBanding" type="checkbox" /> Variceal banding</label>
-            <label class="check-card"><input id="duodenalStenting" type="checkbox" /> Duodenal stenting</label>
-            <label class="check-card"><input id="esophagealStenting" type="checkbox" /> Esophageal stenting</label>
-            <label class="check-card"><input id="colonicStenting" type="checkbox" /> Colonic stenting</label>
-            <label class="check-card"><input id="metallicBiliaryStenting" type="checkbox" /> Metallic biliary stenting</label>
+            <label class="check-card"><input type="checkbox" value="Fibroscan" /> FibroScan</label>
+            <label class="check-card"><input type="checkbox" value="pH Monitoring" /> pH Monitoring</label>
+            <label class="check-card"><input type="checkbox" value="SIBO Breath Test" /> SIBO Breath Test</label>
+            <label class="check-card"><input type="checkbox" value="PEG Tube Insertion" /> PEG Insertion</label>
+            <label class="check-card"><input type="checkbox" value="PEG Tube Replacement" /> PEG Replacement</label>
+            <label class="check-card"><input type="checkbox" value="Foreign Body Removal" /> Foreign Body Removal</label>
+            <label class="check-card"><input id="esophagealStenting" type="checkbox" /> Esophageal Stent</label>
+            <label class="check-card"><input id="duodenalStenting" type="checkbox" /> Duodenal Stent</label>
+            <label class="check-card"><input id="colonicStenting" type="checkbox" /> Colonic Stent</label>
+            <label class="check-card"><input id="metallicBiliaryStenting" type="checkbox" /> Metallic Biliary Stent</label>
           </div></fieldset>
 
           <label class="full-width-field"><span>Patient note (optional)</span><textarea id="endoscopyNote" rows="4" maxlength="1000" placeholder="Add a brief note for this patient or procedure"></textarea></label>
@@ -381,6 +401,17 @@
           <p class="estimate-disclaimer">Estimated values are for progress tracking only and may differ from the final payment.</p>
         </section>
 
+        <section class="card private-view hidden" data-private-section="income">
+          <div class="section-heading"><div><p class="eyebrow">Separate allowance</p><h2>On-call coverage</h2><p class="section-help">Record the number of on-call nights for the selected month. This amount is shown separately and is not included in the estimated practice income or target achievement.</p></div></div>
+          <div class="oncall-income-grid">
+            <label><span>On-call coverage nights</span><input id="onCallDaysInput" type="number" min="0" step="1" inputmode="numeric" value="0" /></label>
+            <article class="income-kpi"><span>On-call fee per night</span><strong id="onCallFeeDisplay">SAR 500</strong></article>
+            <article class="income-kpi"><span>Separate on-call amount</span><strong id="onCallIncomeDisplay">SAR 0</strong></article>
+          </div>
+          <button id="saveOnCallDaysBtn" class="primary-btn settings-save" type="button">Save on-call nights</button>
+          <div id="onCallDaysMessage" class="form-message"></div>
+        </section>
+
         <section class="income-layout private-view hidden" data-private-section="income">
           <article class="card">
             <div class="section-heading"><div><p class="eyebrow">Calculation</p><h2>Monthly income breakdown</h2></div></div>
@@ -452,6 +483,6 @@
   <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-atomic="true"></div>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="app.js"></script>
-<div class="version-stamp" aria-label="Application version">v3.0.0 iPhone Optimized</div>
+<div class="version-stamp" aria-label="Application version">v3.4.0 On-call Income</div>
 </body>
 </html>

@@ -70,15 +70,16 @@ function filteredEndoStats(){return endoState.entries.filter(e=>inStatsPeriod(e.
 // Clinic module
 const clinicForm=$('trackerForm');
 function initClinic(){ $('date').value=today(); updateDay('date','day'); const last=localStorage.getItem(LAST_CLINIC_KEY)||'HMG Fayhaa';selectClinicType(isInpatient(last)?'inpatient':'outpatient',false);selectClinicHospital(clinicHospital({clinic:last})||'HMG Fayhaa');updatePatientTotal();renderClinic(); }
-$('date').onchange=()=>updateDay('date','day');document.querySelectorAll('[data-clinic-hospital]').forEach(btn=>btn.onclick=()=>selectClinicHospital(btn.dataset.clinicHospital));document.querySelectorAll('[data-consultation-type]').forEach(btn=>btn.onclick=()=>selectClinicType(btn.dataset.consultationType));$('newConsultations').oninput=updatePatientTotal;$('followUps').oninput=updatePatientTotal;$('inpatientConsultations').oninput=updatePatientTotal;clinicForm.onsubmit=saveClinic;$('resetFormBtn').onclick=resetClinic;$('exportBtn').onclick=exportClinic;$('clearAllBtn').onclick=clearClinic;
+$('date').onchange=()=>updateDay('date','day');document.querySelectorAll('[data-clinic-hospital]').forEach(btn=>btn.onclick=()=>selectClinicHospital(btn.dataset.clinicHospital));document.querySelectorAll('[data-duration]').forEach(btn=>btn.onclick=()=>selectClinicDuration(btn.dataset.duration));document.querySelectorAll('[data-consultation-type]').forEach(btn=>btn.onclick=()=>selectClinicType(btn.dataset.consultationType));$('newConsultations').oninput=updatePatientTotal;$('followUps').oninput=updatePatientTotal;$('inpatientConsultations').oninput=updatePatientTotal;clinicForm.onsubmit=saveClinic;$('resetFormBtn').onclick=resetClinic;$('exportBtn').onclick=exportClinic;$('clearAllBtn').onclick=clearClinic;
 $('searchInput').oninput=e=>{clinicState.search=e.target.value.toLowerCase();renderClinicRows()}; $('clinicFilter').onchange=e=>{clinicState.filter=e.target.value;renderClinicRows()};
 function isInpatient(v=$('clinic').value){return String(v||'').startsWith('Inpatient Consultation')}
 function selectedClinicHospital(){return document.querySelector('[data-clinic-hospital].active')?.dataset.clinicHospital||clinicHospital({clinic:$('clinic').value})||''}
 function updateClinicValue(){const hospital=selectedClinicHospital(),type=$('consultationType').value;$('clinic').value=hospital?(type==='inpatient'?`Inpatient Consultation ${hospital}`:hospital):''}
-function selectClinicType(type,refresh=true){$('consultationType').value=type;document.querySelectorAll('[data-consultation-type]').forEach(btn=>btn.classList.toggle('active',btn.dataset.consultationType===type));$('outpatientClinicFields').classList.toggle('hidden',type!=='outpatient');$('inpatientClinicFields').classList.toggle('hidden',type!=='inpatient');$('clinicTotalLabel').textContent=type==='inpatient'?'Inpatient consultations':'Total patients';updateClinicValue();if(refresh)updatePatientTotal()}
+function selectClinicType(type,refresh=true){$('consultationType').value=type;document.querySelectorAll('[data-consultation-type]').forEach(btn=>btn.classList.toggle('active',btn.dataset.consultationType===type));$('outpatientClinicFields').classList.toggle('hidden',type!=='outpatient');$('inpatientClinicFields').classList.toggle('hidden',type!=='inpatient');$('clinicDurationField')?.classList.toggle('hidden',type!=='outpatient');$('clinicTotalLabel').textContent=type==='inpatient'?'Inpatient consultations':'Total patients';updateClinicValue();if(refresh)updatePatientTotal()}
 function updatePatientTotal(){const inpatient=$('consultationType').value==='inpatient';const n=inpatient?Math.max(0,Number($('inpatientConsultations').value||0)):Math.max(0,Number($('newConsultations').value||0));const f=inpatient?0:Math.max(0,Number($('followUps').value||0));const total=n+f;$('totalPatients').value=total;if($('clinicTotalPreview'))$('clinicTotalPreview').textContent=total}
 function updateClinicVisibility(){updatePatientTotal()}
 function selectClinicHospital(value){const base=String(value||'').replace(/^Inpatient Consultation /,'');document.querySelectorAll('[data-clinic-hospital]').forEach(btn=>btn.classList.toggle('active',btn.dataset.clinicHospital===base));updateClinicValue()}
+function selectClinicDuration(value){$('duration').value=value;document.querySelectorAll('[data-duration]').forEach(btn=>btn.classList.toggle('active',String(btn.dataset.duration)===String(value)))}
 function saveClinic(e){
   e.preventDefault();$('formMessage').textContent='';
   const button=e.submitter||clinicForm.querySelector('button[type="submit"]'),label=$('submitLabel');
@@ -88,13 +89,13 @@ function saveClinic(e){
   if(!Number.isInteger(n)||n<0||!Number.isInteger(f)||f<0)return validationMessage('formMessage','Enter whole numbers of zero or more.');
   beginSave(button,label);
   try{
-    const total=n+f;const item={id:$('editingId').value||uid(),date:$('date').value,day:getDay($('date').value),clinic:$('clinic').value,duration:null,totalPatients:total,newConsultations:n,followUps:f,updatedAt:new Date().toISOString()};
+    const total=n+f;const duration=inpatient?null:($('duration').value===''?null:Number($('duration').value));const item={id:$('editingId').value||uid(),date:$('date').value,day:getDay($('date').value),clinic:$('clinic').value,duration,totalPatients:total,newConsultations:n,followUps:f,updatedAt:new Date().toISOString()};
     upsert(clinicState.entries,item);persist(CLINIC_KEY,clinicState.entries);localStorage.setItem(LAST_CLINIC_KEY,item.clinic);
     resetClinic();renderClinic();finishSave(button,label,inpatient?`Inpatient consultations saved · ${n}`:`Clinic saved · New ${n} · Follow-up ${f}`);
   }catch(err){console.error(err);failSave(button,label,'Unable to save clinic. Your entry is still on screen.','formMessage')}
 }
-function resetClinic(){clinicForm.reset();$('editingId').value='';$('date').value=today();updateDay('date','day');$('newConsultations').value=0;$('followUps').value=0;$('inpatientConsultations').value=0;$('submitLabel').textContent='Save clinic';$('formMessage').textContent='';const last=localStorage.getItem(LAST_CLINIC_KEY)||'HMG Fayhaa';selectClinicType(isInpatient(last)?'inpatient':'outpatient',false);selectClinicHospital(clinicHospital({clinic:last})||'HMG Fayhaa');updatePatientTotal()}
-function editClinic(id){const x=clinicState.entries.find(e=>String(e.id)===String(id));if(!x)return;$('editingId').value=x.id;$('date').value=x.date;updateDay('date','day');selectClinicType(isInpatient(x.clinic)?'inpatient':'outpatient',false);selectClinicHospital(clinicHospital(x));if(isInpatient(x.clinic)){$('inpatientConsultations').value=x.totalPatients??((x.newConsultations||0)+(x.followUps||0));$('newConsultations').value=0;$('followUps').value=0}else{$('newConsultations').value=x.newConsultations||0;$('followUps').value=x.followUps||0;$('inpatientConsultations').value=0}updatePatientTotal();$('submitLabel').textContent='Update clinic';scrollTo(0,0)}
+function resetClinic(){clinicForm.reset();$('editingId').value='';$('date').value=today();updateDay('date','day');$('newConsultations').value=0;$('followUps').value=0;$('inpatientConsultations').value=0;$('submitLabel').textContent='Save clinic';$('formMessage').textContent='';const last=localStorage.getItem(LAST_CLINIC_KEY)||'HMG Fayhaa';selectClinicType(isInpatient(last)?'inpatient':'outpatient',false);selectClinicHospital(clinicHospital({clinic:last})||'HMG Fayhaa');selectClinicDuration('4');updatePatientTotal()}
+function editClinic(id){const x=clinicState.entries.find(e=>String(e.id)===String(id));if(!x)return;$('editingId').value=x.id;$('date').value=x.date;updateDay('date','day');selectClinicType(isInpatient(x.clinic)?'inpatient':'outpatient',false);selectClinicHospital(clinicHospital(x));selectClinicDuration(x.duration==null?'':String(x.duration));if(isInpatient(x.clinic)){$('inpatientConsultations').value=x.totalPatients??((x.newConsultations||0)+(x.followUps||0));$('newConsultations').value=0;$('followUps').value=0}else{$('newConsultations').value=x.newConsultations||0;$('followUps').value=x.followUps||0;$('inpatientConsultations').value=0}updatePatientTotal();$('submitLabel').textContent='Update clinic';scrollTo(0,0)}
 function renderClinic(){renderClinicRows();if(incomeUnlocked)renderIncomeDashboard();const statsEntries=filteredClinicStats();const t=statsEntries.reduce((a,e)=>({entries:a.entries+1,patients:a.patients+(e.totalPatients??e.newConsultations+e.followUps),new:a.new+e.newConsultations,follow:a.follow+e.followUps,hours:a.hours+(e.duration??0)}),{entries:0,patients:0,new:0,follow:0,hours:0});$('statEntries').textContent=t.entries;$('statPatients').textContent=t.patients;$('statNew').textContent=t.new;$('statFollowUps').textContent=t.follow;$('statHours').textContent=formatNum(t.hours);renderHospitalClinicStats(statsEntries);renderMonthlyClinicChart(statsEntries);if(incomeUnlocked)renderPerformanceDashboard()}
 function renderHospitalClinicStats(source=filteredClinicStats()){
   const configs=[
@@ -130,7 +131,7 @@ function exportClinic(){downloadCsv('clinic-activity', ['Date','Day','Clinic / S
 const pendingForm=$('pendingForm');
 function initPending(){$('pendingDate').value=today();pendingForm.onsubmit=savePending;$('resetPendingBtn').onclick=()=>resetPending();$('clearPendingBtn').onclick=clearPending;$('pendingSearch').oninput=e=>{pendingState.search=e.target.value.toLowerCase();renderPending()};document.querySelectorAll('[data-pending-hospital]').forEach(btn=>btn.onclick=()=>setPendingHospital(btn.dataset.pendingHospital));renderPending()}
 function pendingProcedures(){return [...document.querySelectorAll('#pendingProcedureChoices input:checked')].map(x=>x.value)}
-function setPendingHospital(hospital){pendingState.hospital=hospital;$('pendingHospital').value=hospital;document.querySelectorAll('[data-pending-hospital]').forEach(btn=>btn.classList.toggle('active',btn.dataset.pendingHospital===hospital));const short=hospital==='HMG Fayhaa'?'Fayhaa':'Mohammadiya';$('pendingFormTitle').textContent=`Pending – ${short}`;$('pendingQueueTitle').textContent=`Pending – ${short}`;resetPending(false);renderPending()}
+function setPendingHospital(hospital){pendingState.hospital=hospital;$('pendingHospital').value=hospital;document.querySelectorAll('[data-pending-hospital]').forEach(btn=>{const selected=btn.dataset.pendingHospital===hospital;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',String(selected))});const short=hospital==='HMG Fayhaa'?'Fayhaa':'Mohammadiya';$('pendingFormTitle').textContent=`Pending – ${short}`;$('pendingQueueTitle').textContent=`Pending – ${short}`;resetPending(false);renderPending()}
 function savePending(e){
   e.preventDefault();$('pendingMessage').textContent='';const procedures=pendingProcedures();
   if(!$('pendingDate').value||!$('pendingMrn').value.trim())return validationMessage('pendingMessage','Please enter a date and MRN.');
@@ -311,11 +312,11 @@ const DEFAULT_FEES={
   'New Consultation':110,'EGD':700,'Colonoscopy':680,'Flex Sig':300,'Fibroscan':264,'ERCP':2000,'EUS':4800,
   'Polypectomy':214,'Clip':56,'pH Monitoring':800,'Sclerotherapy':357,'Variceal Banding':611,
   'PEG Tube Insertion':1575,'PEG Tube Replacement':1680,'Foreign Body Removal':0,'Metallic Biliary Stenting':3200,
-  'Duodenal Stenting':0,'Esophageal Stenting':0,'Colonic Stenting':0
+  'Duodenal Stenting':0,'Esophageal Stenting':0,'Colonic Stenting':0,'On-call Night':500
 };
 let incomeUnlocked=false;
 function loadIncomeSettings(){
-  try{const saved=JSON.parse(localStorage.getItem(INCOME_SETTINGS_KEY)||'{}');return {target:Number(saved.target??100000),fees:{...DEFAULT_FEES,...(saved.fees||{})}}}catch{return {target:100000,fees:{...DEFAULT_FEES}}}
+  try{const saved=JSON.parse(localStorage.getItem(INCOME_SETTINGS_KEY)||'{}');return {target:Number(saved.target??100000),fees:{...DEFAULT_FEES,...(saved.fees||{})},onCallDays:{...(saved.onCallDays||{})}}}catch{return {target:100000,fees:{...DEFAULT_FEES},onCallDays:{}}}
 }
 let incomeSettings=loadIncomeSettings();
 function money(v){return new Intl.NumberFormat('en-SA',{style:'currency',currency:'SAR',maximumFractionDigits:0}).format(Number(v)||0)}
@@ -440,6 +441,7 @@ function initIncome(){
   $('lockIncomeBtn').onclick=lockIncome;
   $('incomeMonth').onchange=()=>{renderIncomeDashboard();renderPrivateOverview();renderPrivateHospitalCards()};
   $('saveIncomeTargetBtn').onclick=saveIncomeTarget;
+  $('saveOnCallDaysBtn').onclick=saveOnCallDays;
   $('saveFeeSettingsBtn').onclick=saveFeeSettings;
   document.querySelectorAll('.private-nav-btn').forEach(btn=>btn.onclick=()=>setPrivateView(btn.dataset.privateView));
   setPrivateView('overview');
@@ -449,6 +451,14 @@ function renderFeeSettings(){
   $('feeSettingsGrid').innerHTML=Object.keys(DEFAULT_FEES).map((name,i)=>`<label><span>${esc(name)}</span><input class="fee-input" data-fee="${esc(name)}" type="number" min="0" step="1" value="${Number(incomeSettings.fees[name]||0)}" /></label>`).join('');
 }
 function saveIncomeTarget(){incomeSettings.target=Math.max(0,Number($('incomeTargetInput').value||0));saveIncomeSettings();msg('incomeTargetMessage','Target saved.');renderIncomeDashboard()}
+function saveOnCallDays(){
+  const month=$('incomeMonth').value||currentMonthKey();
+  incomeSettings.onCallDays=incomeSettings.onCallDays||{};
+  incomeSettings.onCallDays[month]=Math.max(0,Math.floor(Number($('onCallDaysInput').value||0)));
+  saveIncomeSettings();
+  msg('onCallDaysMessage','On-call nights saved.');
+  renderIncomeDashboard();
+}
 function saveFeeSettings(){document.querySelectorAll('.fee-input').forEach(input=>incomeSettings.fees[input.dataset.fee]=Math.max(0,Number(input.value||0)));saveIncomeSettings();msg('feeSettingsMessage','Approximate fees saved.');renderIncomeDashboard()}
 function saveIncomeSettings(){localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(incomeSettings));createAutomaticLocalBackup('Income settings saved')}
 function incomeItemsForMonth(month,hospital='all'){
@@ -488,7 +498,13 @@ function renderIncomeHospitalComparison(month,overallTotal){
 
 function renderIncomeDashboard(){
   if(!incomeUnlocked)return;const month=$('incomeMonth').value||currentMonthKey(),items=incomeItemsForMonth(month),expected=items.reduce((s,x)=>s+x.total,0),target=Number(incomeSettings.target||0),remaining=Math.max(0,target-expected),achievement=target>0?(expected/target*100):0;
+  const onCallDays=Math.max(0,Math.floor(Number(incomeSettings.onCallDays?.[month]||0)));
+  const onCallFee=Math.max(0,Number(incomeSettings.fees['On-call Night']||500));
+  const onCallIncome=onCallDays*onCallFee;
   $('incomeTargetInput').value=target;$('incomeTargetDisplay').textContent=money(target);$('incomeExpectedDisplay').textContent=money(expected);$('incomeRemainingDisplay').textContent=money(remaining);$('incomeAchievementDisplay').textContent=`${achievement.toFixed(1)}%`;$('incomeProgressBar').style.width=`${Math.min(100,achievement)}%`;
+  if($('onCallDaysInput'))$('onCallDaysInput').value=onCallDays;
+  if($('onCallFeeDisplay'))$('onCallFeeDisplay').textContent=money(onCallFee);
+  if($('onCallIncomeDisplay'))$('onCallIncomeDisplay').textContent=money(onCallIncome);
   const visible=items.filter(x=>x.count>0);
   $('incomeBreakdown').innerHTML=visible.length?visible.map(x=>`<div class="income-line"><div><strong>${esc(x.name)}</strong><span>${x.count} × ${money(x.fee)}</span></div><strong>${money(x.total)}</strong></div>`).join('')+`<div class="income-line income-total"><div><strong>Total estimated income</strong></div><strong>${money(expected)}</strong></div>`:'<div class="chart-empty"><div><strong>No income activity for this month</strong><span>Add clinic or endoscopy records to calculate an estimate.</span></div></div>';
   renderIncomeHospitalComparison(month,expected);renderPrivateOverview();renderPrivateHospitalCards();

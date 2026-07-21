@@ -456,3 +456,36 @@ body.dark #themeToggle .sun-icon{display:block}
 .clinic-mode-row{margin-bottom:16px}.clinic-type-buttons,.endoscopy-hospital-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.clinic-type-btn,.endoscopy-hospital-btn{min-height:46px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);color:var(--text);font-weight:850}.clinic-type-btn.active,.endoscopy-hospital-btn.active{border-color:var(--primary);background:var(--primary);color:#fff;box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 22%,transparent)}.clinic-count-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}.clinic-count-fields.hidden{display:none!important}.endoscopy-hospital-field{align-self:end}.endoscopy-hospital-buttons{min-width:260px}
 @media(max-width:900px){.clinic-count-fields{grid-template-columns:1fr 1fr}}
 @media(max-width:767px){.clinic-type-btn,.endoscopy-hospital-btn{min-height:52px}.clinic-count-fields{grid-template-columns:1fr}.endoscopy-hospital-buttons{min-width:0;width:100%}.endoscopy-hospital-field{width:100%}}
+
+.oncall-income-grid{display:grid;grid-template-columns:minmax(180px,1fr) repeat(2,minmax(0,1fr));gap:14px;align-items:end}.oncall-income-grid label{margin:0}.oncall-income-grid .income-kpi{min-height:100%}@media(max-width:760px){.oncall-income-grid{grid-template-columns:1fr}.oncall-income-grid .income-kpi{padding:16px}}
+
+
+/* v3.5 — Pending hospital selector matches Clinic and Endoscopy */
+.pending-hospital-field{margin-bottom:20px}
+.pending-hospital-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pending-hospital-btn{min-height:46px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);color:var(--text);font-weight:850;display:flex;align-items:center;justify-content:center;gap:7px}
+.pending-hospital-btn span{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:999px;background:var(--surface);color:var(--text);font-size:.78rem;line-height:1}
+.pending-hospital-btn.active{border-color:var(--primary);background:var(--primary);color:#fff;box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 22%,transparent)}
+.pending-hospital-btn.active span{background:rgba(255,255,255,.2);color:#fff}
+@media(max-width:767px){.pending-hospital-btn{min-height:52px}.pending-hospital-buttons{width:100%}}
+
+
+/* v3.6 compact procedure and additional-procedure selectors */
+.compact-choice-grid{display:flex!important;flex-wrap:wrap;gap:8px!important}
+.compact-choice-grid .check-card{min-height:36px;padding:8px 11px;border-radius:999px;font-size:.82rem;font-weight:800;line-height:1.1;flex:0 0 auto}
+.compact-choice-grid .check-card input[type="checkbox"]{width:16px;height:16px;min-width:16px;margin:0}
+.compact-choice-grid>label:not(.check-card){min-width:150px;flex:1 1 160px}
+@media(max-width:767px){
+  .compact-choice-grid{gap:7px!important}
+  .compact-choice-grid .check-card{min-height:34px;padding:7px 10px;font-size:.78rem}
+  .compact-choice-grid>label:not(.check-card){min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px)}
+}
+
+/* v3.7 compact optional clinic duration */
+.clinic-duration-field { display: grid; gap: 8px; }
+.clinic-duration-field small { font-weight: 500; opacity: .7; }
+.duration-chip-row { display: flex; gap: 7px; overflow-x: auto; padding: 2px 1px 7px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.duration-chip-row::-webkit-scrollbar { display: none; }
+.duration-chip { flex: 0 0 auto; min-width: 48px; min-height: 38px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 7px 11px; font-weight: 700; }
+.duration-chip:first-child { min-width: 104px; }
+.duration-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
