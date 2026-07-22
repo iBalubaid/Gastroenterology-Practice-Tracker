@@ -87,3 +87,17 @@
 - Applied the same compact comparison layout to Clinic, Endoscopy, and Performance statistics.
 - Reduced internal spacing and font sizes only on small screens to avoid horizontal scrolling.
 - Preserved all storage keys, records, calculations, and desktop behavior.
+
+
+## 3.10.14
+- Added a visible Add pending patient button below the hospital selector on iPhone.
+- Strengthened Pending form opening and submit event handling.
+- Preserved the floating + button as an additional shortcut.
+- Preserved all storage keys and record formats.
+
+## v3.10.15
+- Reverted Private Statistics to a complete one-column iPhone layout.
+- Clinic and Endoscopy statistic cards now use full width on mobile.
+- Hospital breakdowns and performance comparisons stack vertically.
+- Removed forced wide chart canvas so diagrams fit the iPhone screen.
+- Preserved compact Clinic/Endoscopy logs, Pending add fix, storage keys, and record formats.

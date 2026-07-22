@@ -743,3 +743,71 @@ body.dark #themeToggle .sun-icon{display:block}
   .hospital-panel-heading h3 { font-size: .76rem; }
   .hospital-panel-heading small { font-size: .57rem; }
 }
+
+/* v3.10-14 — Reliable Pending add controls on iPhone */
+.pending-hospital-field{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end}
+.pending-hospital-field>.field-label{grid-column:1/-1}
+.pending-inline-add{min-width:0;white-space:nowrap;padding:10px 13px}
+@media(max-width:767px){
+  .pending-hospital-field{grid-template-columns:1fr;gap:8px}
+  .pending-hospital-buttons{grid-row:1}
+  .pending-inline-add{grid-row:2;width:100%;min-height:44px}
+  .pending-fab{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .pending-composer.open{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
+}
+
+/* v3.10.15 — complete single-column Private Statistics layout on iPhone */
+@media (max-width: 767px) {
+  .private-statistics-dashboard .compact-dashboard-grid,
+  .private-statistics-dashboard .hospital-dashboard-grid,
+  .private-statistics-dashboard .hospital-procedure-grid,
+  .private-statistics-dashboard .hospital-summary-row,
+  .private-statistics-dashboard .performance-hospital-grid,
+  .private-statistics-dashboard .dashboard-filter-bar {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .private-statistics-dashboard .dashboard-filter-bar .stats-date-field,
+  .private-statistics-dashboard .dashboard-filter-bar > * {
+    grid-column: 1 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .private-statistics-dashboard .stat-card,
+  .private-statistics-dashboard .hospital-stat-panel,
+  .private-statistics-dashboard .performance-hospital-card,
+  .private-statistics-dashboard .hospital-summary-row > div,
+  .private-statistics-dashboard .hospital-procedure-grid > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .private-statistics-dashboard .stat-card {
+    min-height: 78px !important;
+  }
+
+  .private-statistics-dashboard .monthly-chart {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 260px !important;
+    overflow: visible !important;
+  }
+
+  .private-statistics-dashboard .monthly-chart > * {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .private-statistics-dashboard canvas,
+  .private-statistics-dashboard svg {
+    max-width: 100% !important;
+  }
+
+  .private-statistics-dashboard .dashboard-stat-body {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
