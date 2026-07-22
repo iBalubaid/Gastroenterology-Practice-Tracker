@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.12
+- Changed Pending planned procedures to compact quick-select style tabs.
+- Preserved multi-selection, editing, saved values, and all storage keys.
+
 ## 3.6.0
 - Made Main procedures and Additional procedures compact chip-style selectors, matching Quick select.
 - Preserved all procedure values and storage behavior.
@@ -38,3 +42,14 @@
 - Removed the Pending Endoscopy instruction panel.
 - Added optional outpatient clinic duration selection in 0.5-hour increments, defaulting to 4 hours.
 - Reordered Additional Procedures with Polypectomy and Clip first, followed by the requested sequence.
+
+## 3.11
+- Added Queue, Today, and Week views inside Pending.
+- Views are display-only filters and preserve the existing pending storage key and record format.
+- Added per-view counts and date-range summaries.
+
+## 3.13
+- Rebuilt Pending as a compact iPhone queue.
+- Added one-line patient rows with tap-to-expand details and actions.
+- Added a floating add button and full-screen mobile add/edit form.
+- Preserved all existing storage keys and pending-record structure.

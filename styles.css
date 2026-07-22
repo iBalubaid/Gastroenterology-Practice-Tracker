@@ -489,3 +489,26 @@ body.dark #themeToggle .sun-icon{display:block}
 .duration-chip { flex: 0 0 auto; min-width: 48px; min-height: 38px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 7px 11px; font-weight: 700; }
 .duration-chip:first-child { min-width: 104px; }
 .duration-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* v3.11 — Pending Queue, Today, and Week views */
+.pending-view-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 10px}
+.pending-view-btn{min-height:44px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);color:var(--text);font-weight:850;display:flex;align-items:center;justify-content:center;gap:7px}
+.pending-view-btn span{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:999px;background:var(--surface);font-size:.78rem;line-height:1}
+.pending-view-btn.active{border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+.pending-view-summary{margin:0 0 14px;color:var(--muted);font-size:.84rem;font-weight:750}
+@media(max-width:420px){.pending-view-btn{min-height:48px;padding:8px 5px;font-size:.8rem}.pending-view-btn span{min-width:22px;height:22px;font-size:.72rem}}
+
+/* v3.12 — Compact multi-select planned procedure tabs */
+.pending-procedure-tabs{display:flex!important;flex-wrap:wrap;gap:8px!important}
+.pending-procedure-tabs .check-card{position:relative;min-height:38px;padding:8px 13px;border-radius:12px;cursor:pointer;user-select:none;flex:0 0 auto;font-size:.82rem;font-weight:850;line-height:1.1}
+.pending-procedure-tabs .check-card input[type="checkbox"]{position:absolute;inline-size:1px;block-size:1px;opacity:0;pointer-events:none}
+.pending-procedure-tabs .check-card:has(input:focus-visible){outline:3px solid color-mix(in srgb,var(--primary) 25%,transparent);outline-offset:2px}
+.pending-procedure-tabs .check-card:has(input:checked){border-color:var(--primary);background:var(--primary-soft);color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+@media(max-width:480px){.pending-procedure-tabs{gap:7px!important}.pending-procedure-tabs .check-card{min-height:36px;padding:8px 11px;font-size:.78rem}}
+
+/* v3.13 compact iPhone pending queue */
+.pending-composer-top{display:none;align-items:center;justify-content:space-between;margin-bottom:12px}.pending-composer-top strong{font-size:1rem}.pending-composer-close{font-size:1.35rem;line-height:1}.pending-fab{display:none;position:fixed;right:max(18px,env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:80;width:56px;height:56px;border:0;border-radius:50%;background:var(--primary);color:#fff;font-size:2rem;font-weight:500;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,.24)}
+.pending-item.compact{display:block;padding:0;overflow:hidden;background:var(--surface);border-radius:14px}.pending-row{width:100%;border:0;background:transparent;color:inherit;display:grid;grid-template-columns:30px minmax(0,1fr) 20px;gap:9px;align-items:center;padding:10px 11px;text-align:left}.pending-row-main{min-width:0;display:grid;gap:3px}.pending-row-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.pending-row-top strong{font-size:.9rem}.pending-row-procedures{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:.76rem}.pending-date-badge{flex:0 0 auto;border-radius:999px;padding:3px 7px;background:var(--surface-2);color:var(--muted);font-size:.68rem;font-weight:800}.pending-date-badge.today{background:var(--primary-soft);color:var(--primary)}.pending-chevron{color:var(--muted);font-size:.85rem;text-align:center}.pending-item.compact .pending-order{width:27px;height:27px;font-size:.75rem}.pending-details{border-top:1px solid var(--border);padding:10px 11px 11px 50px}.pending-details .pending-tags{margin:0 0 8px}.pending-note{margin:0 0 10px;color:var(--muted);font-size:.8rem;white-space:pre-wrap}.pending-item.compact .pending-actions{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:7px}.pending-item.compact .pending-actions button{width:100%;min-width:0;padding:8px 6px}.pending-list{gap:7px}
+@media(max-width:767px){
+  #pendingModule{padding-bottom:82px}.pending-fab{display:grid;place-items:center}.pending-composer{display:none;position:fixed;inset:0;z-index:100;margin:0!important;border-radius:0;overflow:auto;padding:calc(16px + env(safe-area-inset-top)) 14px calc(24px + env(safe-area-inset-bottom));background:var(--surface)}.pending-composer.open{display:block}.pending-composer-top{display:flex}.pending-composer .section-heading{margin-top:4px}.pending-composer-open{overflow:hidden}.pending-card{margin-bottom:0}.pending-details{padding-left:50px}.pending-row{padding:9px 10px}.pending-view-summary{font-size:.75rem}.pending-list{gap:6px}
+}
