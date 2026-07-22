@@ -81,3 +81,9 @@
 - Added a dedicated Private Statistics tab containing all existing statistics, hospital comparisons, and diagrams.
 - Minimized Clinic and Endoscopy activity logs into closed, expandable sections with visible record counts.
 - Preserved all storage keys, record formats, calculations, filters, exports, and existing data.
+
+## 3.10.13
+- Kept Fayhaa and Mohammadiya hospital breakdown panels side by side on iPhone.
+- Applied the same compact comparison layout to Clinic, Endoscopy, and Performance statistics.
+- Reduced internal spacing and font sizes only on small screens to avoid horizontal scrolling.
+- Preserved all storage keys, records, calculations, and desktop behavior.

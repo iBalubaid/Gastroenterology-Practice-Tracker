@@ -23,3 +23,6 @@ Haptic vibration uses the browser vibration API when available. iPhone Safari ma
 
 ### v3.10-9 mobile update
 The Clinic Activity Log is compact on iPhone. Tap any row to expand its details and actions.
+
+### v3.10.13 mobile hospital comparison
+Hospital breakdown panels remain side by side on iPhone for faster Fayhaa-versus-Mohammadiya comparison. The layout is compact and does not change saved data or storage keys.
