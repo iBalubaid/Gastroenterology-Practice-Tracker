@@ -601,3 +601,34 @@ body.dark #themeToggle .sun-icon{display:block}
   .dashboard-stat-body .section-help { font-size: .75rem; }
   .dashboard-stat-body .monthly-chart { min-height: 230px; }
 }
+
+
+/* v3.10.12 — minimized logs and complete statistics inside Private Area */
+.activity-log-collapsible{padding:0;overflow:hidden}
+.activity-log-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;cursor:pointer;list-style:none;min-height:58px}
+.activity-log-summary::-webkit-details-marker{display:none}
+.activity-log-summary>span:first-child{display:grid;gap:2px;min-width:0}
+.activity-log-summary strong{font-size:1rem;color:var(--text)}
+.activity-log-summary small{font-size:.72rem;color:var(--muted);font-weight:650}
+.activity-log-summary-count{display:grid;place-items:center;min-width:38px;height:30px;padding:0 9px;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-weight:850}
+.activity-log-collapsible[open] .activity-log-summary{border-bottom:1px solid var(--border)}
+.activity-log-collapsible-body{padding:14px 16px 16px}
+.private-statistics-dashboard{display:none}
+.private-statistics-dashboard:not(.hidden){display:block}
+.private-statistics-dashboard .dashboard-intro-card{margin-top:0}
+@media(max-width:767px){
+  .activity-log-collapsible{margin-top:12px}
+  .activity-log-summary{padding:13px 14px;min-height:52px}
+  .activity-log-summary small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px}
+  .activity-log-collapsible-body{padding:10px}
+  .activity-log-toolbar-heading{display:block}
+  .activity-log-toolbar-heading .toolbar{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%}
+  .activity-log-toolbar-heading .toolbar input{grid-column:1/-1}
+  .activity-log-toolbar-heading .toolbar button,.activity-log-toolbar-heading .toolbar select{min-width:0;width:100%}
+  .private-statistics-dashboard .dashboard-filter-bar{position:sticky;top:0;z-index:4;padding:10px;border-radius:14px;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(14px)}
+  .private-statistics-dashboard .compact-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}
+  .private-statistics-dashboard .stat-card{min-height:86px;padding:12px}
+  .private-statistics-dashboard .stat-card strong{font-size:1.7rem}
+  .private-statistics-dashboard .monthly-chart{min-height:300px;overflow-x:auto}
+  .private-statistics-dashboard .monthly-chart>*{min-width:560px}
+}

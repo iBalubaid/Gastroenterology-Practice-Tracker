@@ -40,9 +40,8 @@
 <button class="module-tab active" data-module="clinicModule" type="button"><span class="tab-icon">01</span><span><strong>Clinic</strong><small>Daily activity &amp; consultations</small></span></button>
 <button class="module-tab" data-module="pendingModule" type="button"><span class="tab-icon">02</span><span><strong>Pending</strong><small>Planned endoscopy queue</small></span></button>
 <button class="module-tab" data-module="endoscopyModule" type="button"><span class="tab-icon">03</span><span><strong>Endoscopy</strong><small>Procedures &amp; interventions</small></span></button>
-<button class="module-tab" data-module="dashboardModule" type="button"><span class="tab-icon">04</span><span><strong>Dashboard</strong><small>Clinic &amp; endoscopy statistics</small></span></button></nav>
+</nav>
 </div>
-
 <section class="module-panel active" id="clinicModule">
 <section class="card form-card">
 <div class="section-heading"><div><p class="eyebrow">Quick clinic entry</p><h2>Record clinic activity</h2></div><button class="text-btn" id="resetFormBtn" type="button">Clear form</button></div>
@@ -100,13 +99,10 @@
 <div class="form-actions"><button class="primary-btn" type="submit"><span id="submitLabel">Save clinic</span></button></div>
 </form>
 </section>
-
-
-
-<section class="card">
-<div class="section-heading filters-heading"><div><p class="eyebrow">Records</p><h2>Clinic activity log</h2></div><div class="toolbar"><input id="searchInput" placeholder="Search clinic or date" type="search"/><select id="clinicFilter"><option value="">All clinics and services</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option><option>Inpatient Consultation HMG Fayhaa</option><option>Inpatient Consultation HMG Mohammadiya</option></select><button class="secondary-btn" id="exportBtn" type="button">Export CSV</button><button class="danger-btn" id="clearAllBtn" type="button">Clear all</button></div></div>
+<details class="card activity-log-collapsible" id="clinicActivityLog"><summary class="activity-log-summary"><span><strong>Clinic activity log</strong><small>Tap to browse, search, edit, or export records</small></span><span class="activity-log-summary-count" id="clinicActivityLogCount">0</span></summary><div class="activity-log-collapsible-body">
+<div class="section-heading filters-heading activity-log-toolbar-heading"><div class="toolbar"><input id="searchInput" placeholder="Search clinic or date" type="search"/><select id="clinicFilter"><option value="">All clinics and services</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option><option>Inpatient Consultation HMG Fayhaa</option><option>Inpatient Consultation HMG Mohammadiya</option></select><button class="secondary-btn" id="exportBtn" type="button">Export CSV</button><button class="danger-btn" id="clearAllBtn" type="button">Clear all</button></div></div>
 <div class="table-wrap"><table><thead><tr><th>Date</th><th>Day</th><th>Clinic / Service</th><th>Duration</th><th>Total patients</th><th>New</th><th>Follow-up</th><th>Actions</th></tr></thead><tbody id="recordsBody"></tbody></table><div class="empty-state" id="emptyState"><strong>No entries yet</strong><span>Add your first clinic entry above.</span></div></div>
-</section>
+</div></details>
 </section>
 <section class="module-panel" id="pendingModule">
 <section class="card pending-hospital-switcher">
@@ -212,14 +208,40 @@
 <div class="form-actions"><button class="primary-btn" type="submit"><span id="endoscopySubmitLabel">Save procedure</span></button></div>
 </form>
 </section>
-
-
-<section class="card">
-<div class="section-heading filters-heading"><div><p class="eyebrow">Records</p><h2>Endoscopy activity log</h2></div><div class="toolbar"><input id="endoscopySearch" placeholder="Search MRN, hospital, procedure" type="search"/><select id="hospitalFilter"><option value="">All hospitals</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select><button class="secondary-btn" id="exportEndoscopyBtn" type="button">Export CSV</button><button class="danger-btn" id="clearEndoscopyBtn" type="button">Clear all</button></div></div>
+<details class="card activity-log-collapsible" id="endoscopyActivityLog"><summary class="activity-log-summary"><span><strong>Endoscopy activity log</strong><small>Tap to browse, search, edit, or export records</small></span><span class="activity-log-summary-count" id="endoscopyActivityLogCount">0</span></summary><div class="activity-log-collapsible-body">
+<div class="section-heading filters-heading activity-log-toolbar-heading"><div class="toolbar"><input id="endoscopySearch" placeholder="Search MRN, hospital, procedure" type="search"/><select id="hospitalFilter"><option value="">All hospitals</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select><button class="secondary-btn" id="exportEndoscopyBtn" type="button">Export CSV</button><button class="danger-btn" id="clearEndoscopyBtn" type="button">Clear all</button></div></div>
 <div class="table-wrap endoscopy-log-wrap"><table id="endoscopyTable"><colgroup><col class="col-date"/><col class="col-day"/><col class="col-mrn"/><col class="col-hospital"/><col class="col-procedure"/><col class="col-additional"/><col class="col-note"/><col class="col-actions"/></colgroup><thead><tr><th>Date</th><th>Day</th><th>MRN</th><th>Hospital</th><th>Procedures</th><th>Additional procedures</th><th>Note</th><th>Actions</th></tr></thead><tbody id="endoscopyBody"></tbody></table><div class="empty-state" id="endoscopyEmptyState"><strong>No procedure records yet</strong><span>Add the first endoscopy record above.</span></div></div>
+</div></details>
 </section>
+<section class="module-panel" id="incomeModule">
+<section class="card income-lock-card hidden" id="incomeLockScreen">
+<div class="lock-icon">🔒</div>
+<p class="eyebrow">Private area</p>
+<h2 class="hidden" id="incomeLockTitle">Unlock Private Dashboard</h2>
+<p class="section-help hidden" id="incomeLockHelp">Enter your password to view the private dashboard.</p>
+<form class="password-form" id="incomePasswordForm">
+<label><span id="incomePasswordLabel">Password</span><input autocomplete="current-password" id="incomePassword" minlength="4" required="" type="password"/></label>
+<label class="hidden" id="confirmPasswordGroup"><span>Confirm password</span><input autocomplete="new-password" id="incomePasswordConfirm" minlength="4" type="password"/></label>
+<div class="form-message" id="incomePasswordMessage"></div>
+<button class="primary-btn" type="submit"><span id="incomePasswordButton">Unlock</span></button>
+</form>
+<button class="text-btn reset-private-password-btn" id="resetPrivatePasswordBtn" type="button">Reset password on this device</button>
+<p class="security-note">The password protects this section from casual access on this browser. Because this is an offline webpage, it is not equivalent to server-based authentication.</p>
 </section>
-<section class="module-panel dashboard-module" id="dashboardModule"><section class="card dashboard-intro-card"><div><p class="eyebrow">Practice overview</p><h2>Statistics Dashboard</h2><p class="section-help">Clinic and endoscopy analytics in compact sections. Tap a section to open it.</p></div></section><div class="dashboard-filter-bar">
+<div id="incomeDashboard">
+<section class="private-dashboard-shell">
+<div class="private-dashboard-topbar">
+<div><p class="eyebrow">Private area</p><h2>Practice Dashboard</h2></div>
+</div>
+<nav aria-label="Private dashboard sections" class="private-dashboard-nav">
+<button class="private-nav-btn active" data-private-view="overview" type="button">Overview</button><button class="private-nav-btn" data-private-view="statistics" type="button">Statistics</button>
+<button class="private-nav-btn" data-private-view="income" type="button">Income</button>
+<button class="private-nav-btn" data-private-view="performance" type="button">Performance</button>
+<button class="private-nav-btn" data-private-view="hospitals" type="button">Hospitals</button>
+<button class="private-nav-btn" data-private-view="fees" type="button">Fees</button>
+<button class="private-nav-btn" data-private-view="backup" type="button">Backup</button>
+</nav>
+</section><section class="private-view hidden private-statistics-dashboard" data-private-section="statistics" id="privateStatisticsDashboard"><section class="card dashboard-intro-card"><div><p class="eyebrow">Practice overview</p><h2>Complete Practice Statistics</h2><p class="section-help">All clinic and endoscopy statistics, hospital comparisons, and diagrams in one private mobile dashboard.</p></div></section><div class="dashboard-filter-bar">
 <label>Statistics Period
     <select id="statsPeriod">
 <option value="all">All Time</option>
@@ -307,35 +329,7 @@
 </div>
 </article>
 </div>
-</section></div></details></section><section class="module-panel" id="incomeModule">
-<section class="card income-lock-card hidden" id="incomeLockScreen">
-<div class="lock-icon">🔒</div>
-<p class="eyebrow">Private area</p>
-<h2 class="hidden" id="incomeLockTitle">Unlock Private Dashboard</h2>
-<p class="section-help hidden" id="incomeLockHelp">Enter your password to view the private dashboard.</p>
-<form class="password-form" id="incomePasswordForm">
-<label><span id="incomePasswordLabel">Password</span><input autocomplete="current-password" id="incomePassword" minlength="4" required="" type="password"/></label>
-<label class="hidden" id="confirmPasswordGroup"><span>Confirm password</span><input autocomplete="new-password" id="incomePasswordConfirm" minlength="4" type="password"/></label>
-<div class="form-message" id="incomePasswordMessage"></div>
-<button class="primary-btn" type="submit"><span id="incomePasswordButton">Unlock</span></button>
-</form>
-<button class="text-btn reset-private-password-btn" id="resetPrivatePasswordBtn" type="button">Reset password on this device</button>
-<p class="security-note">The password protects this section from casual access on this browser. Because this is an offline webpage, it is not equivalent to server-based authentication.</p>
-</section>
-<div id="incomeDashboard">
-<section class="private-dashboard-shell">
-<div class="private-dashboard-topbar">
-<div><p class="eyebrow">Private area</p><h2>Practice Dashboard</h2></div>
-</div>
-<nav aria-label="Private dashboard sections" class="private-dashboard-nav">
-<button class="private-nav-btn active" data-private-view="overview" type="button">Overview</button>
-<button class="private-nav-btn" data-private-view="income" type="button">Income</button>
-<button class="private-nav-btn" data-private-view="performance" type="button">Performance</button>
-<button class="private-nav-btn" data-private-view="hospitals" type="button">Hospitals</button>
-<button class="private-nav-btn" data-private-view="fees" type="button">Fees</button>
-<button class="private-nav-btn" data-private-view="backup" type="button">Backup</button>
-</nav>
-</section>
+</section></div></details></section>
 <section class="card private-view" data-private-section="overview">
 <div class="section-heading"><div><p class="eyebrow">Overview</p><h2>Practice at a glance</h2><p class="section-help">Monthly income and productivity summary.</p></div></div>
 <div class="income-kpi-grid">
@@ -465,6 +459,6 @@
 <div aria-atomic="true" aria-live="polite" class="app-toast" id="appToast" role="status"></div>
 <script async="" defer="" src="https://accounts.google.com/gsi/client"></script>
 <script src="app.js"></script>
-<div aria-label="Application version" class="version-stamp">v3.4.0 On-call Income</div>
+<div aria-label="Application version" class="version-stamp">v3.10.12 Private Statistics Dashboard</div>
 </body>
 </html>

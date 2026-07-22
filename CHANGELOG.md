@@ -75,3 +75,9 @@
 - Added compact, collapsible Clinic Statistics and Endoscopy Statistics sections.
 - Added two-column iPhone statistic grids and compact hospital breakdowns.
 - Preserved all existing element IDs, calculations, record structures, and storage keys.
+
+## 3.10.12
+- Moved the complete Clinic and Endoscopy statistics dashboard into the password-protected Private Area.
+- Added a dedicated Private Statistics tab containing all existing statistics, hospital comparisons, and diagrams.
+- Minimized Clinic and Endoscopy activity logs into closed, expandable sections with visible record counts.
+- Preserved all storage keys, record formats, calculations, filters, exports, and existing data.
