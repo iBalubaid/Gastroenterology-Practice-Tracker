@@ -1,499 +1,470 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Gastroenterology practice clinic and endoscopy activity tracker" />
-  <title>Clinic &amp; Endoscopy Tracker</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Gastroenterology practice clinic and endoscopy activity tracker" name="description"/>
+<title>Clinic &amp; Endoscopy Tracker</title>
+<link href="styles.css" rel="stylesheet"/>
 </head>
 <body>
-  <header class="app-header">
-    <div class="brand-block">
-      <img id="practiceLogo" src="hmg-logo.webp" alt="Gastroenterology Practice logo" class="hospital-logo" draggable="false" />
-      <div>
-        <p class="eyebrow">Gastroenterology Practice</p>
-        <h1>Clinic &amp; Endoscopy Tracker</h1>
-        <p class="subtitle">Daily clinic activity, inpatient consultations, and endoscopy procedure tracking.</p>
-      </div>
-    </div>
-    <div class="header-actions">
-      <div id="saveStatus" class="save-status saved" role="status" aria-live="polite" title="All changes saved"><span></span><b>Saved</b></div>
-      <button id="themeToggle" class="secondary-btn theme-btn header-icon-action" type="button" aria-label="Switch to dark mode" title="Dark mode">
-        <span id="themeToggleIcon" class="header-action-icon theme-icon" aria-hidden="true">
-          <svg class="moon-icon" viewBox="0 0 24 24" focusable="false"><path d="M20.2 15.4A8.4 8.4 0 0 1 8.6 3.8 8.7 8.7 0 1 0 20.2 15.4Z"/></svg>
-          <svg class="sun-icon" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
-        </span>
-      </button>
-      <button id="privateAccessBtn" class="header-icon-action private-lock-btn" type="button" aria-label="Open private dashboard" title="Private dashboard">
-        <span class="header-action-icon" aria-hidden="true">
-          <svg class="lock-closed-icon" viewBox="0 0 24 24" focusable="false"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          <svg class="lock-open-icon" viewBox="0 0 24 24" focusable="false"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M9 10V7a4 4 0 0 1 7.5-2"/></svg>
-        </span>
-      </button>
-    </div>
-  </header>
-
-  <main class="container">
-    <div class="module-nav-row">
-      <nav class="module-tabs" aria-label="Modules">
-        <button class="module-tab active" data-module="clinicModule" type="button"><span class="tab-icon">01</span><span><strong>Clinic</strong><small>Daily activity & consultations</small></span></button>
-        <button class="module-tab" data-module="pendingModule" type="button"><span class="tab-icon">02</span><span><strong>Pending</strong><small>Planned endoscopy queue</small></span></button>
-        <button class="module-tab" data-module="endoscopyModule" type="button"><span class="tab-icon">03</span><span><strong>Endoscopy</strong><small>Procedures & interventions</small></span></button>
-      </nav>
-    </div>
-
-        <div class="dashboard-filter-bar">
-    <label>Statistics Period
-    <select id="statsPeriod">
-    <option value="all">All Time</option>
-    <option value="year">This Year</option>
-    <option value="month">This Month</option>
-    <option value="custom">Custom Date Range</option>
-    </select>
-    </label>
-    <label id="statsFromGroup" class="stats-date-field hidden">From
-    <input id="statsFrom" type="date" />
-    </label>
-    <label id="statsToGroup" class="stats-date-field hidden">To
-    <input id="statsTo" type="date" />
-    </label>
-    <label>Hospital
-    <select id="statsHospital">
-    <option value="all">All Hospitals</option>
-    <option>HMG Fayhaa</option>
-    <option>HMG Mohammadiya</option>
-    </select>
-    </label>
-    </div>
-
-    <section id="clinicModule" class="module-panel active">
-      <section class="card form-card">
-        <div class="section-heading"><div><p class="eyebrow">Quick clinic entry</p><h2>Record clinic activity</h2></div><button id="resetFormBtn" class="text-btn" type="button">Clear form</button></div>
-        <form id="trackerForm">
-          <input id="editingId" type="hidden" />
-          <div class="clinic-mode-row">
-            <span class="field-label">Consultation type</span>
-            <div class="clinic-type-buttons" role="group" aria-label="Consultation type">
-              <button type="button" class="clinic-type-btn active" data-consultation-type="outpatient">Outpatient</button>
-              <button type="button" class="clinic-type-btn" data-consultation-type="inpatient">Inpatient</button>
-            </div>
-            <input id="consultationType" type="hidden" value="outpatient" />
-          </div>
-          <div class="clinic-quick-form">
-            <label class="clinic-date-field"><span>Date</span><input id="date" type="date" required /></label>
-            <div class="clinic-hospital-field">
-              <span class="field-label">Hospital</span>
-              <div class="clinic-hospital-buttons" role="group" aria-label="Clinic hospital">
-                <button type="button" class="clinic-hospital-btn" data-clinic-hospital="HMG Fayhaa">Fayhaa</button>
-                <button type="button" class="clinic-hospital-btn" data-clinic-hospital="HMG Mohammadiya">Mohammadiya</button>
-              </div>
-              <select id="clinic" required class="visually-hidden-select" aria-hidden="true" tabindex="-1"><option value="">Select hospital</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option><option>Inpatient Consultation HMG Fayhaa</option><option>Inpatient Consultation HMG Mohammadiya</option></select>
-            </div>
-            <div id="clinicDurationField" class="clinic-duration-field">
-              <span class="field-label">Clinic duration <small>(optional)</small></span>
-              <div class="duration-chip-row" role="group" aria-label="Clinic duration in hours">
-                <button type="button" class="duration-chip" data-duration="">Not recorded</button>
-                <button type="button" class="duration-chip" data-duration="0.5">0.5h</button>
-                <button type="button" class="duration-chip" data-duration="1">1h</button>
-                <button type="button" class="duration-chip" data-duration="1.5">1.5h</button>
-                <button type="button" class="duration-chip" data-duration="2">2h</button>
-                <button type="button" class="duration-chip" data-duration="2.5">2.5h</button>
-                <button type="button" class="duration-chip" data-duration="3">3h</button>
-                <button type="button" class="duration-chip" data-duration="3.5">3.5h</button>
-                <button type="button" class="duration-chip active" data-duration="4">4h</button>
-                <button type="button" class="duration-chip" data-duration="4.5">4.5h</button>
-                <button type="button" class="duration-chip" data-duration="5">5h</button>
-                <button type="button" class="duration-chip" data-duration="5.5">5.5h</button>
-                <button type="button" class="duration-chip" data-duration="6">6h</button>
-              </div>
-              <input id="duration" type="hidden" value="4" />
-            </div>
-            <div id="outpatientClinicFields" class="clinic-count-fields">
-              <label class="clinic-count-field"><span>New consultations</span><input id="newConsultations" type="number" inputmode="numeric" min="0" step="1" value="0" /></label>
-              <label class="clinic-count-field"><span>Follow-up patients</span><input id="followUps" type="number" inputmode="numeric" min="0" step="1" value="0" /></label>
-            </div>
-            <div id="inpatientClinicFields" class="clinic-count-fields hidden">
-              <label class="clinic-count-field"><span>Inpatient consultations</span><input id="inpatientConsultations" type="number" inputmode="numeric" min="0" step="1" value="0" /></label>
-            </div>
-            <div class="clinic-total-preview"><span id="clinicTotalLabel">Total patients</span><strong id="clinicTotalPreview">0</strong></div>
-          </div>
-          <input id="day" type="hidden" />
-          <input id="totalPatients" type="hidden" />
-          <div id="formMessage" class="form-message"></div>
-          <div class="form-actions"><button class="primary-btn" type="submit"><span id="submitLabel">Save clinic</span></button></div>
-        </form>
-      </section>
-
-      
-<section class="stats-grid"><article class="stat-card"><span>Total entries</span><strong id="statEntries">0</strong></article><article class="stat-card"><span>Total patients</span><strong id="statPatients">0</strong></article><article class="stat-card"><span>New consultations</span><strong id="statNew">0</strong></article><article class="stat-card"><span>Follow-ups</span><strong id="statFollowUps">0</strong></article><article class="stat-card"><span>Clinic hours</span><strong id="statHours">0</strong></article></section>
-
-      <section class="card hospital-dashboard-card">
-        <div class="section-heading">
-          <div><p class="eyebrow">Hospital breakdown</p><h2>Clinic statistics by hospital</h2><p class="section-help">Outpatient clinic activity and inpatient consultations are summarized separately for each hospital.</p></div>
-        </div>
-        <div class="hospital-dashboard-grid">
-          <article class="hospital-stat-panel">
-            <div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Fayhaa</h3><small>Clinic and inpatient activity</small></div></div>
-            <div class="hospital-summary-row"><div><span>Outpatient patients</span><strong id="clinicFayhaaPatients">0</strong></div><div><span>Inpatient consultations</span><strong id="clinicFayhaaInpatient">0</strong></div></div>
-            <div class="hospital-procedure-grid">
-              <div><span>Clinic entries</span><strong id="clinicFayhaaEntries">0</strong></div><div><span>Clinic hours</span><strong id="clinicFayhaaHours">0</strong></div><div><span>New consultations</span><strong id="clinicFayhaaNew">0</strong></div><div><span>Follow-ups</span><strong id="clinicFayhaaFollowUps">0</strong></div><div><span>Inpatient entries</span><strong id="clinicFayhaaInpatientEntries">0</strong></div>
-            </div>
-          </article>
-          <article class="hospital-stat-panel">
-            <div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Mohammadiya</h3><small>Clinic and inpatient activity</small></div></div>
-            <div class="hospital-summary-row"><div><span>Outpatient patients</span><strong id="clinicMohammadiyaPatients">0</strong></div><div><span>Inpatient consultations</span><strong id="clinicMohammadiyaInpatient">0</strong></div></div>
-            <div class="hospital-procedure-grid">
-              <div><span>Clinic entries</span><strong id="clinicMohammadiyaEntries">0</strong></div><div><span>Clinic hours</span><strong id="clinicMohammadiyaHours">0</strong></div><div><span>New consultations</span><strong id="clinicMohammadiyaNew">0</strong></div><div><span>Follow-ups</span><strong id="clinicMohammadiyaFollowUps">0</strong></div><div><span>Inpatient entries</span><strong id="clinicMohammadiyaInpatientEntries">0</strong></div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="card chart-card">
-        <div class="section-heading monthly-trend-heading">
-          <div><p class="eyebrow">Outpatient clinic activity</p><h2>Monthly new consultations and follow-ups</h2><p class="section-help">Outpatient clinic visits only. Inpatient consultations and endoscopy procedures are excluded.</p></div>
-          <div class="trend-tabs" role="tablist" aria-label="Outpatient clinic monthly activity hospital view">
-            <button class="trend-tab active" type="button" data-clinic-trend="overall" role="tab" aria-selected="true">Overall</button>
-            <button class="trend-tab" type="button" data-clinic-trend="HMG Fayhaa" role="tab" aria-selected="false">Fayhaa</button>
-            <button class="trend-tab" type="button" data-clinic-trend="HMG Mohammadiya" role="tab" aria-selected="false">Mohammadiya</button>
-          </div>
-        </div>
-        <div id="clinicMonthlyChart" class="monthly-chart" role="img" aria-label="Monthly outpatient new consultations and follow-up visits"></div>
-      </section>
-
-      <section class="card">
-        <div class="section-heading filters-heading"><div><p class="eyebrow">Records</p><h2>Clinic activity log</h2></div><div class="toolbar"><input id="searchInput" type="search" placeholder="Search clinic or date" /><select id="clinicFilter"><option value="">All clinics and services</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option><option>Inpatient Consultation HMG Fayhaa</option><option>Inpatient Consultation HMG Mohammadiya</option></select><button id="exportBtn" class="secondary-btn" type="button">Export CSV</button><button id="clearAllBtn" class="danger-btn" type="button">Clear all</button></div></div>
-        <div class="table-wrap"><table><thead><tr><th>Date</th><th>Day</th><th>Clinic / Service</th><th>Duration</th><th>Total patients</th><th>New</th><th>Follow-up</th><th>Actions</th></tr></thead><tbody id="recordsBody"></tbody></table><div id="emptyState" class="empty-state"><strong>No entries yet</strong><span>Add your first clinic entry above.</span></div></div>
-      </section>
-    </section>
-
-    <section id="pendingModule" class="module-panel">
-      <section id="pendingComposer" class="card pending-card pending-composer">
-        <div class="pending-composer-top"><strong>Add pending patient</strong><button id="closePendingComposerBtn" class="icon-btn pending-composer-close" type="button" aria-label="Close add form">×</button></div>
-        <div class="pending-hospital-field">
-          <span class="field-label">Hospital</span>
-          <div class="pending-hospital-buttons" role="tablist" aria-label="Pending hospital queue">
-            <button class="pending-hospital-btn active" type="button" data-pending-hospital="HMG Fayhaa" aria-selected="true">Fayhaa <span id="pendingFayhaaCount">0</span></button>
-            <button class="pending-hospital-btn" type="button" data-pending-hospital="HMG Mohammadiya" aria-selected="false">Mohammadiya <span id="pendingMohammadiyaCount">0</span></button>
-          </div>
-        </div>
-        <form id="pendingForm" class="tracker-form">
-          <input id="pendingEditingId" type="hidden" /><input id="pendingHospital" type="hidden" value="HMG Fayhaa" />
-          <div class="section-heading"><div><p class="eyebrow">Add to queue</p><h2 id="pendingFormTitle">Pending – Fayhaa</h2></div><button id="resetPendingBtn" class="text-btn" type="button">Clear form</button></div>
-          <div class="form-grid"><label><span>Date</span><input id="pendingDate" type="date" required /></label><label><span>MRN</span><input id="pendingMrn" type="text" inputmode="numeric" maxlength="30" placeholder="Enter MRN" required /></label></div>
-          <fieldset><legend>Planned procedures — select one or more</legend><div class="choice-grid compact-choice-grid pending-procedure-tabs" id="pendingProcedureChoices">
-            <label class="check-card"><input type="checkbox" value="EGD" /> EGD</label><label class="check-card"><input type="checkbox" value="Colonoscopy" /> Colonoscopy</label><label class="check-card"><input type="checkbox" value="Flex Sig" /> Flex Sig</label><label class="check-card"><input type="checkbox" value="EUS" /> EUS</label><label class="check-card"><input type="checkbox" value="ERCP" /> ERCP</label><label class="check-card"><input type="checkbox" value="Fibroscan" /> Fibroscan</label><label class="check-card"><input type="checkbox" value="PEG Tube Insertion" /> PEG Tube Insertion</label><label class="check-card"><input type="checkbox" value="PEG Tube Replacement" /> PEG Tube Replacement</label><label class="check-card"><input type="checkbox" value="Foreign Body Removal" /> Foreign Body Removal</label><label class="check-card"><input type="checkbox" value="pH Monitoring" /> pH Monitoring</label>
-          </div></fieldset>
-          <label class="full-width-field"><span>Note (optional)</span><textarea id="pendingNote" rows="3" maxlength="500" placeholder="Brief reminder"></textarea></label><div id="pendingMessage" class="form-message"></div><div class="form-actions"><button class="primary-btn" type="submit"><span id="pendingSubmitLabel">Add to pending</span></button></div>
-        </form>
-      </section>
-      <section class="card">
-        <div class="section-heading filters-heading"><div><p class="eyebrow">Pending views</p><h2 id="pendingQueueTitle">Pending – Fayhaa</h2></div><div class="toolbar"><input id="pendingSearch" type="search" placeholder="Search MRN or procedure" /><button id="clearPendingBtn" class="danger-btn" type="button">Clear queue</button></div></div>
-        <div class="pending-view-tabs" role="tablist" aria-label="Pending date view">
-          <button class="pending-view-btn active" type="button" data-pending-view="queue" aria-selected="true">Queue <span id="pendingQueueCount">0</span></button>
-          <button class="pending-view-btn" type="button" data-pending-view="today" aria-selected="false">Today <span id="pendingTodayCount">0</span></button>
-          <button class="pending-view-btn" type="button" data-pending-view="week" aria-selected="false">Week <span id="pendingWeekCount">0</span></button>
-        </div>
-        <div id="pendingViewSummary" class="pending-view-summary"></div>
-        <div id="pendingList" class="pending-list"></div><div id="pendingEmptyState" class="empty-state"><strong>No pending patients</strong><span id="pendingEmptyText">Add a planned patient above.</span></div>
-      </section>
-      <button id="openPendingComposerBtn" class="pending-fab" type="button" aria-label="Add pending patient">+</button>
-    </section>
-
-    <section id="endoscopyModule" class="module-panel">
-      <section class="card form-card">
-        <div class="section-heading"><div><p class="eyebrow">HMG Endoscopy</p><h2>Endoscopy Procedure Log</h2></div><div class="heading-actions"><button id="fromPendingBtn" class="secondary-btn" type="button">From Pending</button><button id="resetEndoscopyBtn" class="text-btn" type="button">Clear form</button></div></div>
-        <form id="endoscopyForm">
-          <input id="endoscopyEditingId" type="hidden" />
-          <div class="form-grid">
-            <label><span>Date</span><input id="endoscopyDate" type="date" required /></label>
-            <label><span>Day</span><input id="endoscopyDay" type="text" readonly /></label>
-            <label><span>MRN</span><input id="mrn" type="text" inputmode="numeric" placeholder="Enter MRN" required /></label>
-            <div class="endoscopy-hospital-field">
-              <span class="field-label">Hospital</span>
-              <div class="endoscopy-hospital-buttons" role="group" aria-label="Endoscopy hospital">
-                <button type="button" class="endoscopy-hospital-btn" data-endoscopy-hospital="HMG Fayhaa">Fayhaa</button>
-                <button type="button" class="endoscopy-hospital-btn" data-endoscopy-hospital="HMG Mohammadiya">Mohammadiya</button>
-              </div>
-              <select id="hospital" required class="visually-hidden-select" aria-hidden="true" tabindex="-1"><option value="">Select hospital</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select>
-            </div>
-          </div>
-
-          <div class="quick-entry-panel" aria-label="Quick procedure selection">
-            <div class="quick-entry-heading"><strong>Quick select</strong><span>Choose a common procedure, then save or add details.</span></div>
-            <div class="quick-procedure-buttons">
-              <button type="button" class="quick-procedure-btn" data-procedures="EGD">EGD</button>
-              <button type="button" class="quick-procedure-btn" data-procedures="Colonoscopy">Colonoscopy</button>
-              <button type="button" class="quick-procedure-btn" data-procedures="EGD|Colonoscopy">EGD + Colonoscopy</button>
-              <button type="button" class="quick-procedure-btn" data-procedures="EUS">EUS</button>
-              <button type="button" class="quick-procedure-btn" data-procedures="ERCP">ERCP</button>
-            </div>
-          </div>
-
-          <div class="quick-intervention-panel" aria-label="Quick billable interventions">
-            <div class="quick-entry-heading"><strong>Quick interventions</strong><span>Tap the number performed. Use More details for uncommon interventions.</span></div>
-            <div class="quick-intervention-row">
-              <span>Polypectomy</span>
-              <div class="quick-count-group" data-target="polypectomy" role="group" aria-label="Polypectomy count">
-                <button type="button" data-count="0" class="active">0</button><button type="button" data-count="1">1</button><button type="button" data-count="2">2</button><button type="button" data-count="3">3</button><button type="button" data-count="4">4+</button>
-              </div>
-            </div>
-            <div class="quick-intervention-row">
-              <span>Clip</span>
-              <div class="quick-count-group" data-target="clipping" role="group" aria-label="Clip count">
-                <button type="button" data-count="0" class="active">0</button><button type="button" data-count="1">1</button><button type="button" data-count="2">2</button><button type="button" data-count="3">3</button><button type="button" data-count="4">4+</button>
-              </div>
-            </div>
-          </div>
-
-          <fieldset><legend>Main procedures — select one or more</legend><div class="choice-grid compact-choice-grid" id="procedureChoices">
-            <label class="check-card"><input type="checkbox" value="EGD" /> EGD</label><label class="check-card"><input type="checkbox" value="Colonoscopy" /> Colonoscopy</label><label class="check-card"><input type="checkbox" value="Flex Sig" /> Flex Sig</label><label class="check-card"><input type="checkbox" value="EUS" /> EUS</label><label class="check-card"><input type="checkbox" value="ERCP" /> ERCP</label><label class="check-card"><input type="checkbox" value="Fibroscan" /> Fibroscan</label>
-          </div></fieldset>
-
-          <details id="endoscopyMoreDetails" class="more-details-panel">
-            <summary>More details and interventions</summary>
-          <fieldset><legend>Additional procedures</legend><div class="intervention-grid compact-choice-grid" id="additionalProcedureChoices">
-            <label><span>Polypectomy count</span><input id="polypectomy" type="number" min="0" step="1" value="0" /></label>
-            <label><span>Clipping count</span><input id="clipping" type="number" min="0" step="1" value="0" /></label>
-            <label class="check-card"><input id="sclerotherapy" type="checkbox" /> Sclerotherapy</label>
-            <label class="check-card"><input id="varicealBanding" type="checkbox" /> Variceal banding</label>
-            <label class="check-card"><input type="checkbox" value="Fibroscan" /> FibroScan</label>
-            <label class="check-card"><input type="checkbox" value="pH Monitoring" /> pH Monitoring</label>
-            <label class="check-card"><input type="checkbox" value="SIBO Breath Test" /> SIBO Breath Test</label>
-            <label class="check-card"><input type="checkbox" value="PEG Tube Insertion" /> PEG Insertion</label>
-            <label class="check-card"><input type="checkbox" value="PEG Tube Replacement" /> PEG Replacement</label>
-            <label class="check-card"><input type="checkbox" value="Foreign Body Removal" /> Foreign Body Removal</label>
-            <label class="check-card"><input id="esophagealStenting" type="checkbox" /> Esophageal Stent</label>
-            <label class="check-card"><input id="duodenalStenting" type="checkbox" /> Duodenal Stent</label>
-            <label class="check-card"><input id="colonicStenting" type="checkbox" /> Colonic Stent</label>
-            <label class="check-card"><input id="metallicBiliaryStenting" type="checkbox" /> Metallic Biliary Stent</label>
-          </div></fieldset>
-
-          <label class="full-width-field"><span>Patient note (optional)</span><textarea id="endoscopyNote" rows="4" maxlength="1000" placeholder="Add a brief note for this patient or procedure"></textarea></label>
-          </details>
-          <div id="endoscopyMessage" class="form-message"></div>
-          <div class="form-actions"><button class="primary-btn" type="submit"><span id="endoscopySubmitLabel">Save procedure</span></button></div>
-        </form>
-      </section>
-
-      <section class="stats-grid endoscopy-stats">
-        <article class="stat-card"><span>Patient records</span><strong id="statEndoscopyRecords">0</strong></article>
-        <article class="stat-card"><span>Total procedures</span><strong id="statProcedures">0</strong></article>
-        <article class="stat-card procedure-stat"><span>EGD</span><strong id="statEGD">0</strong></article>
-        <article class="stat-card procedure-stat"><span>Colonoscopy</span><strong id="statColonoscopy">0</strong></article>
-        <article class="stat-card procedure-stat"><span>Flex Sig</span><strong id="statFlexSig">0</strong></article>
-        <article class="stat-card procedure-stat"><span>EUS</span><strong id="statEUS">0</strong></article>
-        <article class="stat-card procedure-stat"><span>ERCP</span><strong id="statERCP">0</strong></article>
-        <article class="stat-card procedure-stat"><span>PEG Tube Insertion</span><strong id="statPEGTubeInsertion">0</strong></article>
-        <article class="stat-card procedure-stat"><span>PEG Tube Replacement</span><strong id="statPEGTubeReplacement">0</strong></article>
-        <article class="stat-card procedure-stat"><span>pH Monitoring</span><strong id="statPHMonitoring">0</strong></article>
-        <article class="stat-card procedure-stat"><span>Foreign Body Removal</span><strong id="statForeignBodyRemoval">0</strong></article>
-        <article class="stat-card procedure-stat"><span>FibroScan</span><strong id="statFibroscan">0</strong></article>
-        <article class="stat-card"><span>Polypectomies</span><strong id="statPolypectomy">0</strong></article>
-        <article class="stat-card"><span>Clips</span><strong id="statClips">0</strong></article>
-        <article class="stat-card"><span>Stenting procedures</span><strong id="statStents">0</strong></article>
-      </section>
-
-      <section class="card hospital-dashboard-card">
-        <div class="section-heading">
-          <div><p class="eyebrow">Hospital breakdown</p><h2>Endoscopy statistics by hospital</h2><p class="section-help">Each panel updates automatically from the saved endoscopy records.</p></div>
-        </div>
-        <div class="hospital-dashboard-grid">
-          <article class="hospital-stat-panel">
-            <div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Fayhaa</h3><small>Endoscopy activity</small></div></div>
-            <div class="hospital-summary-row"><div><span>Patients</span><strong id="fayhaaRecords">0</strong></div><div><span>Procedures</span><strong id="fayhaaProcedures">0</strong></div></div>
-            <div class="hospital-procedure-grid">
-              <div><span>EGD</span><strong id="fayhaaEGD">0</strong></div><div><span>Colonoscopy</span><strong id="fayhaaColonoscopy">0</strong></div><div><span>Flex Sig</span><strong id="fayhaaFlexSig">0</strong></div><div><span>EUS</span><strong id="fayhaaEUS">0</strong></div><div><span>ERCP</span><strong id="fayhaaERCP">0</strong></div><div><span>PEG Insertion</span><strong id="fayhaaPEGTubeInsertion">0</strong></div><div><span>PEG Replacement</span><strong id="fayhaaPEGTubeReplacement">0</strong></div><div><span>pH Monitoring</span><strong id="fayhaaPHMonitoring">0</strong></div><div><span>Foreign Body Removal</span><strong id="fayhaaForeignBodyRemoval">0</strong></div><div><span>FibroScan</span><strong id="fayhaaFibroscan">0</strong></div><div><span>Polypectomies</span><strong id="fayhaaPolypectomy">0</strong></div><div><span>Clips</span><strong id="fayhaaClips">0</strong></div><div><span>Stents</span><strong id="fayhaaStents">0</strong></div>
-            </div>
-          </article>
-          <article class="hospital-stat-panel">
-            <div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Mohammadiya</h3><small>Endoscopy activity</small></div></div>
-            <div class="hospital-summary-row"><div><span>Patients</span><strong id="mohammadiyaRecords">0</strong></div><div><span>Procedures</span><strong id="mohammadiyaProcedures">0</strong></div></div>
-            <div class="hospital-procedure-grid">
-              <div><span>EGD</span><strong id="mohammadiyaEGD">0</strong></div><div><span>Colonoscopy</span><strong id="mohammadiyaColonoscopy">0</strong></div><div><span>Flex Sig</span><strong id="mohammadiyaFlexSig">0</strong></div><div><span>EUS</span><strong id="mohammadiyaEUS">0</strong></div><div><span>ERCP</span><strong id="mohammadiyaERCP">0</strong></div><div><span>PEG Insertion</span><strong id="mohammadiyaPEGTubeInsertion">0</strong></div><div><span>PEG Replacement</span><strong id="mohammadiyaPEGTubeReplacement">0</strong></div><div><span>pH Monitoring</span><strong id="mohammadiyaPHMonitoring">0</strong></div><div><span>Foreign Body Removal</span><strong id="mohammadiyaForeignBodyRemoval">0</strong></div><div><span>FibroScan</span><strong id="mohammadiyaFibroscan">0</strong></div><div><span>Polypectomies</span><strong id="mohammadiyaPolypectomy">0</strong></div><div><span>Clips</span><strong id="mohammadiyaClips">0</strong></div><div><span>Stents</span><strong id="mohammadiyaStents">0</strong></div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="section-heading filters-heading"><div><p class="eyebrow">Records</p><h2>Endoscopy activity log</h2></div><div class="toolbar"><input id="endoscopySearch" type="search" placeholder="Search MRN, hospital, procedure" /><select id="hospitalFilter"><option value="">All hospitals</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select><button id="exportEndoscopyBtn" class="secondary-btn" type="button">Export CSV</button><button id="clearEndoscopyBtn" class="danger-btn" type="button">Clear all</button></div></div>
-        <div class="table-wrap endoscopy-log-wrap"><table id="endoscopyTable"><colgroup><col class="col-date"><col class="col-day"><col class="col-mrn"><col class="col-hospital"><col class="col-procedure"><col class="col-additional"><col class="col-note"><col class="col-actions"></colgroup><thead><tr><th>Date</th><th>Day</th><th>MRN</th><th>Hospital</th><th>Procedures</th><th>Additional procedures</th><th>Note</th><th>Actions</th></tr></thead><tbody id="endoscopyBody"></tbody></table><div id="endoscopyEmptyState" class="empty-state"><strong>No procedure records yet</strong><span>Add the first endoscopy record above.</span></div></div>
-      </section>
-    </section>
-
-    <section id="incomeModule" class="module-panel">
-      <section id="incomeLockScreen" class="card income-lock-card hidden">
-        <div class="lock-icon">🔒</div>
-        <p class="eyebrow">Private area</p>
-        <h2 id="incomeLockTitle" class="hidden">Unlock Private Dashboard</h2>
-        <p id="incomeLockHelp" class="section-help hidden">Enter your password to view the private dashboard.</p>
-        <form id="incomePasswordForm" class="password-form">
-          <label><span id="incomePasswordLabel">Password</span><input id="incomePassword" type="password" minlength="4" autocomplete="current-password" required /></label>
-          <label id="confirmPasswordGroup" class="hidden"><span>Confirm password</span><input id="incomePasswordConfirm" type="password" minlength="4" autocomplete="new-password" /></label>
-          <div id="incomePasswordMessage" class="form-message"></div>
-          <button class="primary-btn" type="submit"><span id="incomePasswordButton">Unlock</span></button>
-        </form>
-        <button id="resetPrivatePasswordBtn" class="text-btn reset-private-password-btn" type="button">Reset password on this device</button>
-        <p class="security-note">The password protects this section from casual access on this browser. Because this is an offline webpage, it is not equivalent to server-based authentication.</p>
-      </section>
-
-      <div id="incomeDashboard">
-        <section class="private-dashboard-shell">
-          <div class="private-dashboard-topbar">
-            <div><p class="eyebrow">Private area</p><h2>Practice Dashboard</h2></div>
-          </div>
-          <nav class="private-dashboard-nav" aria-label="Private dashboard sections">
-            <button class="private-nav-btn active" type="button" data-private-view="overview">Overview</button>
-            <button class="private-nav-btn" type="button" data-private-view="income">Income</button>
-            <button class="private-nav-btn" type="button" data-private-view="performance">Performance</button>
-            <button class="private-nav-btn" type="button" data-private-view="hospitals">Hospitals</button>
-            <button class="private-nav-btn" type="button" data-private-view="fees">Fees</button>
-            <button class="private-nav-btn" type="button" data-private-view="backup">Backup</button>
-          </nav>
-        </section>
-
-        <section class="card private-view" data-private-section="overview">
-          <div class="section-heading"><div><p class="eyebrow">Overview</p><h2>Practice at a glance</h2><p class="section-help">Monthly income and productivity summary.</p></div></div>
-          <div class="income-kpi-grid">
-            <article class="income-kpi"><span>Target income</span><strong id="privateOverviewTarget">SAR 0</strong></article>
-            <article class="income-kpi"><span>Estimated income</span><strong id="privateOverviewIncome">SAR 0</strong></article>
-            <article class="income-kpi"><span>Clinic patients</span><strong id="privateOverviewPatients">0</strong></article>
-            <article class="income-kpi"><span>Procedures</span><strong id="privateOverviewProcedures">0</strong></article>
-          </div>
-          <div class="private-overview-progress"><div id="privateOverviewProgress"></div></div>
-          <p id="privateOverviewStatus" class="estimate-disclaimer">No activity recorded for this month.</p>
-        </section>
-        <section class="card performance-hero private-view hidden" data-private-section="performance">
-          <div class="section-heading">
-            <div><p class="eyebrow">Practice analytics</p><h2>Performance Dashboard</h2><p class="section-help">Read-only metrics calculated from your existing clinic and endoscopy records for the selected statistics period.</p></div>
-          </div>
-          <div class="performance-kpi-grid">
-            <article class="performance-kpi"><span>Clinic sessions</span><strong id="perfSessions">0</strong></article>
-            <article class="performance-kpi"><span>Patients per session</span><strong id="perfPatientsPerSession">0</strong></article>
-            <article class="performance-kpi"><span>New consultations per session</span><strong id="perfNewPerSession">0</strong></article>
-            <article class="performance-kpi"><span>Procedures per session</span><strong id="perfProceduresPerSession">0</strong></article>
-            <article class="performance-kpi"><span>Clinic hours</span><strong id="perfHours">0</strong></article>
-            <article class="performance-kpi"><span>Patients per hour</span><strong id="perfPatientsPerHour">0</strong></article>
-          </div>
-        </section>
-
-        <section class="card performance-comparison-card private-view hidden" data-private-section="performance">
-          <div class="section-heading"><div><p class="eyebrow">Hospital comparison</p><h2>Performance by hospital</h2></div></div>
-          <div class="performance-hospital-grid">
-            <article class="performance-hospital-card">
-              <div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Fayhaa</h3><small>Selected statistics period</small></div></div>
-              <div class="performance-metric-list">
-                <div><span>Clinic sessions</span><strong id="perfFayhaaSessions">0</strong></div><div><span>Total patients</span><strong id="perfFayhaaPatients">0</strong></div><div><span>Patients/session</span><strong id="perfFayhaaPatientsPerSession">0</strong></div><div><span>New/session</span><strong id="perfFayhaaNewPerSession">0</strong></div><div><span>Clinic hours</span><strong id="perfFayhaaHours">0</strong></div><div><span>Endoscopy procedures</span><strong id="perfFayhaaProcedures">0</strong></div><div><span>Procedures/session</span><strong id="perfFayhaaProceduresPerSession">0</strong></div>
-              </div>
-            </article>
-            <article class="performance-hospital-card">
-              <div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Mohammadiya</h3><small>Selected statistics period</small></div></div>
-              <div class="performance-metric-list">
-                <div><span>Clinic sessions</span><strong id="perfMohammadiyaSessions">0</strong></div><div><span>Total patients</span><strong id="perfMohammadiyaPatients">0</strong></div><div><span>Patients/session</span><strong id="perfMohammadiyaPatientsPerSession">0</strong></div><div><span>New/session</span><strong id="perfMohammadiyaNewPerSession">0</strong></div><div><span>Clinic hours</span><strong id="perfMohammadiyaHours">0</strong></div><div><span>Endoscopy procedures</span><strong id="perfMohammadiyaProcedures">0</strong></div><div><span>Procedures/session</span><strong id="perfMohammadiyaProceduresPerSession">0</strong></div>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="card income-header-card private-view hidden" data-private-section="income">
-          <div class="section-heading income-heading">
-            <div><p class="eyebrow">Monthly estimate</p><h2>Income Dashboard</h2><p class="section-help">Calculated from saved clinic and endoscopy records using your approximate fees.</p></div>
-            <div class="income-actions"><label><span>Month</span><input id="incomeMonth" type="month" /></label><button id="lockIncomeBtn" class="secondary-btn" type="button">Lock</button></div>
-          </div>
-          <div class="income-kpi-grid">
-            <article class="income-kpi"><span>Target Income</span><strong id="incomeTargetDisplay">SAR 0</strong></article>
-            <article class="income-kpi"><span>Estimated Income So Far</span><strong id="incomeExpectedDisplay">SAR 0</strong></article>
-            <article class="income-kpi"><span>Remaining to Target</span><strong id="incomeRemainingDisplay">SAR 0</strong></article>
-            <article class="income-kpi"><span>Target Achievement</span><strong id="incomeAchievementDisplay">0%</strong></article>
-          </div>
-          <div class="income-progress"><div id="incomeProgressBar"></div></div>
-          <p class="estimate-disclaimer">Estimated values are for progress tracking only and may differ from the final payment.</p>
-        </section>
-
-        <section class="card private-view hidden" data-private-section="income">
-          <div class="section-heading"><div><p class="eyebrow">Separate allowance</p><h2>On-call coverage</h2><p class="section-help">Record the number of on-call nights for the selected month. This amount is shown separately and is not included in the estimated practice income or target achievement.</p></div></div>
-          <div class="oncall-income-grid">
-            <label><span>On-call coverage nights</span><input id="onCallDaysInput" type="number" min="0" step="1" inputmode="numeric" value="0" /></label>
-            <article class="income-kpi"><span>On-call fee per night</span><strong id="onCallFeeDisplay">SAR 500</strong></article>
-            <article class="income-kpi"><span>Separate on-call amount</span><strong id="onCallIncomeDisplay">SAR 0</strong></article>
-          </div>
-          <button id="saveOnCallDaysBtn" class="primary-btn settings-save" type="button">Save on-call nights</button>
-          <div id="onCallDaysMessage" class="form-message"></div>
-        </section>
-
-        <section class="income-layout private-view hidden" data-private-section="income">
-          <article class="card">
-            <div class="section-heading"><div><p class="eyebrow">Calculation</p><h2>Monthly income breakdown</h2></div></div>
-            <div id="incomeBreakdown" class="income-breakdown"></div>
-          </article>
-          <article class="card">
-            <div class="section-heading"><div><p class="eyebrow">Monthly goal</p><h2>Target setting</h2></div></div>
-            <label><span>Target income (SAR)</span><input id="incomeTargetInput" type="number" min="0" step="1000" /></label>
-            <button id="saveIncomeTargetBtn" class="primary-btn settings-save" type="button">Save target</button>
-            <div id="incomeTargetMessage" class="form-message"></div>
-          </article>
-        </section>
-
-        <section class="card income-hospital-card private-view hidden" data-private-section="income">
-          <div class="section-heading"><div><p class="eyebrow">Hospital comparison</p><h2>Estimated income by hospital</h2><p class="section-help">Compares clinic and endoscopy income for the selected month using the same approximate fees.</p></div></div>
-          <div id="incomeHospitalComparison" class="income-hospital-grid"></div>
-        </section>
-
-        <section class="card private-view hidden" data-private-section="hospitals">
-          <div class="section-heading"><div><p class="eyebrow">Hospital comparison</p><h2>Practice performance by hospital</h2><p class="section-help">A concise comparison for the selected income month.</p></div></div>
-          <div id="privateHospitalCards" class="private-hospital-cards"></div>
-        </section>
-
-        <section class="card private-view hidden" data-private-section="fees">
-          <div class="section-heading"><div><p class="eyebrow">Approximate values</p><h2>Fee settings</h2><p class="section-help">Edit these estimates at any time. Blank or zero values are excluded from income.</p></div></div>
-          <div id="feeSettingsGrid" class="fee-settings-grid"></div>
-          <button id="saveFeeSettingsBtn" class="primary-btn settings-save" type="button">Save approximate fees</button>
-          <div id="feeSettingsMessage" class="form-message"></div>
-        </section>
-
-        <section class="card private-view hidden" data-private-section="backup">
-          <div class="section-heading"><div><p class="eyebrow">Data protection</p><h2>Automatic backups</h2><p class="section-help">A local snapshot is created whenever clinic, procedure, income, password, or fee data is saved.</p></div></div>
-          <div class="backup-grid">
-            <article class="backup-panel">
-              <h3>Local backup</h3>
-              <p class="section-help">Keeps the latest 20 snapshots in this browser.</p>
-              <div class="backup-status"><div><span>Last local backup</span><strong id="lastLocalBackup">Never</strong></div><div><span>Stored snapshots</span><strong id="localBackupCount">0</strong></div></div>
-              <div class="backup-actions"><button id="downloadBackupBtn" class="secondary-btn" type="button">Download backup</button><button id="restoreBackupBtn" class="secondary-btn" type="button">Restore file</button><input id="restoreBackupFile" class="hidden" type="file" accept="application/json,.json" /></div>
-              <div id="localBackupHistory" class="backup-history"></div>
-            </article>
-
-            <article class="backup-panel faceid-panel">
-              <h3>Face ID unlock</h3>
-              <p class="section-help">Use Face ID on this iPhone to unlock the Private Dashboard. Your password remains available as a fallback.</p>
-              <div class="backup-status"><div><span>Face ID status</span><strong id="faceIdStatus">Not enabled</strong></div><div><span>Device</span><strong id="faceIdDeviceStatus">Checking…</strong></div></div>
-              <div class="backup-actions"><button id="enableFaceIdBtn" class="primary-btn" type="button">Enable Face ID</button><button id="disableFaceIdBtn" class="secondary-btn" type="button">Disable Face ID</button></div>
-              <div id="faceIdMessage" class="form-message" aria-live="polite"></div>
-              <p class="estimate-disclaimer">Face ID works only when the tracker is opened from an HTTPS address such as GitHub Pages. It is enabled separately on each device.</p>
-            </article>
-            <article class="backup-panel google-drive-panel">
-              <h3>Google Drive backup</h3>
-              <p class="section-help">Optional cloud backup only. Your tracker continues to use local storage and does not synchronize records between devices.</p>
-              <label class="field-label" for="googleClientId">Google OAuth Web Client ID</label>
-              <input id="googleClientId" class="text-input" type="text" inputmode="text" autocomplete="off" placeholder="...apps.googleusercontent.com" />
-              <p class="section-help compact-help">Enter this once after creating a Google OAuth Web Client ID and enabling the Google Drive API.</p>
-              <div class="backup-status"><div><span>Drive status</span><strong id="googleDriveStatus">Not connected</strong></div><div><span>Last Drive backup</span><strong id="lastGoogleDriveBackup">Never</strong></div></div>
-              <label class="drive-auto-row"><input id="googleDriveAutoBackup" type="checkbox" /> <span>Daily backup while the tracker is open and Google Drive is connected</span></label>
-              <div class="backup-actions google-drive-actions"><button id="connectGoogleDriveBtn" class="secondary-btn" type="button">Connect</button><button id="googleDriveBackupNowBtn" class="primary-btn" type="button">Backup now</button><button id="googleDriveRestoreBtn" class="secondary-btn" type="button">Restore latest</button><button id="disconnectGoogleDriveBtn" class="text-btn" type="button">Disconnect</button></div>
-              <div id="googleDriveMessage" class="form-message" aria-live="polite"></div>
-              <p class="estimate-disclaimer">A static iPhone webpage cannot back up while Safari is fully closed. A missed daily backup is attempted after you reconnect and open the tracker.</p>
-            </article>
-          </div>
-        </section>
+<header class="app-header">
+<div class="brand-block">
+<img alt="Gastroenterology Practice logo" class="hospital-logo" draggable="false" id="practiceLogo" src="hmg-logo.webp"/>
+<div>
+<p class="eyebrow">Gastroenterology Practice</p>
+<h1>Clinic &amp; Endoscopy Tracker</h1>
+<p class="subtitle">Daily clinic activity, inpatient consultations, and endoscopy procedure tracking.</p>
 </div>
-    </section>
+</div>
+<div class="header-actions">
+<div aria-live="polite" class="save-status saved" id="saveStatus" role="status" title="All changes saved"><span></span><b>Saved</b></div>
+<button aria-label="Switch to dark mode" class="secondary-btn theme-btn header-icon-action" id="themeToggle" title="Dark mode" type="button">
+<span aria-hidden="true" class="header-action-icon theme-icon" id="themeToggleIcon">
+<svg class="moon-icon" focusable="false" viewbox="0 0 24 24"><path d="M20.2 15.4A8.4 8.4 0 0 1 8.6 3.8 8.7 8.7 0 1 0 20.2 15.4Z"></path></svg>
+<svg class="sun-icon" focusable="false" viewbox="0 0 24 24"><circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path></svg>
+</span>
+</button>
+<button aria-label="Open private dashboard" class="header-icon-action private-lock-btn" id="privateAccessBtn" title="Private dashboard" type="button">
+<span aria-hidden="true" class="header-action-icon">
+<svg class="lock-closed-icon" focusable="false" viewbox="0 0 24 24"><rect height="10" rx="2" width="14" x="5" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+<svg class="lock-open-icon" focusable="false" viewbox="0 0 24 24"><rect height="10" rx="2" width="14" x="5" y="10"></rect><path d="M9 10V7a4 4 0 0 1 7.5-2"></path></svg>
+</span>
+</button>
+</div>
+</header>
+<main class="container">
+<div class="module-nav-row">
+<nav aria-label="Modules" class="module-tabs">
+<button class="module-tab active" data-module="clinicModule" type="button"><span class="tab-icon">01</span><span><strong>Clinic</strong><small>Daily activity &amp; consultations</small></span></button>
+<button class="module-tab" data-module="pendingModule" type="button"><span class="tab-icon">02</span><span><strong>Pending</strong><small>Planned endoscopy queue</small></span></button>
+<button class="module-tab" data-module="endoscopyModule" type="button"><span class="tab-icon">03</span><span><strong>Endoscopy</strong><small>Procedures &amp; interventions</small></span></button>
+<button class="module-tab" data-module="dashboardModule" type="button"><span class="tab-icon">04</span><span><strong>Dashboard</strong><small>Clinic &amp; endoscopy statistics</small></span></button></nav>
+</div>
 
-  </main>
+<section class="module-panel active" id="clinicModule">
+<section class="card form-card">
+<div class="section-heading"><div><p class="eyebrow">Quick clinic entry</p><h2>Record clinic activity</h2></div><button class="text-btn" id="resetFormBtn" type="button">Clear form</button></div>
+<form id="trackerForm">
+<input id="editingId" type="hidden"/>
+<div class="clinic-mode-row">
+<span class="field-label">Consultation type</span>
+<div aria-label="Consultation type" class="clinic-type-buttons" role="group">
+<button class="clinic-type-btn active" data-consultation-type="outpatient" type="button">Outpatient</button>
+<button class="clinic-type-btn" data-consultation-type="inpatient" type="button">Inpatient</button>
+</div>
+<input id="consultationType" type="hidden" value="outpatient"/>
+</div>
+<div class="clinic-quick-form">
+<label class="clinic-date-field"><span>Date</span><input id="date" required="" type="date"/></label>
+<div class="clinic-hospital-field">
+<span class="field-label">Hospital</span>
+<div aria-label="Clinic hospital" class="clinic-hospital-buttons" role="group">
+<button class="clinic-hospital-btn" data-clinic-hospital="HMG Fayhaa" type="button">Fayhaa</button>
+<button class="clinic-hospital-btn" data-clinic-hospital="HMG Mohammadiya" type="button">Mohammadiya</button>
+</div>
+<select aria-hidden="true" class="visually-hidden-select" id="clinic" required="" tabindex="-1"><option value="">Select hospital</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option><option>Inpatient Consultation HMG Fayhaa</option><option>Inpatient Consultation HMG Mohammadiya</option></select>
+</div>
+<div class="clinic-duration-field" id="clinicDurationField">
+<span class="field-label">Clinic duration <small>(optional)</small></span>
+<div aria-label="Clinic duration in hours" class="duration-chip-row" role="group">
+<button class="duration-chip" data-duration="" type="button">Not recorded</button>
+<button class="duration-chip" data-duration="0.5" type="button">0.5h</button>
+<button class="duration-chip" data-duration="1" type="button">1h</button>
+<button class="duration-chip" data-duration="1.5" type="button">1.5h</button>
+<button class="duration-chip" data-duration="2" type="button">2h</button>
+<button class="duration-chip" data-duration="2.5" type="button">2.5h</button>
+<button class="duration-chip" data-duration="3" type="button">3h</button>
+<button class="duration-chip" data-duration="3.5" type="button">3.5h</button>
+<button class="duration-chip active" data-duration="4" type="button">4h</button>
+<button class="duration-chip" data-duration="4.5" type="button">4.5h</button>
+<button class="duration-chip" data-duration="5" type="button">5h</button>
+<button class="duration-chip" data-duration="5.5" type="button">5.5h</button>
+<button class="duration-chip" data-duration="6" type="button">6h</button>
+</div>
+<input id="duration" type="hidden" value="4"/>
+</div>
+<div class="clinic-count-fields" id="outpatientClinicFields">
+<label class="clinic-count-field"><span>New consultations</span><input id="newConsultations" inputmode="numeric" min="0" step="1" type="number" value="0"/></label>
+<label class="clinic-count-field"><span>Follow-up patients</span><input id="followUps" inputmode="numeric" min="0" step="1" type="number" value="0"/></label>
+</div>
+<div class="clinic-count-fields hidden" id="inpatientClinicFields">
+<label class="clinic-count-field"><span>Inpatient consultations</span><input id="inpatientConsultations" inputmode="numeric" min="0" step="1" type="number" value="0"/></label>
+</div>
+<div class="clinic-total-preview"><span id="clinicTotalLabel">Total patients</span><strong id="clinicTotalPreview">0</strong></div>
+</div>
+<input id="day" type="hidden"/>
+<input id="totalPatients" type="hidden"/>
+<div class="form-message" id="formMessage"></div>
+<div class="form-actions"><button class="primary-btn" type="submit"><span id="submitLabel">Save clinic</span></button></div>
+</form>
+</section>
 
-  <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-atomic="true"></div>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="app.js"></script>
-<div class="version-stamp" aria-label="Application version">v3.4.0 On-call Income</div>
+
+
+<section class="card">
+<div class="section-heading filters-heading"><div><p class="eyebrow">Records</p><h2>Clinic activity log</h2></div><div class="toolbar"><input id="searchInput" placeholder="Search clinic or date" type="search"/><select id="clinicFilter"><option value="">All clinics and services</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option><option>Inpatient Consultation HMG Fayhaa</option><option>Inpatient Consultation HMG Mohammadiya</option></select><button class="secondary-btn" id="exportBtn" type="button">Export CSV</button><button class="danger-btn" id="clearAllBtn" type="button">Clear all</button></div></div>
+<div class="table-wrap"><table><thead><tr><th>Date</th><th>Day</th><th>Clinic / Service</th><th>Duration</th><th>Total patients</th><th>New</th><th>Follow-up</th><th>Actions</th></tr></thead><tbody id="recordsBody"></tbody></table><div class="empty-state" id="emptyState"><strong>No entries yet</strong><span>Add your first clinic entry above.</span></div></div>
+</section>
+</section>
+<section class="module-panel" id="pendingModule">
+<section class="card pending-hospital-switcher">
+<div class="pending-hospital-field">
+<span class="field-label">Hospital</span>
+<div aria-label="Pending hospital queue" class="pending-hospital-buttons" role="tablist">
+<button aria-selected="true" class="pending-hospital-btn active" data-pending-hospital="HMG Fayhaa" type="button">Fayhaa <span id="pendingFayhaaCount">0</span></button>
+<button aria-selected="false" class="pending-hospital-btn" data-pending-hospital="HMG Mohammadiya" type="button">Mohammadiya <span id="pendingMohammadiyaCount">0</span></button>
+</div>
+</div>
+</section>
+<section class="card pending-card pending-composer" id="pendingComposer">
+<div class="pending-composer-top"><strong>Add pending patient</strong><button aria-label="Close add form" class="icon-btn pending-composer-close" id="closePendingComposerBtn" type="button">×</button></div>
+<form class="tracker-form" id="pendingForm">
+<input id="pendingEditingId" type="hidden"/><input id="pendingHospital" type="hidden" value="HMG Fayhaa"/>
+<div class="section-heading"><div><p class="eyebrow">Add to queue</p><h2 id="pendingFormTitle">Pending – Fayhaa</h2></div><button class="text-btn" id="resetPendingBtn" type="button">Clear form</button></div>
+<div class="form-grid"><label><span>Date</span><input id="pendingDate" required="" type="date"/></label><label><span>MRN</span><input id="pendingMrn" inputmode="numeric" maxlength="30" placeholder="Enter MRN" required="" type="text"/></label></div>
+<fieldset><legend>Planned procedures — select one or more</legend><div class="choice-grid compact-choice-grid pending-procedure-tabs" id="pendingProcedureChoices">
+<label class="check-card"><input type="checkbox" value="EGD"/> EGD</label><label class="check-card"><input type="checkbox" value="Colonoscopy"/> Colonoscopy</label><label class="check-card"><input type="checkbox" value="Flex Sig"/> Flex Sig</label><label class="check-card"><input type="checkbox" value="EUS"/> EUS</label><label class="check-card"><input type="checkbox" value="ERCP"/> ERCP</label><label class="check-card"><input type="checkbox" value="Fibroscan"/> Fibroscan</label><label class="check-card"><input type="checkbox" value="PEG Tube Insertion"/> PEG Tube Insertion</label><label class="check-card"><input type="checkbox" value="PEG Tube Replacement"/> PEG Tube Replacement</label><label class="check-card"><input type="checkbox" value="Foreign Body Removal"/> Foreign Body Removal</label><label class="check-card"><input type="checkbox" value="pH Monitoring"/> pH Monitoring</label>
+</div></fieldset>
+<label class="full-width-field"><span>Note (optional)</span><textarea id="pendingNote" maxlength="500" placeholder="Brief reminder" rows="3"></textarea></label><div class="form-message" id="pendingMessage"></div><div class="form-actions"><button class="primary-btn" type="submit"><span id="pendingSubmitLabel">Add to pending</span></button></div>
+</form>
+</section>
+<section class="card">
+<div class="section-heading filters-heading"><div><p class="eyebrow">Pending views</p><h2 id="pendingQueueTitle">Pending – Fayhaa</h2></div><div class="toolbar"><input id="pendingSearch" placeholder="Search MRN or procedure" type="search"/><button class="danger-btn" id="clearPendingBtn" type="button">Clear queue</button></div></div>
+<div aria-label="Pending date view" class="pending-view-tabs" role="tablist">
+<button aria-selected="true" class="pending-view-btn active" data-pending-view="queue" type="button">Queue <span id="pendingQueueCount">0</span></button>
+<button aria-selected="false" class="pending-view-btn" data-pending-view="today" type="button">Today <span id="pendingTodayCount">0</span></button>
+<button aria-selected="false" class="pending-view-btn" data-pending-view="week" type="button">Week <span id="pendingWeekCount">0</span></button>
+</div>
+<div class="pending-view-summary" id="pendingViewSummary"></div>
+<div class="pending-list" id="pendingList"></div><div class="empty-state" id="pendingEmptyState"><strong>No pending patients</strong><span id="pendingEmptyText">Add a planned patient above.</span></div>
+</section>
+<button aria-label="Add pending patient" class="pending-fab" id="openPendingComposerBtn" type="button">+</button>
+</section>
+<section class="module-panel" id="endoscopyModule">
+<section class="card form-card">
+<div class="section-heading"><div><p class="eyebrow">HMG Endoscopy</p><h2>Endoscopy Procedure Log</h2></div><div class="heading-actions"><button class="secondary-btn" id="fromPendingBtn" type="button">From Pending</button><button class="text-btn" id="resetEndoscopyBtn" type="button">Clear form</button></div></div>
+<form id="endoscopyForm">
+<input id="endoscopyEditingId" type="hidden"/>
+<div class="form-grid">
+<label><span>Date</span><input id="endoscopyDate" required="" type="date"/></label>
+<label><span>Day</span><input id="endoscopyDay" readonly="" type="text"/></label>
+<label><span>MRN</span><input id="mrn" inputmode="numeric" placeholder="Enter MRN" required="" type="text"/></label>
+<div class="endoscopy-hospital-field">
+<span class="field-label">Hospital</span>
+<div aria-label="Endoscopy hospital" class="endoscopy-hospital-buttons" role="group">
+<button class="endoscopy-hospital-btn" data-endoscopy-hospital="HMG Fayhaa" type="button">Fayhaa</button>
+<button class="endoscopy-hospital-btn" data-endoscopy-hospital="HMG Mohammadiya" type="button">Mohammadiya</button>
+</div>
+<select aria-hidden="true" class="visually-hidden-select" id="hospital" required="" tabindex="-1"><option value="">Select hospital</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select>
+</div>
+</div>
+<div aria-label="Quick procedure selection" class="quick-entry-panel">
+<div class="quick-entry-heading"><strong>Quick select</strong><span>Choose a common procedure, then save or add details.</span></div>
+<div class="quick-procedure-buttons">
+<button class="quick-procedure-btn" data-procedures="EGD" type="button">EGD</button>
+<button class="quick-procedure-btn" data-procedures="Colonoscopy" type="button">Colonoscopy</button>
+<button class="quick-procedure-btn" data-procedures="EGD|Colonoscopy" type="button">EGD + Colonoscopy</button>
+<button class="quick-procedure-btn" data-procedures="EUS" type="button">EUS</button>
+<button class="quick-procedure-btn" data-procedures="ERCP" type="button">ERCP</button>
+</div>
+</div>
+<div aria-label="Quick billable interventions" class="quick-intervention-panel">
+<div class="quick-entry-heading"><strong>Quick interventions</strong><span>Tap the number performed. Use More details for uncommon interventions.</span></div>
+<div class="quick-intervention-row">
+<span>Polypectomy</span>
+<div aria-label="Polypectomy count" class="quick-count-group" data-target="polypectomy" role="group">
+<button class="active" data-count="0" type="button">0</button><button data-count="1" type="button">1</button><button data-count="2" type="button">2</button><button data-count="3" type="button">3</button><button data-count="4" type="button">4+</button>
+</div>
+</div>
+<div class="quick-intervention-row">
+<span>Clip</span>
+<div aria-label="Clip count" class="quick-count-group" data-target="clipping" role="group">
+<button class="active" data-count="0" type="button">0</button><button data-count="1" type="button">1</button><button data-count="2" type="button">2</button><button data-count="3" type="button">3</button><button data-count="4" type="button">4+</button>
+</div>
+</div>
+</div>
+<fieldset><legend>Main procedures — select one or more</legend><div class="choice-grid compact-choice-grid" id="procedureChoices">
+<label class="check-card"><input type="checkbox" value="EGD"/> EGD</label><label class="check-card"><input type="checkbox" value="Colonoscopy"/> Colonoscopy</label><label class="check-card"><input type="checkbox" value="Flex Sig"/> Flex Sig</label><label class="check-card"><input type="checkbox" value="EUS"/> EUS</label><label class="check-card"><input type="checkbox" value="ERCP"/> ERCP</label><label class="check-card"><input type="checkbox" value="Fibroscan"/> Fibroscan</label>
+</div></fieldset>
+<details class="more-details-panel" id="endoscopyMoreDetails">
+<summary>More details and interventions</summary>
+<fieldset><legend>Additional procedures</legend><div class="intervention-grid compact-choice-grid" id="additionalProcedureChoices">
+<label><span>Polypectomy count</span><input id="polypectomy" min="0" step="1" type="number" value="0"/></label>
+<label><span>Clipping count</span><input id="clipping" min="0" step="1" type="number" value="0"/></label>
+<label class="check-card"><input id="sclerotherapy" type="checkbox"/> Sclerotherapy</label>
+<label class="check-card"><input id="varicealBanding" type="checkbox"/> Variceal banding</label>
+<label class="check-card"><input type="checkbox" value="Fibroscan"/> FibroScan</label>
+<label class="check-card"><input type="checkbox" value="pH Monitoring"/> pH Monitoring</label>
+<label class="check-card"><input type="checkbox" value="SIBO Breath Test"/> SIBO Breath Test</label>
+<label class="check-card"><input type="checkbox" value="PEG Tube Insertion"/> PEG Insertion</label>
+<label class="check-card"><input type="checkbox" value="PEG Tube Replacement"/> PEG Replacement</label>
+<label class="check-card"><input type="checkbox" value="Foreign Body Removal"/> Foreign Body Removal</label>
+<label class="check-card"><input id="esophagealStenting" type="checkbox"/> Esophageal Stent</label>
+<label class="check-card"><input id="duodenalStenting" type="checkbox"/> Duodenal Stent</label>
+<label class="check-card"><input id="colonicStenting" type="checkbox"/> Colonic Stent</label>
+<label class="check-card"><input id="metallicBiliaryStenting" type="checkbox"/> Metallic Biliary Stent</label>
+</div></fieldset>
+<label class="full-width-field"><span>Patient note (optional)</span><textarea id="endoscopyNote" maxlength="1000" placeholder="Add a brief note for this patient or procedure" rows="4"></textarea></label>
+</details>
+<div class="form-message" id="endoscopyMessage"></div>
+<div class="form-actions"><button class="primary-btn" type="submit"><span id="endoscopySubmitLabel">Save procedure</span></button></div>
+</form>
+</section>
+
+
+<section class="card">
+<div class="section-heading filters-heading"><div><p class="eyebrow">Records</p><h2>Endoscopy activity log</h2></div><div class="toolbar"><input id="endoscopySearch" placeholder="Search MRN, hospital, procedure" type="search"/><select id="hospitalFilter"><option value="">All hospitals</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select><button class="secondary-btn" id="exportEndoscopyBtn" type="button">Export CSV</button><button class="danger-btn" id="clearEndoscopyBtn" type="button">Clear all</button></div></div>
+<div class="table-wrap endoscopy-log-wrap"><table id="endoscopyTable"><colgroup><col class="col-date"/><col class="col-day"/><col class="col-mrn"/><col class="col-hospital"/><col class="col-procedure"/><col class="col-additional"/><col class="col-note"/><col class="col-actions"/></colgroup><thead><tr><th>Date</th><th>Day</th><th>MRN</th><th>Hospital</th><th>Procedures</th><th>Additional procedures</th><th>Note</th><th>Actions</th></tr></thead><tbody id="endoscopyBody"></tbody></table><div class="empty-state" id="endoscopyEmptyState"><strong>No procedure records yet</strong><span>Add the first endoscopy record above.</span></div></div>
+</section>
+</section>
+<section class="module-panel dashboard-module" id="dashboardModule"><section class="card dashboard-intro-card"><div><p class="eyebrow">Practice overview</p><h2>Statistics Dashboard</h2><p class="section-help">Clinic and endoscopy analytics in compact sections. Tap a section to open it.</p></div></section><div class="dashboard-filter-bar">
+<label>Statistics Period
+    <select id="statsPeriod">
+<option value="all">All Time</option>
+<option value="year">This Year</option>
+<option value="month">This Month</option>
+<option value="custom">Custom Date Range</option>
+</select>
+</label>
+<label class="stats-date-field hidden" id="statsFromGroup">From
+    <input id="statsFrom" type="date"/>
+</label>
+<label class="stats-date-field hidden" id="statsToGroup">To
+    <input id="statsTo" type="date"/>
+</label>
+<label>Hospital
+    <select id="statsHospital">
+<option value="all">All Hospitals</option>
+<option>HMG Fayhaa</option>
+<option>HMG Mohammadiya</option>
+</select>
+</label>
+</div><details class="card dashboard-stat-section" open=""><summary><span><strong>Clinic Statistics</strong><small>Sessions, patients, consultations and hours</small></span><span class="summary-chevron">⌄</span></summary><div class="dashboard-stat-body"><section class="stats-grid compact-dashboard-grid"><article class="stat-card"><span>Total entries</span><strong id="statEntries">0</strong></article><article class="stat-card"><span>Total patients</span><strong id="statPatients">0</strong></article><article class="stat-card"><span>New consultations</span><strong id="statNew">0</strong></article><article class="stat-card"><span>Follow-ups</span><strong id="statFollowUps">0</strong></article><article class="stat-card"><span>Clinic hours</span><strong id="statHours">0</strong></article></section><section class="card hospital-dashboard-card">
+<div class="section-heading">
+<div><p class="eyebrow">Hospital breakdown</p><h2>Clinic statistics by hospital</h2><p class="section-help">Outpatient clinic activity and inpatient consultations are summarized separately for each hospital.</p></div>
+</div>
+<div class="hospital-dashboard-grid">
+<article class="hospital-stat-panel">
+<div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Fayhaa</h3><small>Clinic and inpatient activity</small></div></div>
+<div class="hospital-summary-row"><div><span>Outpatient patients</span><strong id="clinicFayhaaPatients">0</strong></div><div><span>Inpatient consultations</span><strong id="clinicFayhaaInpatient">0</strong></div></div>
+<div class="hospital-procedure-grid">
+<div><span>Clinic entries</span><strong id="clinicFayhaaEntries">0</strong></div><div><span>Clinic hours</span><strong id="clinicFayhaaHours">0</strong></div><div><span>New consultations</span><strong id="clinicFayhaaNew">0</strong></div><div><span>Follow-ups</span><strong id="clinicFayhaaFollowUps">0</strong></div><div><span>Inpatient entries</span><strong id="clinicFayhaaInpatientEntries">0</strong></div>
+</div>
+</article>
+<article class="hospital-stat-panel">
+<div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Mohammadiya</h3><small>Clinic and inpatient activity</small></div></div>
+<div class="hospital-summary-row"><div><span>Outpatient patients</span><strong id="clinicMohammadiyaPatients">0</strong></div><div><span>Inpatient consultations</span><strong id="clinicMohammadiyaInpatient">0</strong></div></div>
+<div class="hospital-procedure-grid">
+<div><span>Clinic entries</span><strong id="clinicMohammadiyaEntries">0</strong></div><div><span>Clinic hours</span><strong id="clinicMohammadiyaHours">0</strong></div><div><span>New consultations</span><strong id="clinicMohammadiyaNew">0</strong></div><div><span>Follow-ups</span><strong id="clinicMohammadiyaFollowUps">0</strong></div><div><span>Inpatient entries</span><strong id="clinicMohammadiyaInpatientEntries">0</strong></div>
+</div>
+</article>
+</div>
+</section><section class="card chart-card">
+<div class="section-heading monthly-trend-heading">
+<div><p class="eyebrow">Outpatient clinic activity</p><h2>Monthly new consultations and follow-ups</h2><p class="section-help">Outpatient clinic visits only. Inpatient consultations and endoscopy procedures are excluded.</p></div>
+<div aria-label="Outpatient clinic monthly activity hospital view" class="trend-tabs" role="tablist">
+<button aria-selected="true" class="trend-tab active" data-clinic-trend="overall" role="tab" type="button">Overall</button>
+<button aria-selected="false" class="trend-tab" data-clinic-trend="HMG Fayhaa" role="tab" type="button">Fayhaa</button>
+<button aria-selected="false" class="trend-tab" data-clinic-trend="HMG Mohammadiya" role="tab" type="button">Mohammadiya</button>
+</div>
+</div>
+<div aria-label="Monthly outpatient new consultations and follow-up visits" class="monthly-chart" id="clinicMonthlyChart" role="img"></div>
+</section></div></details><details class="card dashboard-stat-section"><summary><span><strong>Endoscopy Statistics</strong><small>Procedures, interventions and hospital activity</small></span><span class="summary-chevron">⌄</span></summary><div class="dashboard-stat-body"><section class="stats-grid endoscopy-stats compact-dashboard-grid">
+<article class="stat-card"><span>Patient records</span><strong id="statEndoscopyRecords">0</strong></article>
+<article class="stat-card"><span>Total procedures</span><strong id="statProcedures">0</strong></article>
+<article class="stat-card procedure-stat"><span>EGD</span><strong id="statEGD">0</strong></article>
+<article class="stat-card procedure-stat"><span>Colonoscopy</span><strong id="statColonoscopy">0</strong></article>
+<article class="stat-card procedure-stat"><span>Flex Sig</span><strong id="statFlexSig">0</strong></article>
+<article class="stat-card procedure-stat"><span>EUS</span><strong id="statEUS">0</strong></article>
+<article class="stat-card procedure-stat"><span>ERCP</span><strong id="statERCP">0</strong></article>
+<article class="stat-card procedure-stat"><span>PEG Tube Insertion</span><strong id="statPEGTubeInsertion">0</strong></article>
+<article class="stat-card procedure-stat"><span>PEG Tube Replacement</span><strong id="statPEGTubeReplacement">0</strong></article>
+<article class="stat-card procedure-stat"><span>pH Monitoring</span><strong id="statPHMonitoring">0</strong></article>
+<article class="stat-card procedure-stat"><span>Foreign Body Removal</span><strong id="statForeignBodyRemoval">0</strong></article>
+<article class="stat-card procedure-stat"><span>FibroScan</span><strong id="statFibroscan">0</strong></article>
+<article class="stat-card"><span>Polypectomies</span><strong id="statPolypectomy">0</strong></article>
+<article class="stat-card"><span>Clips</span><strong id="statClips">0</strong></article>
+<article class="stat-card"><span>Stenting procedures</span><strong id="statStents">0</strong></article>
+</section><section class="card hospital-dashboard-card">
+<div class="section-heading">
+<div><p class="eyebrow">Hospital breakdown</p><h2>Endoscopy statistics by hospital</h2><p class="section-help">Each panel updates automatically from the saved endoscopy records.</p></div>
+</div>
+<div class="hospital-dashboard-grid">
+<article class="hospital-stat-panel">
+<div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Fayhaa</h3><small>Endoscopy activity</small></div></div>
+<div class="hospital-summary-row"><div><span>Patients</span><strong id="fayhaaRecords">0</strong></div><div><span>Procedures</span><strong id="fayhaaProcedures">0</strong></div></div>
+<div class="hospital-procedure-grid">
+<div><span>EGD</span><strong id="fayhaaEGD">0</strong></div><div><span>Colonoscopy</span><strong id="fayhaaColonoscopy">0</strong></div><div><span>Flex Sig</span><strong id="fayhaaFlexSig">0</strong></div><div><span>EUS</span><strong id="fayhaaEUS">0</strong></div><div><span>ERCP</span><strong id="fayhaaERCP">0</strong></div><div><span>PEG Insertion</span><strong id="fayhaaPEGTubeInsertion">0</strong></div><div><span>PEG Replacement</span><strong id="fayhaaPEGTubeReplacement">0</strong></div><div><span>pH Monitoring</span><strong id="fayhaaPHMonitoring">0</strong></div><div><span>Foreign Body Removal</span><strong id="fayhaaForeignBodyRemoval">0</strong></div><div><span>FibroScan</span><strong id="fayhaaFibroscan">0</strong></div><div><span>Polypectomies</span><strong id="fayhaaPolypectomy">0</strong></div><div><span>Clips</span><strong id="fayhaaClips">0</strong></div><div><span>Stents</span><strong id="fayhaaStents">0</strong></div>
+</div>
+</article>
+<article class="hospital-stat-panel">
+<div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Mohammadiya</h3><small>Endoscopy activity</small></div></div>
+<div class="hospital-summary-row"><div><span>Patients</span><strong id="mohammadiyaRecords">0</strong></div><div><span>Procedures</span><strong id="mohammadiyaProcedures">0</strong></div></div>
+<div class="hospital-procedure-grid">
+<div><span>EGD</span><strong id="mohammadiyaEGD">0</strong></div><div><span>Colonoscopy</span><strong id="mohammadiyaColonoscopy">0</strong></div><div><span>Flex Sig</span><strong id="mohammadiyaFlexSig">0</strong></div><div><span>EUS</span><strong id="mohammadiyaEUS">0</strong></div><div><span>ERCP</span><strong id="mohammadiyaERCP">0</strong></div><div><span>PEG Insertion</span><strong id="mohammadiyaPEGTubeInsertion">0</strong></div><div><span>PEG Replacement</span><strong id="mohammadiyaPEGTubeReplacement">0</strong></div><div><span>pH Monitoring</span><strong id="mohammadiyaPHMonitoring">0</strong></div><div><span>Foreign Body Removal</span><strong id="mohammadiyaForeignBodyRemoval">0</strong></div><div><span>FibroScan</span><strong id="mohammadiyaFibroscan">0</strong></div><div><span>Polypectomies</span><strong id="mohammadiyaPolypectomy">0</strong></div><div><span>Clips</span><strong id="mohammadiyaClips">0</strong></div><div><span>Stents</span><strong id="mohammadiyaStents">0</strong></div>
+</div>
+</article>
+</div>
+</section></div></details></section><section class="module-panel" id="incomeModule">
+<section class="card income-lock-card hidden" id="incomeLockScreen">
+<div class="lock-icon">🔒</div>
+<p class="eyebrow">Private area</p>
+<h2 class="hidden" id="incomeLockTitle">Unlock Private Dashboard</h2>
+<p class="section-help hidden" id="incomeLockHelp">Enter your password to view the private dashboard.</p>
+<form class="password-form" id="incomePasswordForm">
+<label><span id="incomePasswordLabel">Password</span><input autocomplete="current-password" id="incomePassword" minlength="4" required="" type="password"/></label>
+<label class="hidden" id="confirmPasswordGroup"><span>Confirm password</span><input autocomplete="new-password" id="incomePasswordConfirm" minlength="4" type="password"/></label>
+<div class="form-message" id="incomePasswordMessage"></div>
+<button class="primary-btn" type="submit"><span id="incomePasswordButton">Unlock</span></button>
+</form>
+<button class="text-btn reset-private-password-btn" id="resetPrivatePasswordBtn" type="button">Reset password on this device</button>
+<p class="security-note">The password protects this section from casual access on this browser. Because this is an offline webpage, it is not equivalent to server-based authentication.</p>
+</section>
+<div id="incomeDashboard">
+<section class="private-dashboard-shell">
+<div class="private-dashboard-topbar">
+<div><p class="eyebrow">Private area</p><h2>Practice Dashboard</h2></div>
+</div>
+<nav aria-label="Private dashboard sections" class="private-dashboard-nav">
+<button class="private-nav-btn active" data-private-view="overview" type="button">Overview</button>
+<button class="private-nav-btn" data-private-view="income" type="button">Income</button>
+<button class="private-nav-btn" data-private-view="performance" type="button">Performance</button>
+<button class="private-nav-btn" data-private-view="hospitals" type="button">Hospitals</button>
+<button class="private-nav-btn" data-private-view="fees" type="button">Fees</button>
+<button class="private-nav-btn" data-private-view="backup" type="button">Backup</button>
+</nav>
+</section>
+<section class="card private-view" data-private-section="overview">
+<div class="section-heading"><div><p class="eyebrow">Overview</p><h2>Practice at a glance</h2><p class="section-help">Monthly income and productivity summary.</p></div></div>
+<div class="income-kpi-grid">
+<article class="income-kpi"><span>Target income</span><strong id="privateOverviewTarget">SAR 0</strong></article>
+<article class="income-kpi"><span>Estimated income</span><strong id="privateOverviewIncome">SAR 0</strong></article>
+<article class="income-kpi"><span>Clinic patients</span><strong id="privateOverviewPatients">0</strong></article>
+<article class="income-kpi"><span>Procedures</span><strong id="privateOverviewProcedures">0</strong></article>
+</div>
+<div class="private-overview-progress"><div id="privateOverviewProgress"></div></div>
+<p class="estimate-disclaimer" id="privateOverviewStatus">No activity recorded for this month.</p>
+</section>
+<section class="card performance-hero private-view hidden" data-private-section="performance">
+<div class="section-heading">
+<div><p class="eyebrow">Practice analytics</p><h2>Performance Dashboard</h2><p class="section-help">Read-only metrics calculated from your existing clinic and endoscopy records for the selected statistics period.</p></div>
+</div>
+<div class="performance-kpi-grid">
+<article class="performance-kpi"><span>Clinic sessions</span><strong id="perfSessions">0</strong></article>
+<article class="performance-kpi"><span>Patients per session</span><strong id="perfPatientsPerSession">0</strong></article>
+<article class="performance-kpi"><span>New consultations per session</span><strong id="perfNewPerSession">0</strong></article>
+<article class="performance-kpi"><span>Procedures per session</span><strong id="perfProceduresPerSession">0</strong></article>
+<article class="performance-kpi"><span>Clinic hours</span><strong id="perfHours">0</strong></article>
+<article class="performance-kpi"><span>Patients per hour</span><strong id="perfPatientsPerHour">0</strong></article>
+</div>
+</section>
+<section class="card performance-comparison-card private-view hidden" data-private-section="performance">
+<div class="section-heading"><div><p class="eyebrow">Hospital comparison</p><h2>Performance by hospital</h2></div></div>
+<div class="performance-hospital-grid">
+<article class="performance-hospital-card">
+<div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Fayhaa</h3><small>Selected statistics period</small></div></div>
+<div class="performance-metric-list">
+<div><span>Clinic sessions</span><strong id="perfFayhaaSessions">0</strong></div><div><span>Total patients</span><strong id="perfFayhaaPatients">0</strong></div><div><span>Patients/session</span><strong id="perfFayhaaPatientsPerSession">0</strong></div><div><span>New/session</span><strong id="perfFayhaaNewPerSession">0</strong></div><div><span>Clinic hours</span><strong id="perfFayhaaHours">0</strong></div><div><span>Endoscopy procedures</span><strong id="perfFayhaaProcedures">0</strong></div><div><span>Procedures/session</span><strong id="perfFayhaaProceduresPerSession">0</strong></div>
+</div>
+</article>
+<article class="performance-hospital-card">
+<div class="hospital-panel-heading"><span class="hospital-dot"></span><div><h3>HMG Mohammadiya</h3><small>Selected statistics period</small></div></div>
+<div class="performance-metric-list">
+<div><span>Clinic sessions</span><strong id="perfMohammadiyaSessions">0</strong></div><div><span>Total patients</span><strong id="perfMohammadiyaPatients">0</strong></div><div><span>Patients/session</span><strong id="perfMohammadiyaPatientsPerSession">0</strong></div><div><span>New/session</span><strong id="perfMohammadiyaNewPerSession">0</strong></div><div><span>Clinic hours</span><strong id="perfMohammadiyaHours">0</strong></div><div><span>Endoscopy procedures</span><strong id="perfMohammadiyaProcedures">0</strong></div><div><span>Procedures/session</span><strong id="perfMohammadiyaProceduresPerSession">0</strong></div>
+</div>
+</article>
+</div>
+</section>
+<section class="card income-header-card private-view hidden" data-private-section="income">
+<div class="section-heading income-heading">
+<div><p class="eyebrow">Monthly estimate</p><h2>Income Dashboard</h2><p class="section-help">Calculated from saved clinic and endoscopy records using your approximate fees.</p></div>
+<div class="income-actions"><label><span>Month</span><input id="incomeMonth" type="month"/></label><button class="secondary-btn" id="lockIncomeBtn" type="button">Lock</button></div>
+</div>
+<div class="income-kpi-grid">
+<article class="income-kpi"><span>Target Income</span><strong id="incomeTargetDisplay">SAR 0</strong></article>
+<article class="income-kpi"><span>Estimated Income So Far</span><strong id="incomeExpectedDisplay">SAR 0</strong></article>
+<article class="income-kpi"><span>Remaining to Target</span><strong id="incomeRemainingDisplay">SAR 0</strong></article>
+<article class="income-kpi"><span>Target Achievement</span><strong id="incomeAchievementDisplay">0%</strong></article>
+</div>
+<div class="income-progress"><div id="incomeProgressBar"></div></div>
+<p class="estimate-disclaimer">Estimated values are for progress tracking only and may differ from the final payment.</p>
+</section>
+<section class="card private-view hidden" data-private-section="income">
+<div class="section-heading"><div><p class="eyebrow">Separate allowance</p><h2>On-call coverage</h2><p class="section-help">Record the number of on-call nights for the selected month. This amount is shown separately and is not included in the estimated practice income or target achievement.</p></div></div>
+<div class="oncall-income-grid">
+<label><span>On-call coverage nights</span><input id="onCallDaysInput" inputmode="numeric" min="0" step="1" type="number" value="0"/></label>
+<article class="income-kpi"><span>On-call fee per night</span><strong id="onCallFeeDisplay">SAR 500</strong></article>
+<article class="income-kpi"><span>Separate on-call amount</span><strong id="onCallIncomeDisplay">SAR 0</strong></article>
+</div>
+<button class="primary-btn settings-save" id="saveOnCallDaysBtn" type="button">Save on-call nights</button>
+<div class="form-message" id="onCallDaysMessage"></div>
+</section>
+<section class="income-layout private-view hidden" data-private-section="income">
+<article class="card">
+<div class="section-heading"><div><p class="eyebrow">Calculation</p><h2>Monthly income breakdown</h2></div></div>
+<div class="income-breakdown" id="incomeBreakdown"></div>
+</article>
+<article class="card">
+<div class="section-heading"><div><p class="eyebrow">Monthly goal</p><h2>Target setting</h2></div></div>
+<label><span>Target income (SAR)</span><input id="incomeTargetInput" min="0" step="1000" type="number"/></label>
+<button class="primary-btn settings-save" id="saveIncomeTargetBtn" type="button">Save target</button>
+<div class="form-message" id="incomeTargetMessage"></div>
+</article>
+</section>
+<section class="card income-hospital-card private-view hidden" data-private-section="income">
+<div class="section-heading"><div><p class="eyebrow">Hospital comparison</p><h2>Estimated income by hospital</h2><p class="section-help">Compares clinic and endoscopy income for the selected month using the same approximate fees.</p></div></div>
+<div class="income-hospital-grid" id="incomeHospitalComparison"></div>
+</section>
+<section class="card private-view hidden" data-private-section="hospitals">
+<div class="section-heading"><div><p class="eyebrow">Hospital comparison</p><h2>Practice performance by hospital</h2><p class="section-help">A concise comparison for the selected income month.</p></div></div>
+<div class="private-hospital-cards" id="privateHospitalCards"></div>
+</section>
+<section class="card private-view hidden" data-private-section="fees">
+<div class="section-heading"><div><p class="eyebrow">Approximate values</p><h2>Fee settings</h2><p class="section-help">Edit these estimates at any time. Blank or zero values are excluded from income.</p></div></div>
+<div class="fee-settings-grid" id="feeSettingsGrid"></div>
+<button class="primary-btn settings-save" id="saveFeeSettingsBtn" type="button">Save approximate fees</button>
+<div class="form-message" id="feeSettingsMessage"></div>
+</section>
+<section class="card private-view hidden" data-private-section="backup">
+<div class="section-heading"><div><p class="eyebrow">Data protection</p><h2>Automatic backups</h2><p class="section-help">A local snapshot is created whenever clinic, procedure, income, password, or fee data is saved.</p></div></div>
+<div class="backup-grid">
+<article class="backup-panel">
+<h3>Local backup</h3>
+<p class="section-help">Keeps the latest 20 snapshots in this browser.</p>
+<div class="backup-status"><div><span>Last local backup</span><strong id="lastLocalBackup">Never</strong></div><div><span>Stored snapshots</span><strong id="localBackupCount">0</strong></div></div>
+<div class="backup-actions"><button class="secondary-btn" id="downloadBackupBtn" type="button">Download backup</button><button class="secondary-btn" id="restoreBackupBtn" type="button">Restore file</button><input accept="application/json,.json" class="hidden" id="restoreBackupFile" type="file"/></div>
+<div class="backup-history" id="localBackupHistory"></div>
+</article>
+<article class="backup-panel faceid-panel">
+<h3>Face ID unlock</h3>
+<p class="section-help">Use Face ID on this iPhone to unlock the Private Dashboard. Your password remains available as a fallback.</p>
+<div class="backup-status"><div><span>Face ID status</span><strong id="faceIdStatus">Not enabled</strong></div><div><span>Device</span><strong id="faceIdDeviceStatus">Checking…</strong></div></div>
+<div class="backup-actions"><button class="primary-btn" id="enableFaceIdBtn" type="button">Enable Face ID</button><button class="secondary-btn" id="disableFaceIdBtn" type="button">Disable Face ID</button></div>
+<div aria-live="polite" class="form-message" id="faceIdMessage"></div>
+<p class="estimate-disclaimer">Face ID works only when the tracker is opened from an HTTPS address such as GitHub Pages. It is enabled separately on each device.</p>
+</article>
+<article class="backup-panel google-drive-panel">
+<h3>Google Drive backup</h3>
+<p class="section-help">Optional cloud backup only. Your tracker continues to use local storage and does not synchronize records between devices.</p>
+<label class="field-label" for="googleClientId">Google OAuth Web Client ID</label>
+<input autocomplete="off" class="text-input" id="googleClientId" inputmode="text" placeholder="...apps.googleusercontent.com" type="text"/>
+<p class="section-help compact-help">Enter this once after creating a Google OAuth Web Client ID and enabling the Google Drive API.</p>
+<div class="backup-status"><div><span>Drive status</span><strong id="googleDriveStatus">Not connected</strong></div><div><span>Last Drive backup</span><strong id="lastGoogleDriveBackup">Never</strong></div></div>
+<label class="drive-auto-row"><input id="googleDriveAutoBackup" type="checkbox"/> <span>Daily backup while the tracker is open and Google Drive is connected</span></label>
+<div class="backup-actions google-drive-actions"><button class="secondary-btn" id="connectGoogleDriveBtn" type="button">Connect</button><button class="primary-btn" id="googleDriveBackupNowBtn" type="button">Backup now</button><button class="secondary-btn" id="googleDriveRestoreBtn" type="button">Restore latest</button><button class="text-btn" id="disconnectGoogleDriveBtn" type="button">Disconnect</button></div>
+<div aria-live="polite" class="form-message" id="googleDriveMessage"></div>
+<p class="estimate-disclaimer">A static iPhone webpage cannot back up while Safari is fully closed. A missed daily backup is attempted after you reconnect and open the tracker.</p>
+</article>
+</div>
+</section>
+</div>
+</section>
+</main>
+<div aria-atomic="true" aria-live="polite" class="app-toast" id="appToast" role="status"></div>
+<script async="" defer="" src="https://accounts.google.com/gsi/client"></script>
+<script src="app.js"></script>
+<div aria-label="Application version" class="version-stamp">v3.4.0 On-call Income</div>
 </body>
 </html>

@@ -1,3 +1,14 @@
+## 3.10.10
+- Made the Endoscopy Activity Log compact on iPhone.
+- Endoscopy entries now show date, MRN, hospital, and procedures by default.
+- Tap an entry to reveal additional procedures, notes, Edit, and Delete.
+- Preserved all storage keys and existing record structures.
+
+## 3.10-9
+- Minimized the Clinic Activity Log on iPhone with compact summary rows.
+- Tap a clinic row to reveal duration, new/follow-up counts, and actions.
+- Preserved all storage keys and clinic record formats.
+
 # Changelog
 
 ## v3.12
@@ -53,3 +64,14 @@
 - Added one-line patient rows with tap-to-expand details and actions.
 - Added a floating add button and full-screen mobile add/edit form.
 - Preserved all existing storage keys and pending-record structure.
+
+## 3.10-8
+- Fixed Pending hospital switching on iPhone by keeping Fayhaa and Mohammadiya selectors visible above the queue.
+- Preserved existing Pending storage and add/edit behavior.
+
+## 3.10.11
+- Added a unified Dashboard module for Clinic and Endoscopy statistics.
+- Removed large statistics blocks from the daily Clinic and Endoscopy activity pages.
+- Added compact, collapsible Clinic Statistics and Endoscopy Statistics sections.
+- Added two-column iPhone statistic grids and compact hospital breakdowns.
+- Preserved all existing element IDs, calculations, record structures, and storage keys.

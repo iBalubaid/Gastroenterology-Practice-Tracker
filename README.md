@@ -19,3 +19,7 @@ Google Drive is used for backup/restore only. The tracker remains local-first. D
 This release preserves the existing clinic, endoscopy, pending, income, password, theme, Google Drive, and Face ID storage keys. Export a JSON backup before replacing GitHub files as an additional safeguard.
 
 Haptic vibration uses the browser vibration API when available. iPhone Safari may not expose vibration to webpages; toast feedback always remains available.
+
+
+### v3.10-9 mobile update
+The Clinic Activity Log is compact on iPhone. Tap any row to expand its details and actions.
