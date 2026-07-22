@@ -145,6 +145,18 @@ function savePending(e){
   e.preventDefault();$('pendingMessage').textContent='';const procedures=pendingProcedures();
   if(!$('pendingDate').value||!$('pendingMrn').value.trim())return validationMessage('pendingMessage','Please enter a date and MRN.');
   if(!procedures.length)return validationMessage('pendingMessage','Select at least one planned procedure.');
+  const enteredMrn=$('pendingMrn').value.trim();
+  const editingId=String($('pendingEditingId').value||'');
+  const duplicateEntries=pendingState.entries.filter(item=>String(item.id)!==editingId&&String(item.mrn||'').trim().toLowerCase()===enteredMrn.toLowerCase());
+  if(duplicateEntries.length){
+    const details=duplicateEntries.map((item,index)=>{
+      const proceduresText=(item.procedures||[]).join(', ')||'No procedure';
+      const noteText=item.note?`\nNotes: ${item.note}`:'';
+      return `${index+1}. ${item.hospital||'Hospital not specified'} · ${fmtDate(item.date)}\nProcedures: ${proceduresText}${noteText}`;
+    }).join('\n\n');
+    const continueAdding=confirm(`MRN ${enteredMrn} is already in the Pending list:\n\n${details}\n\nDo you want to add another pending entry for this MRN?`);
+    if(!continueAdding)return validationMessage('pendingMessage','This MRN is already in Pending. The new entry was not added.');
+  }
   const button=e.submitter||pendingForm.querySelector('button[type="submit"]'),label=$('pendingSubmitLabel');beginSave(button,label);
   try{const item={id:$('pendingEditingId').value||uid(),date:$('pendingDate').value,mrn:$('pendingMrn').value.trim(),hospital:pendingState.hospital,procedures,note:$('pendingNote').value.trim(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};upsert(pendingState.entries,item);persist(PENDING_KEY,pendingState.entries);createAutomaticLocalBackup('Pending patient saved');togglePendingComposer(false);renderPending();finishSave(button,label,'Pending patient saved')}
   catch(err){console.error(err);failSave(button,label,'Unable to save pending patient. Your entry is still on screen.','pendingMessage')}

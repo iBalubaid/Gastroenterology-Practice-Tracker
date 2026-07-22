@@ -101,3 +101,8 @@
 - Hospital breakdowns and performance comparisons stack vertically.
 - Removed forced wide chart canvas so diagrams fit the iPhone screen.
 - Preserved compact Clinic/Endoscopy logs, Pending add fix, storage keys, and record formats.
+
+## 3.10.16
+- Pending duplicate-MRN check now shows the existing matching pending case details.
+- User can choose whether to continue adding another pending entry.
+- Editing an existing pending entry does not flag itself as a duplicate.
