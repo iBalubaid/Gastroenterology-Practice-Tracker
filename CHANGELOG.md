@@ -1,3 +1,8 @@
+## v1.4.1
+- Removed duplicate Clinic and Endoscopy Edit/Delete controls.
+- Standardized one action set in the top-right header position for every mobile card.
+- Reserved layout space so actions do not cover record data.
+
 # HMG GI Tracker Phone v1.4
 
 - Hardened Apple Calendar/Readdle export for Asia/Riyadh.

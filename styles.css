@@ -950,3 +950,62 @@ body.dark #themeToggle .sun-icon{display:block}
   #recordsBody .clinic-log-row.expanded .clinic-log-detail,
   #endoscopyBody .endo-log-row.expanded .endo-log-detail{grid-column:1/-1!important}
 }
+
+
+/* v1.4.1 — One consistent Clinic/Endoscopy action set; no duplicates */
+@media(max-width:767px){
+  #recordsBody .clinic-log-row,
+  #endoscopyBody .endo-log-row{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    padding-right:11px!important;
+  }
+
+  #recordsBody .clinic-log-date,
+  #endoscopyBody .endo-log-date{
+    grid-column:1!important;
+    grid-row:1!important;
+    display:flex!important;
+    align-items:center!important;
+    min-width:0!important;
+    padding-bottom:6px!important;
+    border-bottom:1px solid var(--border)!important;
+  }
+
+  #recordsBody .clinic-log-actions,
+  #endoscopyBody .endo-log-actions,
+  #recordsBody .clinic-log-row.expanded .clinic-log-actions,
+  #endoscopyBody .endo-log-row.expanded .endo-log-actions{
+    display:flex!important;
+    grid-column:2!important;
+    grid-row:1!important;
+    align-self:start!important;
+    justify-self:end!important;
+    align-items:center!important;
+    gap:6px!important;
+    margin:0!important;
+    padding:0 20px 6px 0!important;
+    border:0!important;
+    min-height:0!important;
+    background:transparent!important;
+  }
+
+  #recordsBody .clinic-log-actions::before,
+  #endoscopyBody .endo-log-actions::before{display:none!important}
+
+  #recordsBody .clinic-log-actions .log-icon-btn,
+  #endoscopyBody .endo-log-actions .log-icon-btn{
+    width:32px!important;height:32px!important;
+    min-width:32px!important;min-height:32px!important;
+    padding:0!important;border-radius:8px!important;
+    display:inline-grid!important;place-items:center!important;
+    font-size:.84rem!important;line-height:1!important;
+  }
+
+  #recordsBody .clinic-log-service{grid-column:1;grid-row:2}
+  #recordsBody .clinic-log-total{grid-column:2;grid-row:2;padding-right:20px!important}
+  #endoscopyBody .endo-log-mrn{grid-column:1;grid-row:2}
+  #endoscopyBody .endo-log-hospital{grid-column:1;grid-row:3}
+  #endoscopyBody .endo-log-procedures{grid-column:2;grid-row:2/4;padding-right:20px!important}
+
+  .mobile-log-header-actions{display:none!important}
+}
