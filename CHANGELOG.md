@@ -1,3 +1,7 @@
+## 3.10.15-11
+- Replaced the Pending Delete text button with a compact trash-bin icon matching the calendar action size.
+- Preserved delete confirmation and all existing functionality.
+
 ## 3.10.17
 - Added an optional Admission Tracker inside the Private Area.
 - Tracks selected MRNs only, with hospital, initial consultation date, current admission day, follow-up days, discharge date, notes, and approximate fees.
