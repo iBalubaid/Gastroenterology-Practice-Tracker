@@ -199,11 +199,13 @@ async function addPendingToCalendar(id){
   const description=[`Hospital: ${item.hospital}`,`Procedures: ${(item.procedures||[]).join(', ')}`,`Duration: ${duration} minutes`,item.note?`Notes: ${item.note}`:''].filter(Boolean).join('\n');
   const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
   const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Gastroenterology Practice Tracker//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',`UID:pending-${icsEscape(item.id)}@practice-tracker`,`DTSTAMP:${stamp}`,`DTSTART:${start}`,`DTEND:${end}`,`SUMMARY:${icsEscape(title)}`,`LOCATION:${icsEscape(`MRN ${item.mrn}`)}`,`DESCRIPTION:${icsEscape(description)}`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
-  const filename=`${item.date}-${String(item.mrn).replace(/[^a-z0-9]/gi,'')}-endoscopy.ics`,blob=new Blob([ics],{type:'text/calendar;charset=utf-8'}),file=new File([blob],filename,{type:'text/calendar'});
+  const filename=`${item.date}-${String(item.mrn).replace(/[^a-z0-9]/gi,'')}-endoscopy.ics`,blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
   try{
-    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title});
-    else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.rel='noopener';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500)}
-  }catch(err){if(err?.name==='AbortError')return;console.error(err);return alert('The calendar file could not be opened. Please try again.')}
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=filename;a.rel='noopener';a.style.display='none';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2500);
+  }catch(err){console.error(err);return alert('The calendar file could not be opened. Please try again.')}
   item.calendarAddedAt=new Date().toISOString();item.calendarFingerprint=pendingCalendarFingerprint(item);persist(PENDING_KEY,pendingState.entries);renderPending();showToast('Calendar event prepared')
 }
 
