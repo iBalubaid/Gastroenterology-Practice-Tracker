@@ -113,3 +113,9 @@
 - Pending duplicate-MRN check now shows the existing matching pending case details.
 - User can choose whether to continue adding another pending entry.
 - Editing an existing pending entry does not flag itself as a duplicate.
+
+## 3.10.18c
+- Clinic and Endoscopy activity logs now use ultra-compact, Pending-style single-line rows on iPhone.
+- Clinic row shows date, hospital abbreviation, total patients, new and follow-up counts.
+- Endoscopy row shows date, hospital abbreviation, MRN, and main procedures only.
+- Interventions, notes, and actions remain available after tapping to expand.

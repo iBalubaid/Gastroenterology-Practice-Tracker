@@ -843,3 +843,47 @@ body.dark #themeToggle .sun-icon{display:block}
   color: #fca5a5;
   background: rgba(248, 113, 113, .14);
 }
+
+/* v3.10-18c — Pending-style ultra-compact Clinic and Endoscopy rows */
+.clinic-mobile-summary,.endo-mobile-summary{display:none}
+@media(max-width:767px){
+  #recordsBody .clinic-log-row,#endoscopyBody .endo-log-row{
+    display:block!important;
+    padding:0!important;
+    border-radius:12px!important;
+    overflow:hidden;
+  }
+  #recordsBody .clinic-log-row::after,#endoscopyBody .endo-log-row::after{
+    right:8px;font-size:1rem;
+  }
+  .clinic-mobile-summary,.endo-mobile-summary{
+    display:grid!important;
+    align-items:center;
+    width:100%!important;
+    min-height:42px;
+    padding:7px 27px 7px 9px!important;
+    box-sizing:border-box;
+    border:0!important;
+    background:transparent!important;
+    font-size:.72rem;
+    line-height:1.15;
+    gap:3px 7px;
+  }
+  .clinic-mobile-summary{grid-template-columns:auto 24px minmax(48px,auto) minmax(0,1fr)}
+  .endo-mobile-summary{grid-template-columns:auto 22px minmax(58px,auto) minmax(0,1fr)}
+  .compact-date{font-weight:850;white-space:nowrap;color:var(--text)}
+  .compact-site{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:7px;background:var(--primary-soft);color:var(--primary);font-weight:900;font-size:.67rem}
+  .compact-main,.compact-mrn{font-weight:850;white-space:nowrap;color:var(--text)}
+  .compact-sub,.compact-procs{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);text-align:right;font-weight:720}
+  #recordsBody .clinic-log-date,#recordsBody .clinic-log-day-cell,#recordsBody .clinic-log-service,#recordsBody .clinic-log-total,
+  #endoscopyBody .endo-log-date,#endoscopyBody .endo-log-day-cell,#endoscopyBody .endo-log-mrn,#endoscopyBody .endo-log-hospital,#endoscopyBody .endo-log-procedures{display:none!important}
+  #recordsBody .clinic-log-row.expanded .clinic-mobile-summary,#endoscopyBody .endo-log-row.expanded .endo-mobile-summary{border-bottom:1px solid var(--border)!important}
+  #recordsBody .clinic-log-row.expanded .clinic-log-detail,#endoscopyBody .endo-log-row.expanded .endo-log-detail{
+    margin:0 9px!important;
+    padding:7px 0!important;
+  }
+  #recordsBody .clinic-log-row.expanded .clinic-log-actions,#endoscopyBody .endo-log-row.expanded .endo-log-actions{
+    margin:0 9px 9px!important;
+    padding-top:4px!important;
+  }
+}
