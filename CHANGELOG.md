@@ -1,3 +1,11 @@
+## 3.10.15-20
+- Moved Clinic and Endoscopy Edit/Delete controls into a dedicated mobile card header.
+- Kept all clinical details below the header to prevent overlap.
+- Removed the extra bottom action row on phone.
+
+- Fixed Pending calendar event times by explicitly using the Asia/Riyadh timezone in generated ICS files.
+- Calendar events now open at the exact selected Pending start time instead of shifting during import.
+
 ## 3.10.15.15
 - Show planned start time in the collapsed Pending date badge without changing the existing card layout.
 

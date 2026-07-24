@@ -898,3 +898,55 @@ body.dark #themeToggle .sun-icon{display:block}
 .clinic-duration-picker label>span{font-size:.78rem;font-weight:700;color:var(--muted)}
 .clinic-duration-picker select{width:100%;min-height:46px;font-size:16px;font-weight:700;text-align:center;text-align-last:center}
 @media(max-width:480px){.clinic-duration-picker{gap:8px}.clinic-duration-picker select{min-height:44px}}
+
+
+/* v3.10.15-20 — Clinic and endoscopy actions in a protected card header */
+.mobile-log-header-actions{display:none}
+.log-header-text{display:inline-flex;align-items:baseline;gap:7px;min-width:0}
+@media(max-width:767px){
+  #recordsBody .clinic-log-row,
+  #endoscopyBody .endo-log-row{padding-right:34px}
+
+  #recordsBody .clinic-log-date,
+  #endoscopyBody .endo-log-date{
+    grid-column:1/-1!important;
+    grid-row:1!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    min-width:0;
+    padding-bottom:6px!important;
+    border-bottom:1px solid var(--border)!important;
+  }
+  #recordsBody .clinic-log-date .log-header-text,
+  #endoscopyBody .endo-log-date .log-header-text{min-width:0;overflow:hidden}
+  #recordsBody .clinic-log-date .log-header-text strong,
+  #endoscopyBody .endo-log-date .log-header-text strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mobile-log-header-actions{
+    display:inline-flex!important;
+    flex:0 0 auto;
+    align-items:center;
+    gap:6px;
+    padding-right:2px;
+  }
+  .mobile-log-header-actions .log-icon-btn{
+    width:32px!important;height:32px!important;
+    min-width:32px!important;min-height:32px!important;
+    border-radius:8px!important;font-size:.84rem!important;
+  }
+
+  #recordsBody .clinic-log-service{grid-column:1;grid-row:2}
+  #recordsBody .clinic-log-total{grid-column:2;grid-row:2;align-self:center}
+  #recordsBody .clinic-log-actions{display:none!important}
+  #recordsBody .clinic-log-row.expanded .clinic-log-actions{display:none!important}
+
+  #endoscopyBody .endo-log-mrn{grid-column:1;grid-row:2;text-align:left!important}
+  #endoscopyBody .endo-log-hospital{grid-column:1;grid-row:3}
+  #endoscopyBody .endo-log-procedures{grid-column:2;grid-row:2/4;align-self:center}
+  #endoscopyBody .endo-log-actions{display:none!important}
+  #endoscopyBody .endo-log-row.expanded .endo-log-actions{display:none!important}
+
+  #recordsBody .clinic-log-row.expanded .clinic-log-detail,
+  #endoscopyBody .endo-log-row.expanded .endo-log-detail{grid-column:1/-1!important}
+}
