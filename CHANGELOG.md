@@ -1,3 +1,7 @@
+## 3.10.15-13
+- Pending start-time selection now uses fixed 15-minute intervals with no hospital-specific default.
+- Preserved direct ICS calendar opening, compact calendar/bin buttons, overdue highlighting, and all storage keys.
+
 ## 3.10.15-11
 - Replaced the Pending Delete text button with a compact trash-bin icon matching the calendar action size.
 - Preserved delete confirmation and all existing functionality.
