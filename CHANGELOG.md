@@ -1,3 +1,6 @@
+## 3.10.15.14
+- Pending start-time selector now lists 15-minute slots from 08:00 through 00:00.
+
 ## 3.10.15-13
 - Pending start-time selection now uses fixed 15-minute intervals with no hospital-specific default.
 - Preserved direct ICS calendar opening, compact calendar/bin buttons, overdue highlighting, and all storage keys.
