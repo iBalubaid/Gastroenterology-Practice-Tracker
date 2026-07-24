@@ -131,3 +131,18 @@
 ## 3.10.18d
 - Added Pending start time, editable calendar duration, and standard .ics calendar export compatible with iPhone Calendar and Readdle.
 - Calendar status changes to Added and resets when schedule details change.
+
+## v3.10.15.16
+- Pending cases are sorted by planned date.
+- Within the same date, timed cases are sorted chronologically.
+- Untimed cases appear after timed cases for that date.
+- Midnight (00:00) is treated as the final slot of the selected day.
+
+## v3.10.15-17
+- Replaced Clinic and Endoscopy log Edit/Delete text buttons with compact icon-only buttons.
+- Reduced expanded log action-row spacing and card height on iPhone.
+
+## v3.10.15.18
+- Replaced clinic duration chips with separate Hours and Minutes selectors.
+- Default clinic duration is 4 h 00 min.
+- Minute choices use 00, 15, 30, and 45 while preserving the existing numeric duration storage format.

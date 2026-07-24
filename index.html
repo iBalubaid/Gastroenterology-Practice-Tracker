@@ -67,20 +67,9 @@
 </div>
 <div class="clinic-duration-field" id="clinicDurationField">
 <span class="field-label">Clinic duration <small>(optional)</small></span>
-<div aria-label="Clinic duration in hours" class="duration-chip-row" role="group">
-<button class="duration-chip" data-duration="" type="button">Not recorded</button>
-<button class="duration-chip" data-duration="0.5" type="button">0.5h</button>
-<button class="duration-chip" data-duration="1" type="button">1h</button>
-<button class="duration-chip" data-duration="1.5" type="button">1.5h</button>
-<button class="duration-chip" data-duration="2" type="button">2h</button>
-<button class="duration-chip" data-duration="2.5" type="button">2.5h</button>
-<button class="duration-chip" data-duration="3" type="button">3h</button>
-<button class="duration-chip" data-duration="3.5" type="button">3.5h</button>
-<button class="duration-chip active" data-duration="4" type="button">4h</button>
-<button class="duration-chip" data-duration="4.5" type="button">4.5h</button>
-<button class="duration-chip" data-duration="5" type="button">5h</button>
-<button class="duration-chip" data-duration="5.5" type="button">5.5h</button>
-<button class="duration-chip" data-duration="6" type="button">6h</button>
+<div class="clinic-duration-picker" aria-label="Clinic duration">
+<label><span>Hours</span><select id="durationHours"><option value="">Not recorded</option><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></label>
+<label><span>Minutes</span><select id="durationMinutes"><option value="0" selected>00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option></select></label>
 </div>
 <input id="duration" type="hidden" value="4"/>
 </div>

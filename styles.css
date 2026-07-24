@@ -857,3 +857,44 @@ body.dark #themeToggle .sun-icon{display:block}
 /* v3.10-15-11 — compact Pending delete icon */
 .pending-item.compact .pending-delete-btn{width:44px!important;min-width:44px!important;max-width:44px!important;height:40px!important;padding:0!important;display:inline-grid!important;place-items:center;font-size:1rem;line-height:1;flex:0 0 44px!important;color:var(--danger)}
 @media(max-width:600px){.pending-item.compact .pending-delete-btn{width:44px!important;min-width:44px!important;max-width:44px!important;height:40px!important}}
+
+
+/* v3.10.15-17 — Compact clinic/endoscopy log action icons */
+.log-icon-btn{
+  width:34px!important;
+  height:34px!important;
+  min-width:34px!important;
+  min-height:34px!important;
+  padding:0!important;
+  display:inline-grid!important;
+  place-items:center!important;
+  border-radius:9px!important;
+  font-size:.9rem!important;
+  line-height:1!important;
+}
+@media(max-width:767px){
+  #recordsBody .clinic-log-row.expanded,
+  #endoscopyBody .endo-log-row.expanded{padding-bottom:8px}
+  #recordsBody .clinic-log-row.expanded .clinic-log-actions,
+  #endoscopyBody .endo-log-row.expanded .endo-log-actions{
+    display:flex!important;
+    justify-content:flex-end!important;
+    align-items:center!important;
+    gap:6px!important;
+    padding-top:3px!important;
+  }
+  #recordsBody .clinic-log-actions button,
+  #endoscopyBody .endo-log-actions button{
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    min-height:34px!important;
+  }
+}
+
+/* Compact iPhone-style clinic duration picker */
+.clinic-duration-picker{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.clinic-duration-picker label{display:grid;gap:6px}
+.clinic-duration-picker label>span{font-size:.78rem;font-weight:700;color:var(--muted)}
+.clinic-duration-picker select{width:100%;min-height:46px;font-size:16px;font-weight:700;text-align:center;text-align-last:center}
+@media(max-width:480px){.clinic-duration-picker{gap:8px}.clinic-duration-picker select{min-height:44px}}
