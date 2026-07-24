@@ -1,3 +1,11 @@
+# HMG GI Tracker Phone v1.4
+
+- Hardened Apple Calendar/Readdle export for Asia/Riyadh.
+- Replaced browser-local date arithmetic with timezone-independent calendar arithmetic.
+- Added X-WR-TIMEZONE and confirmed-event metadata to generated ICS files.
+- Selected Pending start time is preserved exactly; duration only changes the end time.
+- Preserved all storage keys, records, Pending sorting, overdue highlighting, compact actions, and clinic duration picker.
+
 ## 3.10.15-20
 - Moved Clinic and Endoscopy Edit/Delete controls into a dedicated mobile card header.
 - Kept all clinical details below the header to prevent overlap.

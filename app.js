@@ -191,15 +191,22 @@ function pendingCalendarProcedureTitle(procedures){
 }
 function icsEscape(value){return String(value||'').replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;')}
 function icsLocal(date,time){return `${String(date||'').replace(/-/g,'')}T${String(time||'').replace(':','')}00`}
-function addMinutesToLocal(date,time,minutes){const d=new Date(`${date}T${time}:00`);d.setMinutes(d.getMinutes()+Number(minutes||0));const pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`}
+function addMinutesToRiyadhLocal(date,time,minutes){
+  const [year,month,day]=String(date||'').split('-').map(Number),[hour,minute]=String(time||'').split(':').map(Number);
+  if(!year||!month||!day||!Number.isFinite(hour)||!Number.isFinite(minute))return icsLocal(date,time);
+  // Calculate with UTC fields only. This prevents the browser/device timezone from shifting the selected Saudi local time.
+  const d=new Date(Date.UTC(year,month-1,day,hour,minute+Number(minutes||0),0));
+  const pad=n=>String(n).padStart(2,'0');
+  return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00`;
+}
 async function addPendingToCalendar(id){
   const item=pendingState.entries.find(x=>String(x.id)===String(id));if(!item)return;
   if(!item.time)return alert('Please edit this pending case and add a start time before adding it to your calendar.');
-  const duration=Number(item.durationMinutes)||calculatedPendingDuration(item.procedures||[]),start=icsLocal(item.date,item.time),end=addMinutesToLocal(item.date,item.time,duration);
+  const duration=Number(item.durationMinutes)||calculatedPendingDuration(item.procedures||[]),start=icsLocal(item.date,item.time),end=addMinutesToRiyadhLocal(item.date,item.time,duration);
   const shortProcedure=pendingCalendarProcedureTitle(item.procedures||[]),hospitalCode=pendingHospitalCode(item.hospital),title=`${shortProcedure} • ${hospitalCode}`;
   const description=[`Hospital: ${item.hospital}`,`Procedures: ${(item.procedures||[]).join(', ')}`,`Duration: ${duration} minutes`,item.note?`Notes: ${item.note}`:''].filter(Boolean).join('\n');
   const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
-  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Gastroenterology Practice Tracker//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VTIMEZONE','TZID:Asia/Riyadh','X-LIC-LOCATION:Asia/Riyadh','BEGIN:STANDARD','TZOFFSETFROM:+0300','TZOFFSETTO:+0300','TZNAME:+03','DTSTART:19700101T000000','END:STANDARD','END:VTIMEZONE','BEGIN:VEVENT',`UID:pending-${icsEscape(item.id)}@practice-tracker`,`DTSTAMP:${stamp}`,`DTSTART;TZID=Asia/Riyadh:${start}`,`DTEND;TZID=Asia/Riyadh:${end}`,`SUMMARY:${icsEscape(title)}`,`LOCATION:${icsEscape(`MRN ${item.mrn}`)}`,`DESCRIPTION:${icsEscape(description)}`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//HMG GI Tracker//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-TIMEZONE:Asia/Riyadh','BEGIN:VTIMEZONE','TZID:Asia/Riyadh','X-LIC-LOCATION:Asia/Riyadh','BEGIN:STANDARD','DTSTART:19700101T000000','TZOFFSETFROM:+0300','TZOFFSETTO:+0300','TZNAME:+03','END:STANDARD','END:VTIMEZONE','BEGIN:VEVENT',`UID:pending-${icsEscape(item.id)}@hmg-gi-tracker`,`DTSTAMP:${stamp}`,`DTSTART;TZID=Asia/Riyadh:${start}`,`DTEND;TZID=Asia/Riyadh:${end}`,'STATUS:CONFIRMED','TRANSP:OPAQUE','SEQUENCE:0',`SUMMARY:${icsEscape(title)}`,`LOCATION:${icsEscape(`MRN ${item.mrn}`)}`,`DESCRIPTION:${icsEscape(description)}`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
   const filename=`${item.date}-${String(item.mrn).replace(/[^a-z0-9]/gi,'')}-endoscopy.ics`,blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
   try{
     const url=URL.createObjectURL(blob),a=document.createElement('a');
