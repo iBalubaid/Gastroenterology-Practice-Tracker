@@ -1,4 +1,4 @@
-const CLINIC_KEY="dailyClinicTrackerEntriesV1", ENDO_KEY="hmgEndoscopyEntriesV1", PENDING_KEY="practicePendingEndoscopyV1", THEME_KEY="dailyClinicTrackerTheme", INCOME_SETTINGS_KEY="practiceIncomeSettingsV1", INCOME_PASSWORD_KEY="practiceIncomePasswordHashV1";
+const CLINIC_KEY="dailyClinicTrackerEntriesV1", ENDO_KEY="hmgEndoscopyEntriesV1", PENDING_KEY="practicePendingEndoscopyV1", ADMISSION_KEY="practiceAdmissionTrackerV1", THEME_KEY="dailyClinicTrackerTheme", INCOME_SETTINGS_KEY="practiceIncomeSettingsV1", INCOME_PASSWORD_KEY="practiceIncomePasswordHashV1";
 const LOCAL_BACKUPS_KEY="practiceAutomaticBackupsV1";
 const GOOGLE_CLIENT_ID_KEY="practiceGoogleDriveClientIdV1";
 const GOOGLE_DRIVE_LAST_BACKUP_KEY="practiceGoogleDriveLastBackupV1";
@@ -10,6 +10,7 @@ const GOOGLE_DRIVE_SCOPE="https://www.googleapis.com/auth/drive.appdata";
 const clinicState={entries:load(CLINIC_KEY),search:"",filter:"",expandedId:""};
 const endoState={entries:load(ENDO_KEY),search:"",filter:"",expandedId:""};
 const pendingState={entries:load(PENDING_KEY),hospital:"HMG Fayhaa",search:"",view:"queue",expandedId:""};
+const admissionState={entries:load(ADMISSION_KEY),search:"",status:"active",expandedId:""};
 let activePendingId="";
 const statsState={period:'all',hospital:'all',from:'',to:''};
 const $=id=>document.getElementById(id);
@@ -128,6 +129,38 @@ window.toggleClinicDetails=toggleClinicDetails;window.editClinic=editClinic;wind
 function clearClinic(){if(!clinicState.entries.length)return alert('There are no clinic entries to clear.');if(confirm(`Delete all ${clinicState.entries.length} clinic entries? This cannot be undone.`)){createAutomaticLocalBackup('Before clearing clinic log');clinicState.entries=[];persist(CLINIC_KEY,[]);renderClinic();alert('Clinic log cleared.')}}
 function exportClinic(){downloadCsv('clinic-activity', ['Date','Day','Clinic / Service','Duration (hours)','Total patients','New consultations','Follow-ups'],clinicState.entries.sort((a,b)=>a.date.localeCompare(b.date)).map(e=>[e.date,e.day||getDay(e.date),e.clinic,e.duration??'',e.totalPatients??'',e.newConsultations,e.followUps]))}
 
+// Optional admission tracker
+function admissionDayCount(entry,asOf=today()){
+  const end=entry.dischargeDate||asOf;if(!entry.startDate||end<entry.startDate)return 0;
+  const startDate=new Date(entry.startDate+'T12:00:00'),endDate=new Date(end+'T12:00:00');
+  return Math.floor((endDate-startDate)/86400000)+1;
+}
+function admissionFees(entry){const days=admissionDayCount(entry),initial=Number(incomeSettings?.fees?.['Inpatient Initial Consultation']??110),follow=Number(incomeSettings?.fees?.['Inpatient Follow-up']??110);return days?initial+Math.max(0,days-1)*follow:0}
+function initAdmissions(){
+  if(!$('admissionForm'))return;
+  $('admissionStartDate').value=today();$('admissionForm').onsubmit=saveAdmission;$('resetAdmissionBtn').onclick=resetAdmission;
+  $('admissionStatusFilter').onchange=e=>{admissionState.status=e.target.value;renderAdmissions()};$('admissionSearch').oninput=e=>{admissionState.search=e.target.value.trim().toLowerCase();renderAdmissions()};renderAdmissions();
+}
+function saveAdmission(ev){ev.preventDefault();const id=$('admissionEditingId').value,mrn=$('admissionMrn').value.trim(),hospital=$('admissionHospital').value,startDate=$('admissionStartDate').value,dischargeDate=$('admissionDischargeDate').value,note=$('admissionNote').value.trim();
+  if(!mrn||!hospital||!startDate)return validationMessage('admissionMessage','Enter MRN, hospital, and initial consultation date.');
+  if(dischargeDate&&dischargeDate<startDate)return validationMessage('admissionMessage','Discharge date cannot be before the initial consultation date.');
+  const duplicate=admissionState.entries.find(x=>String(x.id)!==String(id)&&x.mrn===mrn&&!x.dischargeDate);if(duplicate&&!confirm(`MRN ${mrn} is already being tracked at ${duplicate.hospital} since ${fmtDate(duplicate.startDate)}. Add another admission?`))return;
+  const entry={id:id||uid(),mrn,hospital,startDate,dischargeDate,note,createdAt:new Date().toISOString()};
+  if(id)admissionState.entries=admissionState.entries.map(x=>String(x.id)===String(id)?{...x,...entry}:x);else admissionState.entries.push(entry);
+  persist(ADMISSION_KEY,admissionState.entries);createAutomaticLocalBackup(id?'Admission updated':'Admission added');resetAdmission();renderAdmissions();renderBackupStatus();showToast(id?'Admission updated':'Admission tracking started');
+}
+function resetAdmission(){$('admissionForm').reset();$('admissionEditingId').value='';$('admissionStartDate').value=today();$('admissionHospital').value='HMG Fayhaa';$('admissionSubmitLabel').textContent='Start tracking';msg('admissionMessage','')}
+function renderAdmissions(){if(!$('admissionList'))return;const q=admissionState.search;let list=[...admissionState.entries].filter(x=>(!q||`${x.mrn} ${x.hospital} ${x.note||''}`.toLowerCase().includes(q))&&(admissionState.status==='all'||(admissionState.status==='active'?!x.dischargeDate:!!x.dischargeDate))).sort((a,b)=>(b.startDate||'').localeCompare(a.startDate||''));
+  const active=admissionState.entries.filter(x=>!x.dischargeDate),activeDays=active.reduce((n,x)=>n+admissionDayCount(x),0),allFees=admissionState.entries.reduce((n,x)=>n+admissionFees(x),0);
+  $('admissionActiveCount').textContent=active.length;$('admissionConsultationDays').textContent=activeDays;$('admissionInitialCount').textContent=admissionState.entries.length;$('admissionEstimatedFees').textContent=money(allFees);
+  $('admissionEmpty').classList.toggle('hidden',list.length>0);$('admissionList').innerHTML=list.map(x=>{const days=admissionDayCount(x),follow=Math.max(0,days-1),expanded=String(admissionState.expandedId)===String(x.id);return `<article class="admission-row ${expanded?'expanded':''}" onclick="toggleAdmission('${x.id}')"><div class="admission-row-main"><div><strong>MRN ${esc(x.mrn)}</strong><small>${esc(x.hospital)} · ${x.dischargeDate?'Discharged':'Active'}</small></div><div class="admission-day-badge">Day ${days}</div></div><div class="admission-row-details"><div><span>Initial consultation</span><strong>${fmtDate(x.startDate)}</strong></div><div><span>Follow-up days</span><strong>${follow}</strong></div><div><span>Total billable days</span><strong>${days}</strong></div><div><span>Estimated fee</span><strong>${money(admissionFees(x))}</strong></div>${x.dischargeDate?`<div><span>Discharge</span><strong>${fmtDate(x.dischargeDate)}</strong></div>`:''}${x.note?`<p>${esc(x.note)}</p>`:''}<div class="admission-actions"><button class="secondary-btn" onclick="event.stopPropagation();editAdmission('${x.id}')">Edit</button>${!x.dischargeDate?`<button class="primary-btn" onclick="event.stopPropagation();dischargeAdmission('${x.id}')">Discharge today</button>`:''}<button class="danger-btn" onclick="event.stopPropagation();deleteAdmission('${x.id}')">Delete</button></div></div></article>`}).join('');
+}
+function toggleAdmission(id){admissionState.expandedId=String(admissionState.expandedId)===String(id)?'':String(id);renderAdmissions()}
+function editAdmission(id){const x=admissionState.entries.find(x=>String(x.id)===String(id));if(!x)return;$('admissionEditingId').value=x.id;$('admissionMrn').value=x.mrn;$('admissionHospital').value=x.hospital;$('admissionStartDate').value=x.startDate;$('admissionDischargeDate').value=x.dischargeDate||'';$('admissionNote').value=x.note||'';$('admissionSubmitLabel').textContent='Update admission';$('admissionComposer').open=true;$('admissionComposer').scrollIntoView({behavior:'smooth',block:'start'})}
+function dischargeAdmission(id){const x=admissionState.entries.find(x=>String(x.id)===String(id));if(!x)return;const date=prompt('Discharge date (YYYY-MM-DD):',today());if(!date)return;if(date<x.startDate)return alert('Discharge date cannot be before the initial consultation date.');createAutomaticLocalBackup('Before discharge');x.dischargeDate=date;persist(ADMISSION_KEY,admissionState.entries);renderAdmissions();showToast('Admission marked discharged')}
+function deleteAdmission(id){const x=admissionState.entries.find(x=>String(x.id)===String(id));if(x&&confirm(`Delete admission tracking for MRN ${x.mrn}?`)){createAutomaticLocalBackup('Before deleting admission');admissionState.entries=admissionState.entries.filter(x=>String(x.id)!==String(id));persist(ADMISSION_KEY,admissionState.entries);renderAdmissions();showToast('Admission deleted','delete')}}
+window.toggleAdmission=toggleAdmission;window.editAdmission=editAdmission;window.dischargeAdmission=dischargeAdmission;window.deleteAdmission=deleteAdmission;
+
 // Pending endoscopy module
 const pendingForm=$('pendingForm');
 function initPending(){$('pendingDate').value=today();pendingForm.addEventListener('submit',savePending);$('resetPendingBtn').onclick=()=>resetPending();$('clearPendingBtn').onclick=clearPending;$('openPendingComposerBtn').onclick=()=>togglePendingComposer(true);$('addPendingInlineBtn').onclick=()=>togglePendingComposer(true);$('closePendingComposerBtn').onclick=()=>togglePendingComposer(false);$('pendingSearch').oninput=e=>{pendingState.search=e.target.value.toLowerCase();renderPending()};document.querySelectorAll('[data-pending-hospital]').forEach(btn=>btn.onclick=()=>setPendingHospital(btn.dataset.pendingHospital));document.querySelectorAll('[data-pending-view]').forEach(btn=>btn.onclick=()=>setPendingView(btn.dataset.pendingView));renderPending()}
@@ -180,7 +213,7 @@ function renderPending(){
   $('pendingEmptyText').textContent=emptyLabels[pendingState.view];
   const q=pendingState.search,list=hospitalEntries.filter(x=>pendingMatchesView(x)&&(!q||`${x.mrn} ${(x.procedures||[]).join(' ')} ${x.note||''}`.toLowerCase().includes(q))).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.createdAt||'').localeCompare(b.createdAt||''));
   $('pendingList').innerHTML='';$('pendingEmptyState').classList.toggle('hidden',list.length>0);
-  list.forEach((x,i)=>{const expanded=String(pendingState.expandedId)===String(x.id),procedures=(x.procedures||[]);$('pendingList').insertAdjacentHTML('beforeend',`<article class="pending-item compact ${expanded?'expanded':''}" data-pending-id="${esc(x.id)}"><button class="pending-row" type="button" onclick="togglePendingDetails('${x.id}')" aria-expanded="${expanded}"><span class="pending-order">${i+1}</span><span class="pending-row-main"><span class="pending-row-top"><strong>MRN ${esc(x.mrn)}</strong><span class="pending-date-badge ${x.date===today()?'today':''}">${esc(pendingDateLabel(x.date))}</span></span><span class="pending-row-procedures">${procedures.map(esc).join(' · ')||'No procedure'}</span></span><span class="pending-chevron">${expanded?'⌃':'⌄'}</span></button><div class="pending-details" ${expanded?'':'hidden'}><div class="pending-tags">${procedures.map(p=>`<span class="tag">${esc(p)}</span>`).join('')}</div>${x.note?`<p class="pending-note">${esc(x.note)}</p>`:''}<div class="pending-actions"><button class="primary-btn compact-btn" type="button" onclick="event.stopPropagation();startPending('${x.id}')">Start</button><button class="icon-btn" type="button" onclick="event.stopPropagation();editPending('${x.id}')">Edit</button><button class="icon-btn delete" type="button" onclick="event.stopPropagation();deletePending('${x.id}')">Delete</button></div></div></article>`)})
+  list.forEach((x,i)=>{const expanded=String(pendingState.expandedId)===String(x.id),procedures=(x.procedures||[]),isOverdue=Boolean(x.date&&x.date<today());$('pendingList').insertAdjacentHTML('beforeend',`<article class="pending-item compact ${expanded?'expanded':''} ${isOverdue?'overdue':''}" data-pending-id="${esc(x.id)}"><button class="pending-row" type="button" onclick="togglePendingDetails('${x.id}')" aria-expanded="${expanded}"><span class="pending-order">${i+1}</span><span class="pending-row-main"><span class="pending-row-top"><strong>MRN ${esc(x.mrn)}</strong><span class="pending-date-badge ${x.date===today()?'today':''} ${isOverdue?'overdue':''}">${isOverdue?'Overdue · ':''}${esc(pendingDateLabel(x.date))}</span></span><span class="pending-row-procedures">${procedures.map(esc).join(' · ')||'No procedure'}</span></span><span class="pending-chevron">${expanded?'⌃':'⌄'}</span></button><div class="pending-details" ${expanded?'':'hidden'}><div class="pending-tags">${procedures.map(p=>`<span class="tag">${esc(p)}</span>`).join('')}</div>${x.note?`<p class="pending-note">${esc(x.note)}</p>`:''}<div class="pending-actions"><button class="primary-btn compact-btn" type="button" onclick="event.stopPropagation();startPending('${x.id}')">Start</button><button class="icon-btn" type="button" onclick="event.stopPropagation();editPending('${x.id}')">Edit</button><button class="icon-btn delete" type="button" onclick="event.stopPropagation();deletePending('${x.id}')">Delete</button></div></div></article>`)})
 }
 window.editPending=editPending;window.deletePending=deletePending;window.startPending=startPending;window.togglePendingDetails=togglePendingDetails;
 
@@ -345,6 +378,8 @@ function renderPerformanceHospital(prefix,data){setPerformanceText(`perf${prefix
 function renderPerformanceDashboard(){if(!incomeUnlocked||!$('perfSessions'))return;const fayhaa=performanceForHospital('HMG Fayhaa');const mohammadiya=performanceForHospital('HMG Mohammadiya');renderPerformanceHospital('Fayhaa',fayhaa);renderPerformanceHospital('Mohammadiya',mohammadiya);const selected=statsState.hospital==='HMG Fayhaa'?fayhaa:statsState.hospital==='HMG Mohammadiya'?mohammadiya:{sessions:fayhaa.sessions+mohammadiya.sessions,patients:fayhaa.patients+mohammadiya.patients,newConsultations:fayhaa.newConsultations+mohammadiya.newConsultations,hours:fayhaa.hours+mohammadiya.hours,procedureCount:fayhaa.procedureCount+mohammadiya.procedureCount};setPerformanceText('perfSessions',selected.sessions);setPerformanceText('perfPatientsPerSession',performanceNumber(selected.sessions?selected.patients/selected.sessions:0));setPerformanceText('perfNewPerSession',performanceNumber(selected.sessions?selected.newConsultations/selected.sessions:0));setPerformanceText('perfProceduresPerSession',performanceNumber(selected.sessions?selected.procedureCount/selected.sessions:0));setPerformanceText('perfHours',performanceNumber(selected.hours));setPerformanceText('perfPatientsPerHour',performanceNumber(selected.hours?selected.patients/selected.hours:0))}
 
 const DEFAULT_FEES={
+  'Inpatient Initial Consultation':110,
+  'Inpatient Follow-up':110,
   'New Consultation':110,'EGD':700,'Colonoscopy':680,'Flex Sig':300,'Fibroscan':264,'ERCP':2000,'EUS':4800,
   'Polypectomy':214,'Clip':56,'pH Monitoring':800,'Sclerotherapy':357,'Variceal Banding':611,
   'PEG Tube Insertion':1575,'PEG Tube Replacement':1680,'Foreign Body Removal':0,'Metallic Biliary Stenting':3200,
@@ -495,7 +530,7 @@ function saveOnCallDays(){
   msg('onCallDaysMessage','On-call nights saved.');
   renderIncomeDashboard();
 }
-function saveFeeSettings(){document.querySelectorAll('.fee-input').forEach(input=>incomeSettings.fees[input.dataset.fee]=Math.max(0,Number(input.value||0)));saveIncomeSettings();msg('feeSettingsMessage','Approximate fees saved.');renderIncomeDashboard()}
+function saveFeeSettings(){document.querySelectorAll('.fee-input').forEach(input=>incomeSettings.fees[input.dataset.fee]=Math.max(0,Number(input.value||0)));saveIncomeSettings();msg('feeSettingsMessage','Approximate fees saved.');renderIncomeDashboard();renderAdmissions()}
 function saveIncomeSettings(){localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(incomeSettings));createAutomaticLocalBackup('Income settings saved')}
 function incomeItemsForMonth(month,hospital='all'){
   const fees=incomeSettings.fees, items=[];
@@ -608,7 +643,7 @@ function load(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch{return
 
 // Automatic local backups
 function backupPayload(){
-  return {format:'gastroenterology-practice-tracker-backup',version:3,createdAt:new Date().toISOString(),clinicRecords:load(CLINIC_KEY),procedureRecords:load(ENDO_KEY),pendingRecords:load(PENDING_KEY),incomeSettings:JSON.parse(localStorage.getItem(INCOME_SETTINGS_KEY)||'{}'),passwordHash:localStorage.getItem(INCOME_PASSWORD_KEY)||'',theme:localStorage.getItem(THEME_KEY)||'light'};
+  return {format:'gastroenterology-practice-tracker-backup',version:4,createdAt:new Date().toISOString(),clinicRecords:load(CLINIC_KEY),procedureRecords:load(ENDO_KEY),pendingRecords:load(PENDING_KEY),admissionRecords:load(ADMISSION_KEY),incomeSettings:JSON.parse(localStorage.getItem(INCOME_SETTINGS_KEY)||'{}'),passwordHash:localStorage.getItem(INCOME_PASSWORD_KEY)||'',theme:localStorage.getItem(THEME_KEY)||'light'};
 }
 function loadLocalBackups(){try{return JSON.parse(localStorage.getItem(LOCAL_BACKUPS_KEY)||'[]')}catch{return[]}}
 function createAutomaticLocalBackup(reason='Data saved'){
@@ -629,7 +664,7 @@ function downloadBackup(){
   const data=JSON.stringify(backupPayload(),null,2),url=URL.createObjectURL(new Blob([data],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=`gastroenterology-practice-backup-${today()}.json`;a.click();URL.revokeObjectURL(url);
 }
 function restoreBackupFile(file){
-  const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(data.format!=='gastroenterology-practice-tracker-backup')throw new Error('Not a valid tracker backup.');if(!confirm('Restore this backup? Current tracker data will be replaced.'))return;createAutomaticLocalBackup('Before restore');localStorage.setItem(CLINIC_KEY,JSON.stringify(data.clinicRecords||[]));localStorage.setItem(ENDO_KEY,JSON.stringify(data.procedureRecords||[]));localStorage.setItem(PENDING_KEY,JSON.stringify(data.pendingRecords||[]));localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(data.incomeSettings||{}));if(data.passwordHash)localStorage.setItem(INCOME_PASSWORD_KEY,data.passwordHash);else localStorage.removeItem(INCOME_PASSWORD_KEY);if(data.theme)localStorage.setItem(THEME_KEY,data.theme);localStorage.removeItem(FACE_ID_CREDENTIAL_KEY);localStorage.removeItem(FACE_ID_ENABLED_KEY);location.reload()}catch(err){alert(err.message||'Unable to restore this file.')}};reader.readAsText(file);
+  const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(data.format!=='gastroenterology-practice-tracker-backup')throw new Error('Not a valid tracker backup.');if(!confirm('Restore this backup? Current tracker data will be replaced.'))return;createAutomaticLocalBackup('Before restore');localStorage.setItem(CLINIC_KEY,JSON.stringify(data.clinicRecords||[]));localStorage.setItem(ENDO_KEY,JSON.stringify(data.procedureRecords||[]));localStorage.setItem(PENDING_KEY,JSON.stringify(data.pendingRecords||[]));localStorage.setItem(ADMISSION_KEY,JSON.stringify(data.admissionRecords||[]));localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(data.incomeSettings||{}));if(data.passwordHash)localStorage.setItem(INCOME_PASSWORD_KEY,data.passwordHash);else localStorage.removeItem(INCOME_PASSWORD_KEY);if(data.theme)localStorage.setItem(THEME_KEY,data.theme);localStorage.removeItem(FACE_ID_CREDENTIAL_KEY);localStorage.removeItem(FACE_ID_ENABLED_KEY);location.reload()}catch(err){alert(err.message||'Unable to restore this file.')}};reader.readAsText(file);
 }
 function initBackups(){
   if(!loadLocalBackups().length)createAutomaticLocalBackup('Initial backup');else renderBackupStatus();
@@ -698,7 +733,7 @@ async function restoreLatestGoogleDriveBackup(){
   if(data.format!=='gastroenterology-practice-tracker-backup')throw new Error('The Google Drive file is not a valid tracker backup.');
   const summary=`${(data.clinicRecords||[]).length} clinic, ${(data.pendingRecords||[]).length} pending, and ${(data.procedureRecords||[]).length} procedure records`;
   if(!confirm(`Restore the latest Google Drive backup (${summary})? Current tracker data on this device will be replaced.`))return;
-  createAutomaticLocalBackup('Before Google Drive restore');localStorage.setItem(CLINIC_KEY,JSON.stringify(data.clinicRecords||[]));localStorage.setItem(ENDO_KEY,JSON.stringify(data.procedureRecords||[]));localStorage.setItem(PENDING_KEY,JSON.stringify(data.pendingRecords||[]));localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(data.incomeSettings||{}));if(data.passwordHash)localStorage.setItem(INCOME_PASSWORD_KEY,data.passwordHash);else localStorage.removeItem(INCOME_PASSWORD_KEY);if(data.theme)localStorage.setItem(THEME_KEY,data.theme);localStorage.removeItem(FACE_ID_CREDENTIAL_KEY);localStorage.removeItem(FACE_ID_ENABLED_KEY);location.reload();
+  createAutomaticLocalBackup('Before Google Drive restore');localStorage.setItem(CLINIC_KEY,JSON.stringify(data.clinicRecords||[]));localStorage.setItem(ENDO_KEY,JSON.stringify(data.procedureRecords||[]));localStorage.setItem(PENDING_KEY,JSON.stringify(data.pendingRecords||[]));localStorage.setItem(ADMISSION_KEY,JSON.stringify(data.admissionRecords||[]));localStorage.setItem(INCOME_SETTINGS_KEY,JSON.stringify(data.incomeSettings||{}));if(data.passwordHash)localStorage.setItem(INCOME_PASSWORD_KEY,data.passwordHash);else localStorage.removeItem(INCOME_PASSWORD_KEY);if(data.theme)localStorage.setItem(THEME_KEY,data.theme);localStorage.removeItem(FACE_ID_CREDENTIAL_KEY);localStorage.removeItem(FACE_ID_ENABLED_KEY);location.reload();
 }
 function disconnectGoogleDrive(){
   if(googleAccessToken&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(googleAccessToken,()=>{});googleAccessToken='';googleTokenExpiresAt=0;googleTokenClient=null;googleDriveOperation=null;renderGoogleDriveStatus();setGoogleDriveMessage('Disconnected from Google Drive.');
@@ -721,6 +756,7 @@ initClinic();
 initPending();
 initEndo();
 initIncome();
+initAdmissions();
 initBackups();
 initGoogleDriveBackup();
 

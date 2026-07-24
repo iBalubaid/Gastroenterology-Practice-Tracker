@@ -235,7 +235,7 @@
 <div><p class="eyebrow">Private area</p><h2>Practice Dashboard</h2></div>
 </div>
 <nav aria-label="Private dashboard sections" class="private-dashboard-nav">
-<button class="private-nav-btn active" data-private-view="overview" type="button">Overview</button><button class="private-nav-btn" data-private-view="statistics" type="button">Statistics</button>
+<button class="private-nav-btn active" data-private-view="overview" type="button">Overview</button><button class="private-nav-btn" data-private-view="statistics" type="button">Statistics</button><button class="private-nav-btn" data-private-view="admissions" type="button">Admissions</button>
 <button class="private-nav-btn" data-private-view="income" type="button">Income</button>
 <button class="private-nav-btn" data-private-view="performance" type="button">Performance</button>
 <button class="private-nav-btn" data-private-view="hospitals" type="button">Hospitals</button>
@@ -341,6 +341,27 @@
 </div>
 <div class="private-overview-progress"><div id="privateOverviewProgress"></div></div>
 <p class="estimate-disclaimer" id="privateOverviewStatus">No activity recorded for this month.</p>
+</section>
+<section class="private-view hidden admission-dashboard" data-private-section="admissions">
+<section class="card admission-summary-card">
+<div class="section-heading"><div><p class="eyebrow">Selected inpatient cases</p><h2>Admission Tracker</h2><p class="section-help">Track only the admitted patients you choose. Day 1 is the initial consultation day.</p></div></div>
+<div class="admission-kpi-grid">
+<article class="income-kpi"><span>Active admissions</span><strong id="admissionActiveCount">0</strong></article>
+<article class="income-kpi"><span>Consultation days</span><strong id="admissionConsultationDays">0</strong></article>
+<article class="income-kpi"><span>Initial consultations</span><strong id="admissionInitialCount">0</strong></article>
+<article class="income-kpi"><span>Estimated fees</span><strong id="admissionEstimatedFees">SAR 0</strong></article>
+</div>
+</section>
+<section class="card admission-form-card">
+<details id="admissionComposer"><summary class="activity-log-summary"><span><strong>+ Track an admission</strong><small>Add only the cases that need daily follow-up tracking</small></span></summary>
+<form id="admissionForm" class="admission-form">
+<input id="admissionEditingId" type="hidden"/>
+<div class="form-grid"><label><span>MRN</span><input id="admissionMrn" inputmode="numeric" maxlength="30" required type="text"/></label><label><span>Hospital</span><select id="admissionHospital" required><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select></label><label><span>Initial consultation date</span><input id="admissionStartDate" required type="date"/></label><label><span>Discharge date <small>(optional)</small></span><input id="admissionDischargeDate" type="date"/></label></div>
+<label class="full-width-field"><span>Note <small>(optional)</small></span><textarea id="admissionNote" maxlength="500" rows="2"></textarea></label>
+<div class="form-message" id="admissionMessage"></div><div class="form-actions"><button class="primary-btn" type="submit"><span id="admissionSubmitLabel">Start tracking</span></button><button class="secondary-btn" id="resetAdmissionBtn" type="button">Clear</button></div>
+</form></details>
+</section>
+<section class="card"><div class="section-heading"><div><p class="eyebrow">Current and completed</p><h2>Tracked admissions</h2></div><div class="toolbar"><select id="admissionStatusFilter"><option value="active">Active</option><option value="all">All</option><option value="discharged">Discharged</option></select><input id="admissionSearch" type="search" placeholder="Search MRN"/></div></div><div id="admissionList" class="admission-list"></div><div id="admissionEmpty" class="empty-state"><strong>No tracked admissions</strong><span>Add a selected inpatient case above.</span></div></section>
 </section>
 <section class="card performance-hero private-view hidden" data-private-section="performance">
 <div class="section-heading">

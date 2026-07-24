@@ -1,3 +1,10 @@
+## 3.10.17
+- Added an optional Admission Tracker inside the Private Area.
+- Tracks selected MRNs only, with hospital, initial consultation date, current admission day, follow-up days, discharge date, notes, and approximate fees.
+- Added editable inpatient initial and follow-up fees.
+- Included admission records in local, downloaded, and Google Drive backups.
+- Preserved all existing storage keys and added `practiceAdmissionTrackerV1`.
+
 ## 3.10.10
 - Made the Endoscopy Activity Log compact on iPhone.
 - Endoscopy entries now show date, MRN, hospital, and procedures by default.

@@ -26,3 +26,7 @@ The Clinic Activity Log is compact on iPhone. Tap any row to expand its details 
 
 ### v3.10.13 mobile hospital comparison
 Hospital breakdown panels remain side by side on iPhone for faster Fayhaa-versus-Mohammadiya comparison. The layout is compact and does not change saved data or storage keys.
+
+
+## Optional Admission Tracker
+Inside the locked Private Area, use **Admissions** to track only selected inpatient cases. The tracker counts the initial consultation day as Day 1, calculates follow-up days and total billable consultation days, and supports discharge, editing, search, and backup. Approximate initial and follow-up fees can be changed under Fee Settings.

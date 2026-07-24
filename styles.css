@@ -811,3 +811,35 @@ body.dark #themeToggle .sun-icon{display:block}
     padding-right: 10px !important;
   }
 }
+
+
+/* v3.10-17 — Optional admission tracker */
+.admission-dashboard{display:grid;gap:14px}.admission-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.admission-form{padding-top:14px}.admission-list{display:grid;gap:9px}.admission-row{border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:12px;cursor:pointer}.admission-row-main{display:flex;align-items:center;justify-content:space-between;gap:12px}.admission-row-main>div:first-child{display:grid;gap:3px}.admission-row-main small{color:var(--muted)}.admission-day-badge{border-radius:999px;background:var(--soft-primary);color:var(--primary);padding:6px 10px;font-weight:850;white-space:nowrap}.admission-row-details{display:none;margin-top:11px;padding-top:11px;border-top:1px solid var(--border);gap:8px}.admission-row.expanded .admission-row-details{display:grid}.admission-row-details>div:not(.admission-actions){display:flex;justify-content:space-between;gap:12px}.admission-row-details span{color:var(--muted)}.admission-row-details p{margin:4px 0;padding:9px;border-radius:10px;background:var(--surface-soft)}.admission-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:4px}
+@media(max-width:767px){.admission-kpi-grid{grid-template-columns:1fr 1fr}.admission-actions{grid-template-columns:1fr}.admission-form .form-grid{grid-template-columns:1fr}.admission-row{padding:11px}.admission-row-main strong{font-size:.9rem}.admission-row-main small{font-size:.72rem}}
+
+/* Pending overdue emphasis */
+.pending-item.overdue {
+  border-color: rgba(220, 38, 38, .45);
+  border-left: 4px solid #dc2626;
+  background: rgba(220, 38, 38, .055);
+}
+.pending-item.overdue .pending-order {
+  background: rgba(220, 38, 38, .12);
+  color: #b91c1c;
+}
+.pending-date-badge.overdue {
+  background: rgba(220, 38, 38, .13);
+  color: #b91c1c;
+  border-color: rgba(220, 38, 38, .25);
+  font-weight: 700;
+}
+[data-theme="dark"] .pending-item.overdue {
+  background: rgba(248, 113, 113, .08);
+  border-color: rgba(248, 113, 113, .45);
+  border-left-color: #f87171;
+}
+[data-theme="dark"] .pending-date-badge.overdue,
+[data-theme="dark"] .pending-item.overdue .pending-order {
+  color: #fca5a5;
+  background: rgba(248, 113, 113, .14);
+}
