@@ -365,7 +365,50 @@ function renderHospitalEndoscopyStats(source=filteredEndoStats()){
   });
 }
 function toggleEndoDetails(id){endoState.expandedId=String(endoState.expandedId)===String(id)?'':String(id);renderEndoRows()}
-function renderEndoRows(){const list=[...endoState.entries].filter(e=>(!endoState.filter||e.hospital===endoState.filter)&&(!endoState.search||`${e.date} ${e.mrn} ${e.hospital} ${validProcedures(e).join(' ')} ${extrasText(e).join(' ')} ${e.note||''}`.toLowerCase().includes(endoState.search))).sort(sortDesc);if($('endoscopyActivityLogCount'))$('endoscopyActivityLogCount').textContent=list.length;$('endoscopyBody').innerHTML='';$('endoscopyEmptyState').classList.toggle('hidden',list.length>0);list.forEach(e=>{const expanded=String(endoState.expandedId)===String(e.id);$('endoscopyBody').insertAdjacentHTML('beforeend',`<tr class="endo-log-row ${expanded?'expanded':''}" onclick="toggleEndoDetails('${e.id}')" aria-expanded="${expanded}"><td data-label="Date" class="endo-log-date"><span class="log-header-text"><strong>${fmtDate(e.date)}</strong><span class="endo-log-day">${e.day||getDay(e.date)}</span><strong class="endo-mobile-mrn">MRN ${esc(e.mrn)}</strong></span></td><td data-label="Day" class="endo-log-day-cell">${e.day||getDay(e.date)}</td><td data-label="MRN" class="endo-log-mrn"><strong class="endo-mrn">${esc(e.mrn)}</strong></td><td data-label="Hospital" class="endo-log-hospital"><span class="service-badge">${esc(e.hospital)}</span></td><td data-label="Procedures" class="endo-log-procedures"><div class="endo-chip-list">${validProcedures(e).map(x=>`<span class="tag">${esc(x)}</span>`).join('')}</div></td><td data-label="Additional procedures" class="endo-log-detail"><div class="endo-chip-list">${extrasText(e).map(x=>`<span class="tag">${esc(x)}</span>`).join('')||'<span class="endo-empty">—</span>'}</div></td><td data-label="Note" class="endo-log-detail">${e.note?`<span class="note-text">${esc(e.note)}</span>`:'—'}</td><td data-label="Actions" class="actions-cell endo-log-actions"><button class="icon-btn log-icon-btn" aria-label="Edit endoscopy entry" title="Edit" onclick="event.stopPropagation();editEndo('${e.id}')">✏️</button><button class="icon-btn delete log-icon-btn" aria-label="Delete endoscopy entry" title="Delete" onclick="event.stopPropagation();deleteEndo('${e.id}')">🗑️</button></td></tr>`)})}
+function renderEndoRows(){
+  const list=[...endoState.entries]
+    .filter(e=>(!endoState.filter||e.hospital===endoState.filter)&&(!endoState.search||`${e.date} ${e.mrn} ${e.hospital} ${validProcedures(e).join(' ')} ${extrasText(e).join(' ')} ${e.note||''}`.toLowerCase().includes(endoState.search)))
+    .sort(sortDesc);
+  if($('endoscopyActivityLogCount'))$('endoscopyActivityLogCount').textContent=list.length;
+  $('endoscopyBody').innerHTML='';
+  $('endoscopyEmptyState').classList.toggle('hidden',list.length>0);
+  list.forEach(e=>{
+    const expanded=String(endoState.expandedId)===String(e.id);
+    const hospital=e.hospital==='HMG Fayhaa'?'Fayhaa':e.hospital==='HMG Mohammadiya'?'Mohammadiya':esc(e.hospital);
+    const procedureTags=validProcedures(e).map(x=>`<span class="tag">${esc(x)}</span>`).join('')||'<span class="endo-empty">No procedure recorded</span>';
+    const extraTags=extrasText(e).map(x=>`<span class="tag">${esc(x)}</span>`).join('')||'<span class="endo-empty">None</span>';
+    $('endoscopyBody').insertAdjacentHTML('beforeend',`
+      <tr class="endo-card-row ${expanded?'expanded':''}">
+        <td colspan="8">
+          <article class="endo-card" aria-expanded="${expanded}">
+            <div class="endo-card-header" onclick="toggleEndoDetails('${e.id}')">
+              <div class="endo-card-date">${fmtDate(e.date)}</div>
+              <div class="endo-card-actions">
+                <button type="button" class="icon-btn log-icon-btn" aria-label="Edit endoscopy entry" title="Edit" onclick="event.stopPropagation();editEndo('${e.id}')">✏️</button>
+                <button type="button" class="icon-btn delete log-icon-btn" aria-label="Delete endoscopy entry" title="Delete" onclick="event.stopPropagation();deleteEndo('${e.id}')">🗑️</button>
+              </div>
+            </div>
+            <button type="button" class="endo-card-summary" onclick="toggleEndoDetails('${e.id}')" aria-label="${expanded?'Collapse':'Expand'} endoscopy record for MRN ${esc(e.mrn)}">
+              <span class="endo-card-mrn">MRN ${esc(e.mrn)}</span>
+              <span class="endo-card-procedures">${procedureTags}</span>
+              <span class="endo-card-hospital">${hospital}</span>
+            </button>
+            ${expanded?`
+              <div class="endo-card-details">
+                <div class="endo-detail-block">
+                  <span class="endo-detail-label">Interventions and additional procedures</span>
+                  <div class="endo-chip-list">${extraTags}</div>
+                </div>
+                <div class="endo-detail-block">
+                  <span class="endo-detail-label">Notes</span>
+                  <div class="endo-detail-value">${e.note?esc(e.note):'<span class="endo-empty">None</span>'}</div>
+                </div>
+              </div>`:''}
+          </article>
+        </td>
+      </tr>`);
+  });
+}
 window.editEndo=editEndo;window.deleteEndo=id=>{const key=String(id),e=endoState.entries.find(x=>String(x.id)===key);if(e&&confirm(`Delete endoscopy record for MRN ${e.mrn}?`)){createAutomaticLocalBackup('Before deleting endoscopy entry');endoState.entries=endoState.entries.filter(x=>String(x.id)!==key);persist(ENDO_KEY,endoState.entries);renderEndo();alert('Endoscopy record deleted.')}};
 function clearEndo(){if(!endoState.entries.length)return alert('There are no endoscopy records to clear.');if(confirm(`Delete all ${endoState.entries.length} endoscopy records? This cannot be undone.`)){createAutomaticLocalBackup('Before clearing endoscopy log');endoState.entries=[];persist(ENDO_KEY,[]);renderEndo();alert('Endoscopy log cleared.')}}
 function exportEndo(){downloadCsv('endoscopy-procedure-log',['Date','Day','MRN','Hospital','Procedures','Polypectomy count','Clipping count','Sclerotherapy','Variceal banding','Duodenal stenting','Esophageal stenting','Colonic stenting','Metallic biliary stenting','Note'],endoState.entries.sort((a,b)=>a.date.localeCompare(b.date)).map(e=>{const x=e.extras||{};return[e.date,e.day||getDay(e.date),e.mrn,e.hospital,validProcedures(e).join('; '),x.polypectomy||0,x.clipping||0,yes(x.sclerotherapy),yes(x.varicealBanding),yes(x.duodenalStenting),yes(x.esophagealStenting),yes(x.colonicStenting),yes(x.metallicBiliaryStenting),e.note||'']}))}
