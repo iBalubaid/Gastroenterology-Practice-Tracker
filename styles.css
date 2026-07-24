@@ -1009,3 +1009,100 @@ body.dark #themeToggle .sun-icon{display:block}
 
   .mobile-log-header-actions{display:none!important}
 }
+
+
+/* v1.4.2 — Restore Clinic actions to the original top-right header; Endoscopy unchanged */
+.mobile-clinic-header-actions{display:none}
+@media(max-width:767px){
+  #recordsBody .clinic-log-row{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    padding-right:11px!important;
+  }
+  #recordsBody .clinic-log-date{
+    grid-column:1/-1!important;
+    grid-row:1!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    min-width:0!important;
+    padding-bottom:6px!important;
+    border-bottom:1px solid var(--border)!important;
+  }
+  #recordsBody .clinic-log-date .log-header-text{min-width:0;overflow:hidden}
+  #recordsBody .clinic-log-date .log-header-text strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mobile-clinic-header-actions{
+    display:inline-flex!important;
+    flex:0 0 auto;
+    align-items:center;
+    gap:6px;
+    padding-right:2px;
+  }
+  .mobile-clinic-header-actions .log-icon-btn{
+    width:32px!important;height:32px!important;
+    min-width:32px!important;min-height:32px!important;
+    padding:0!important;border-radius:8px!important;
+    display:inline-grid!important;place-items:center!important;
+    font-size:.84rem!important;line-height:1!important;
+  }
+  #recordsBody .clinic-log-actions,
+  #recordsBody .clinic-log-row.expanded .clinic-log-actions{display:none!important}
+  #recordsBody .clinic-log-service{grid-column:1;grid-row:2}
+  #recordsBody .clinic-log-total{grid-column:2;grid-row:2;padding-right:0!important;align-self:center}
+}
+
+
+/* v1.4.3 — Compact three-line Endoscopy summary on phone */
+.endo-mobile-mrn{display:none}
+@media(max-width:767px){
+  #endoscopyBody .endo-log-row{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    row-gap:5px!important;
+  }
+  #endoscopyBody .endo-log-date{
+    grid-column:1!important;
+    grid-row:1!important;
+    min-width:0!important;
+  }
+  #endoscopyBody .endo-log-date .log-header-text{
+    width:100%;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:8px!important;
+    min-width:0!important;
+  }
+  #endoscopyBody .endo-log-date .endo-log-day{display:none!important}
+  #endoscopyBody .endo-mobile-mrn{
+    display:inline!important;
+    flex:0 1 auto;
+    color:var(--primary)!important;
+    font-size:.8rem!important;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  #endoscopyBody .endo-log-mrn{display:none!important}
+  #endoscopyBody .endo-log-procedures{
+    grid-column:1/-1!important;
+    grid-row:2!important;
+    justify-self:start!important;
+    align-self:auto!important;
+    max-width:100%!important;
+    padding-right:0!important;
+    overflow:visible!important;
+  }
+  #endoscopyBody .endo-log-procedures .endo-chip-list{
+    justify-content:flex-start!important;
+    flex-wrap:wrap!important;
+    overflow:visible!important;
+  }
+  #endoscopyBody .endo-log-hospital{
+    grid-column:1/-1!important;
+    grid-row:3!important;
+    justify-self:start!important;
+  }
+  #endoscopyBody .endo-log-day-cell{display:none!important}
+  #endoscopyBody .endo-log-detail{display:none!important}
+  #endoscopyBody .endo-log-row.expanded .endo-log-detail{display:grid!important}
+}

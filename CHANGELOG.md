@@ -1,3 +1,8 @@
+# v1.4.2
+- Restored Clinic Edit/Delete buttons to the original top-right card header on phone.
+- Kept Endoscopy action layout unchanged.
+- Preserved calendar timezone fix, Pending sorting, storage keys, and all other functionality.
+
 ## v1.4.1
 - Removed duplicate Clinic and Endoscopy Edit/Delete controls.
 - Standardized one action set in the top-right header position for every mobile card.
@@ -167,3 +172,11 @@
 - Replaced clinic duration chips with separate Hours and Minutes selectors.
 - Default clinic duration is 4 h 00 min.
 - Minute choices use 00, 15, 30, and 45 while preserving the existing numeric duration storage format.
+
+
+## v1.4.3
+- Made collapsed Endoscopy cards three lines on phone.
+- Date and MRN share the first line.
+- Main procedure appears on the second line.
+- Hospital appears on the third line.
+- Additional procedures/interventions and notes remain hidden until expansion.
