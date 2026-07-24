@@ -845,3 +845,10 @@ body.dark #themeToggle .sun-icon{display:block}
 }
 
 .pending-calendar-meta{margin:8px 0 4px;color:var(--muted);font-size:.88rem}.calendar-btn.added{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35);color:#15803d}.pending-actions{flex-wrap:wrap}@media(max-width:600px){.pending-actions .calendar-btn{flex:1 1 100%;justify-content:center}.pending-calendar-meta{font-size:.82rem}}
+
+/* v3.10-15-10 — compact Pending calendar action */
+.pending-item.compact .pending-actions{grid-template-columns:1.2fr repeat(3,minmax(44px,auto));align-items:center}
+.pending-item.compact .calendar-btn{width:44px!important;min-width:44px!important;max-width:44px!important;height:40px;padding:0!important;display:inline-grid;place-items:center;font-size:1.05rem;line-height:1;flex:0 0 44px!important}
+.calendar-btn.added{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35);color:#15803d}
+.calendar-btn.update{background:rgba(245,158,11,.13);border-color:rgba(245,158,11,.38);color:#b45309}
+@media(max-width:600px){.pending-actions .calendar-btn{flex:0 0 44px!important;justify-content:center}.pending-item.compact .pending-actions{grid-template-columns:minmax(78px,1fr) repeat(3,44px);gap:7px}.pending-item.compact .pending-actions button{min-height:40px}.pending-item.compact .pending-actions .calendar-btn{width:44px!important}}
