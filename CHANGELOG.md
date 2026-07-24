@@ -1,3 +1,6 @@
+## 3.10.15.15
+- Show planned start time in the collapsed Pending date badge without changing the existing card layout.
+
 ## 3.10.15.14
 - Pending start-time selector now lists 15-minute slots from 08:00 through 00:00.
 
