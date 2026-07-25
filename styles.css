@@ -1411,3 +1411,43 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     grid-template-columns:repeat(5,minmax(0,1fr));
   }
 }
+
+/* v1.5.3 — normalize date controls and prevent procedure-button double-tap zoom */
+input[type="date"]{
+  -webkit-appearance:none;
+  appearance:none;
+  height:auto;
+  min-height:0;
+  max-height:none;
+  padding:12px 13px;
+  line-height:1.5;
+  border-radius:12px;
+}
+input[type="date"]::-webkit-date-and-time-value{
+  min-height:0;
+  line-height:1.5;
+  text-align:left;
+}
+input[type="date"]::-webkit-calendar-picker-indicator{
+  margin:0;
+  padding:0;
+}
+#pendingProcedureChoices .check-card,
+#pendingProcedureChoices .check-card *{
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+@media(max-width:640px){
+  input[type="date"]{
+    height:auto;
+    min-height:0;
+    max-height:none;
+    padding:12px 13px;
+    font-size:16px;
+  }
+  #pendingProcedureChoices .check-card{
+    font-size:16px;
+  }
+}

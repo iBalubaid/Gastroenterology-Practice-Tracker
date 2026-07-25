@@ -1,7 +1,7 @@
-# Changelog
+# HMG GI Tracker v1.5.3
 
-## v1.5.2
-- Reorganized Pending planned procedures into equal-sized multi-select buttons.
-- Uses two columns on phone and five columns on wider screens.
-- Orders common procedures first: EGD, Colonoscopy, Flex Sig, FibroScan, ERCP, and EUS.
-- Preserves all procedure values, storage keys, calendar behavior, and existing records.
+- Removed the oversized fixed 48 px date-field height.
+- Date inputs now inherit the same natural sizing and padding as other controls.
+- Prevented iPhone Safari double-tap zoom when selecting or unselecting planned procedures.
+- Increased planned-procedure label text to an iPhone-safe 16 px on small screens.
+- Preserved all storage keys and existing records.

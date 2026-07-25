@@ -905,3 +905,11 @@ initGoogleDriveBackup();
 
 // Monthly clinic trend tabs
 document.querySelectorAll('[data-clinic-trend]').forEach(btn=>btn.addEventListener('click',()=>setClinicTrendView(btn.dataset.clinicTrend)));
+
+// v1.5.3 — prevent iPhone Safari double-tap zoom on planned-procedure toggles.
+const pendingProcedureChoicePanel = document.getElementById('pendingProcedureChoices');
+if (pendingProcedureChoicePanel) {
+  pendingProcedureChoicePanel.addEventListener('dblclick', event => {
+    if (event.target.closest('.check-card')) event.preventDefault();
+  }, { passive: false });
+}
