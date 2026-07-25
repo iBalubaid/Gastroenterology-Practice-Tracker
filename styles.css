@@ -1350,3 +1350,64 @@ body.dark #themeToggle .sun-icon{display:block}
 .custom-count-stepper input::-webkit-outer-spin-button,.custom-count-stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .custom-count-stepper input[type=number]{-moz-appearance:textfield}
 @media(max-width:640px){.quick-intervention-grid{grid-template-columns:1fr}.quick-intervention-card{padding:11px}.custom-count-stepper{grid-template-columns:46px minmax(0,1fr) 46px}.custom-count-stepper button,.custom-count-stepper input{min-height:46px}}
+
+/* v1.5.1 — uniform date controls across all forms */
+input[type="date"]{
+  display:block;
+  width:100%;
+  height:48px;
+  min-height:48px;
+  max-height:48px;
+  padding:10px 12px;
+  line-height:26px;
+  box-sizing:border-box;
+  border-radius:12px;
+  vertical-align:middle;
+}
+input[type="date"]::-webkit-date-and-time-value{
+  min-height:26px;
+  line-height:26px;
+  text-align:left;
+}
+input[type="date"]::-webkit-calendar-picker-indicator{
+  margin:0;
+  padding:2px;
+}
+@media(max-width:640px){
+  input[type="date"]{
+    height:48px;
+    min-height:48px;
+    max-height:48px;
+    font-size:16px;
+  }
+}
+
+
+/* v1.5.2 — Uniform Pending planned-procedure grid */
+#pendingProcedureChoices.pending-procedure-tabs{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px!important;
+  width:100%;
+}
+#pendingProcedureChoices.pending-procedure-tabs .check-card{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-width:0;
+  min-height:46px;
+  padding:9px 10px;
+  text-align:center;
+  line-height:1.15;
+  white-space:normal;
+}
+#pendingProcedureChoices.pending-procedure-tabs .check-card span{
+  display:block;
+  overflow-wrap:anywhere;
+}
+@media(min-width:768px){
+  #pendingProcedureChoices.pending-procedure-tabs{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+  }
+}

@@ -1,3 +1,3 @@
-# HMG GI Tracker Phone v1.4.9
+# HMG GI Tracker Phone v1.5.1
 
-Open `index.html` in a modern browser. This release keeps the existing data model and storage keys while simplifying Endoscopy procedure entry.
+Open `index.html` to use the tracker. This release standardizes date-field sizing throughout the application.
