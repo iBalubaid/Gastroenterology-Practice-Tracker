@@ -906,9 +906,48 @@ initGoogleDriveBackup();
 // Monthly clinic trend tabs
 document.querySelectorAll('[data-clinic-trend]').forEach(btn=>btn.addEventListener('click',()=>setClinicTrendView(btn.dataset.clinicTrend)));
 
-// v1.5.3 — prevent iPhone Safari double-tap zoom on planned-procedure toggles.
+// v1.5.4 — prevent iPhone Safari double-tap zoom without changing the procedure-button design.
 const pendingProcedureChoicePanel = document.getElementById('pendingProcedureChoices');
 if (pendingProcedureChoicePanel) {
+  let pendingTouchStart = null;
+
+  pendingProcedureChoicePanel.addEventListener('touchstart', event => {
+    const touch = event.touches[0];
+    const card = event.target.closest('.check-card');
+    pendingTouchStart = card && touch
+      ? { card, x: touch.clientX, y: touch.clientY }
+      : null;
+  }, { passive: true });
+
+  pendingProcedureChoicePanel.addEventListener('touchend', event => {
+    const touch = event.changedTouches[0];
+    const card = event.target.closest('.check-card');
+    if (!card || !touch || !pendingTouchStart || pendingTouchStart.card !== card) {
+      pendingTouchStart = null;
+      return;
+    }
+
+    const moved = Math.hypot(
+      touch.clientX - pendingTouchStart.x,
+      touch.clientY - pendingTouchStart.y
+    );
+    pendingTouchStart = null;
+
+    // Preserve normal page scrolling. Only a true tap is handled here.
+    if (moved > 10) return;
+
+    // Prevent Safari from generating a second synthetic click/double-tap zoom.
+    event.preventDefault();
+    const input = card.querySelector('input[type="checkbox"]');
+    if (!input || input.disabled) return;
+    input.checked = !input.checked;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }, { passive: false });
+
+  pendingProcedureChoicePanel.addEventListener('touchcancel', () => {
+    pendingTouchStart = null;
+  }, { passive: true });
+
   pendingProcedureChoicePanel.addEventListener('dblclick', event => {
     if (event.target.closest('.check-card')) event.preventDefault();
   }, { passive: false });
