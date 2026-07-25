@@ -146,52 +146,66 @@
 <select aria-hidden="true" class="visually-hidden-select" id="hospital" required="" tabindex="-1"><option value="">Select hospital</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select>
 </div>
 </div>
-<div aria-label="Quick procedure selection" class="quick-entry-panel">
-<div class="quick-entry-heading"><strong>Quick select</strong><span>Choose a common procedure, then save or add details.</span></div>
-<div class="quick-procedure-buttons">
+<section class="endo-entry-section main-procedure-section" aria-labelledby="mainProcedureHeading">
+<div class="quick-entry-heading"><strong id="mainProcedureHeading">Main Procedure</strong><span>Select one or more procedures.</span></div>
+<div class="quick-procedure-buttons main-procedure-buttons">
 <button class="quick-procedure-btn" data-procedures="EGD" type="button">EGD</button>
 <button class="quick-procedure-btn" data-procedures="Colonoscopy" type="button">Colonoscopy</button>
-<button class="quick-procedure-btn" data-procedures="EGD|Colonoscopy" type="button">EGD + Colonoscopy</button>
+<button class="quick-procedure-btn" data-procedures="Flex Sig" type="button">Flex Sig</button>
+<button class="quick-procedure-btn" data-procedures="Fibroscan" type="button">FibroScan</button>
 <button class="quick-procedure-btn" data-procedures="EUS" type="button">EUS</button>
 <button class="quick-procedure-btn" data-procedures="ERCP" type="button">ERCP</button>
 </div>
+<div id="procedureChoices" class="visually-hidden-procedure-inputs" aria-hidden="true">
+<input type="checkbox" value="EGD"/><input type="checkbox" value="Colonoscopy"/><input type="checkbox" value="Flex Sig"/><input type="checkbox" value="EUS"/><input type="checkbox" value="ERCP"/><input type="checkbox" value="Fibroscan"/>
 </div>
-<div aria-label="Quick billable interventions" class="quick-intervention-panel">
-<div class="quick-entry-heading"><strong>Quick interventions</strong><span>Tap the number performed. Use More details for uncommon interventions.</span></div>
-<div class="quick-intervention-row">
-<span>Polypectomy</span>
-<div aria-label="Polypectomy count" class="quick-count-group" data-target="polypectomy" role="group">
-<button class="active" data-count="0" type="button">0</button><button data-count="1" type="button">1</button><button data-count="2" type="button">2</button><button data-count="3" type="button">3</button><button data-count="4" type="button">4+</button>
+</section>
+<section class="endo-entry-section quick-intervention-panel" aria-labelledby="quickInterventionHeading">
+<div class="quick-entry-heading"><strong id="quickInterventionHeading">Quick Interventions</strong><span>Select 1–4 quickly, or enter any larger number.</span></div>
+<div class="quick-intervention-grid">
+<div class="quick-intervention-card">
+<span class="quick-intervention-label">Polypectomy</span>
+<div aria-label="Polypectomy quick count" class="quick-count-group" data-target="polypectomy" role="group"><button data-count="1" type="button">1</button><button data-count="2" type="button">2</button><button data-count="3" type="button">3</button><button data-count="4" type="button">4</button></div>
+<div class="custom-count-stepper"><button data-count-step="-1" data-target="polypectomy" type="button" aria-label="Decrease polypectomy count">−</button><input id="polypectomy" min="0" step="1" inputmode="numeric" type="number" value="0" aria-label="Polypectomy count"/><button data-count-step="1" data-target="polypectomy" type="button" aria-label="Increase polypectomy count">+</button></div>
+</div>
+<div class="quick-intervention-card">
+<span class="quick-intervention-label">Clips</span>
+<div aria-label="Clip quick count" class="quick-count-group" data-target="clipping" role="group"><button data-count="1" type="button">1</button><button data-count="2" type="button">2</button><button data-count="3" type="button">3</button><button data-count="4" type="button">4</button></div>
+<div class="custom-count-stepper"><button data-count-step="-1" data-target="clipping" type="button" aria-label="Decrease clip count">−</button><input id="clipping" min="0" step="1" inputmode="numeric" type="number" value="0" aria-label="Clip count"/><button data-count-step="1" data-target="clipping" type="button" aria-label="Increase clip count">+</button></div>
 </div>
 </div>
-<div class="quick-intervention-row">
-<span>Clip</span>
-<div aria-label="Clip count" class="quick-count-group" data-target="clipping" role="group">
-<button class="active" data-count="0" type="button">0</button><button data-count="1" type="button">1</button><button data-count="2" type="button">2</button><button data-count="3" type="button">3</button><button data-count="4" type="button">4+</button>
+</section>
+<section class="endo-entry-section additional-procedure-section" aria-labelledby="additionalProcedureHeading">
+<div class="quick-entry-heading"><strong id="additionalProcedureHeading">Additional Procedures</strong><span>Tap to select. Tap again to remove.</span></div>
+<div class="additional-procedure-buttons" id="additionalProcedureButtons">
+<button class="additional-procedure-btn" data-checkbox-target="varicealBanding" type="button">Variceal banding</button>
+<button class="additional-procedure-btn" data-checkbox-target="sclerotherapy" type="button">Sclerotherapy</button>
+<button class="additional-procedure-btn" data-value-target="Foreign Body Removal" type="button">Foreign body removal</button>
+<button class="additional-procedure-btn" data-value-target="PEG Tube Insertion" type="button">PEG insertion</button>
+<button class="additional-procedure-btn" data-value-target="PEG Tube Replacement" type="button">PEG replacement</button>
+<button class="additional-procedure-btn" data-checkbox-target="esophagealStenting" type="button">Esophageal stent</button>
+<button class="additional-procedure-btn" data-checkbox-target="duodenalStenting" type="button">Duodenal stent</button>
+<button class="additional-procedure-btn" data-checkbox-target="colonicStenting" type="button">Colonic stent</button>
+<button class="additional-procedure-btn" data-checkbox-target="metallicBiliaryStenting" type="button">Metal biliary stent</button>
+<button class="additional-procedure-btn" data-value-target="pH Monitoring" type="button">pH monitoring</button>
+<button class="additional-procedure-btn" data-value-target="SIBO Breath Test" type="button">SIBO breath test</button>
 </div>
+<div id="additionalProcedureChoices" class="visually-hidden-procedure-inputs" aria-hidden="true">
+<input id="sclerotherapy" type="checkbox"/>
+<input id="varicealBanding" type="checkbox"/>
+<input type="checkbox" value="pH Monitoring"/>
+<input type="checkbox" value="SIBO Breath Test"/>
+<input type="checkbox" value="PEG Tube Insertion"/>
+<input type="checkbox" value="PEG Tube Replacement"/>
+<input type="checkbox" value="Foreign Body Removal"/>
+<input id="esophagealStenting" type="checkbox"/>
+<input id="duodenalStenting" type="checkbox"/>
+<input id="colonicStenting" type="checkbox"/>
+<input id="metallicBiliaryStenting" type="checkbox"/>
 </div>
-</div>
-<fieldset><legend>Main procedures — select one or more</legend><div class="choice-grid compact-choice-grid" id="procedureChoices">
-<label class="check-card"><input type="checkbox" value="EGD"/> EGD</label><label class="check-card"><input type="checkbox" value="Colonoscopy"/> Colonoscopy</label><label class="check-card"><input type="checkbox" value="Flex Sig"/> Flex Sig</label><label class="check-card"><input type="checkbox" value="EUS"/> EUS</label><label class="check-card"><input type="checkbox" value="ERCP"/> ERCP</label><label class="check-card"><input type="checkbox" value="Fibroscan"/> Fibroscan</label>
-</div></fieldset>
+</section>
 <details class="more-details-panel" id="endoscopyMoreDetails">
-<summary>More details and interventions</summary>
-<fieldset><legend>Additional procedures</legend><div class="intervention-grid compact-choice-grid" id="additionalProcedureChoices">
-<label><span>Polypectomy count</span><input id="polypectomy" min="0" step="1" type="number" value="0"/></label>
-<label><span>Clipping count</span><input id="clipping" min="0" step="1" type="number" value="0"/></label>
-<label class="check-card"><input id="sclerotherapy" type="checkbox"/> Sclerotherapy</label>
-<label class="check-card"><input id="varicealBanding" type="checkbox"/> Variceal banding</label>
-<label class="check-card"><input type="checkbox" value="Fibroscan"/> FibroScan</label>
-<label class="check-card"><input type="checkbox" value="pH Monitoring"/> pH Monitoring</label>
-<label class="check-card"><input type="checkbox" value="SIBO Breath Test"/> SIBO Breath Test</label>
-<label class="check-card"><input type="checkbox" value="PEG Tube Insertion"/> PEG Insertion</label>
-<label class="check-card"><input type="checkbox" value="PEG Tube Replacement"/> PEG Replacement</label>
-<label class="check-card"><input type="checkbox" value="Foreign Body Removal"/> Foreign Body Removal</label>
-<label class="check-card"><input id="esophagealStenting" type="checkbox"/> Esophageal Stent</label>
-<label class="check-card"><input id="duodenalStenting" type="checkbox"/> Duodenal Stent</label>
-<label class="check-card"><input id="colonicStenting" type="checkbox"/> Colonic Stent</label>
-<label class="check-card"><input id="metallicBiliaryStenting" type="checkbox"/> Metallic Biliary Stent</label>
-</div></fieldset>
+<summary>Patient note</summary>
 <label class="full-width-field"><span>Patient note (optional)</span><textarea id="endoscopyNote" maxlength="1000" placeholder="Add a brief note for this patient or procedure" rows="4"></textarea></label>
 </details>
 <div class="form-message" id="endoscopyMessage"></div>
@@ -199,7 +213,7 @@
 </form>
 </section>
 <details class="card activity-log-collapsible" id="endoscopyActivityLog"><summary class="activity-log-summary"><span><strong>Endoscopy activity log</strong><small>Tap to browse, search, edit, or export records</small></span><span class="activity-log-summary-count" id="endoscopyActivityLogCount">0</span></summary><div class="activity-log-collapsible-body">
-<div class="section-heading filters-heading activity-log-toolbar-heading"><div class="toolbar"><input id="endoscopySearch" placeholder="Search MRN, hospital, procedure" type="search"/><select id="hospitalFilter"><option value="">All hospitals</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select><button class="secondary-btn" id="exportEndoscopyBtn" type="button">Export CSV</button><button class="danger-btn" id="clearEndoscopyBtn" type="button">Clear all</button></div></div>
+<div class="section-heading filters-heading activity-log-toolbar-heading"><div class="endo-view-filter" role="group" aria-label="Endoscopy log view"><button class="endo-view-btn active" id="showAllEndoscopyBtn" type="button">All</button><button class="endo-view-btn" id="showFlaggedEndoscopyBtn" type="button">🚩 Flagged <span id="flaggedEndoscopyCount">0</span></button></div><div class="toolbar"><input id="endoscopySearch" placeholder="Search MRN, hospital, procedure" type="search"/><select id="hospitalFilter"><option value="">All hospitals</option><option>HMG Fayhaa</option><option>HMG Mohammadiya</option></select><button class="secondary-btn" id="exportEndoscopyBtn" type="button">Export CSV</button><button class="danger-btn" id="clearEndoscopyBtn" type="button">Clear all</button></div></div>
 <div class="table-wrap endoscopy-log-wrap"><table id="endoscopyTable"><colgroup><col class="col-date"/><col class="col-day"/><col class="col-mrn"/><col class="col-hospital"/><col class="col-procedure"/><col class="col-additional"/><col class="col-note"/><col class="col-actions"/></colgroup><thead><tr><th>Date</th><th>Day</th><th>MRN</th><th>Hospital</th><th>Procedures</th><th>Additional procedures</th><th>Note</th><th>Actions</th></tr></thead><tbody id="endoscopyBody"></tbody></table><div class="empty-state" id="endoscopyEmptyState"><strong>No procedure records yet</strong><span>Add the first endoscopy record above.</span></div></div>
 </div></details>
 </section>

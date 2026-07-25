@@ -8,7 +8,7 @@ const FACE_ID_CREDENTIAL_KEY="practiceFaceIdCredentialV1";
 const FACE_ID_ENABLED_KEY="practiceFaceIdEnabledV1";
 const GOOGLE_DRIVE_SCOPE="https://www.googleapis.com/auth/drive.appdata";
 const clinicState={entries:load(CLINIC_KEY),search:"",filter:"",expandedId:""};
-const endoState={entries:load(ENDO_KEY),search:"",filter:"",expandedId:""};
+const endoState={entries:load(ENDO_KEY),search:"",filter:"",expandedId:"",flaggedOnly:false};
 const pendingState={entries:load(PENDING_KEY),hospital:"HMG Fayhaa",search:"",view:"queue",expandedId:""};
 const admissionState={entries:load(ADMISSION_KEY),search:"",status:"active",expandedId:""};
 let activePendingId="";
@@ -27,11 +27,39 @@ function beginSave(button,label){setSaveStatus('saving','Saving');if(button){but
 function finishSave(button,label,message){setSaveStatus('saved','Saved');if(button){label.textContent='✓ Saved';setTimeout(()=>{button.disabled=false;label.textContent=button.dataset.originalLabel||'Save'},700)}showToast(message,'success')}
 function failSave(button,label,message,id){setSaveStatus('error','Save failed');if(button){button.disabled=false;label.textContent=button.dataset.originalLabel||'Save'}if(id)msg(id,message);showToast(message,'error')}
 function validationMessage(id,text){msg(id,text);setSaveStatus('error','Check entry');showToast(text,'error')}
+function syncQuickProcedureButtons(){
+  const selected=new Set([...document.querySelectorAll('#procedureChoices input:checked')].map(input=>input.value));
+  document.querySelectorAll('.quick-procedure-btn').forEach(btn=>{
+    const values=String(btn.dataset.procedures||'').split('|').filter(Boolean);
+    btn.classList.toggle('active',values.length>0&&values.every(value=>selected.has(value)));
+  });
+}
 function applyQuickProcedure(values){
-  const selected=String(values||'').split('|').filter(Boolean);
-  document.querySelectorAll('#procedureChoices input').forEach(input=>input.checked=selected.includes(input.value));
-  document.querySelectorAll('.quick-procedure-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.procedures===values));
+  const requested=String(values||'').split('|').filter(Boolean);
+  requested.forEach(value=>{
+    const input=[...document.querySelectorAll('#procedureChoices input')].find(item=>item.value===value);
+    if(input)input.checked=!input.checked;
+  });
+  syncQuickProcedureButtons();
   haptic('success');
+}
+function additionalValueInput(value){return [...document.querySelectorAll('#additionalProcedureChoices input[type="checkbox"][value]')].find(input=>input.value===value)}
+function toggleAdditionalProcedureButton(btn){
+  const countTarget=btn.dataset.countTarget,checkboxTarget=btn.dataset.checkboxTarget,valueTarget=btn.dataset.valueTarget;
+  if(countTarget){const input=$(countTarget);if(input)input.value=Number(input.value||0)>0?0:1}
+  else if(checkboxTarget&&$(checkboxTarget))$(checkboxTarget).checked=!$(checkboxTarget).checked;
+  else if(valueTarget){const input=additionalValueInput(valueTarget);if(input)input.checked=!input.checked}
+  syncAdditionalProcedureButtons();renderQuickInterventionCounts();haptic('success');
+}
+function syncAdditionalProcedureButtons(){
+  document.querySelectorAll('.additional-procedure-btn').forEach(btn=>{
+    let active=false;
+    if(btn.dataset.countTarget)active=Number($(btn.dataset.countTarget)?.value||0)>0;
+    else if(btn.dataset.checkboxTarget)active=Boolean($(btn.dataset.checkboxTarget)?.checked);
+    else if(btn.dataset.valueTarget)active=Boolean(additionalValueInput(btn.dataset.valueTarget)?.checked);
+    btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));
+  });
+  document.querySelectorAll('[data-count-panel]').forEach(panel=>{panel.hidden=Number($(panel.dataset.countPanel)?.value||0)<=0});
 }
 
 
@@ -272,30 +300,32 @@ function renderPending(){
     return(a.createdAt||'').localeCompare(b.createdAt||'');
   });
   $('pendingList').innerHTML='';$('pendingEmptyState').classList.toggle('hidden',list.length>0);
-  list.forEach((x,i)=>{const expanded=String(pendingState.expandedId)===String(x.id),procedures=(x.procedures||[]),isOverdue=Boolean(x.date&&x.date<today());$('pendingList').insertAdjacentHTML('beforeend',`<article class="pending-item compact ${expanded?'expanded':''} ${isOverdue?'overdue':''}" data-pending-id="${esc(x.id)}"><button class="pending-row" type="button" onclick="togglePendingDetails('${x.id}')" aria-expanded="${expanded}"><span class="pending-order">${i+1}</span><span class="pending-row-main"><span class="pending-row-top"><strong>MRN ${esc(x.mrn)}</strong><span class="pending-date-badge ${x.date===today()?'today':''} ${isOverdue?'overdue':''}">${isOverdue?'Overdue · ':''}${esc(pendingDateLabel(x.date))}${x.time?` · ${esc(x.time)}`:''}</span></span><span class="pending-row-procedures">${procedures.map(esc).join(' · ')||'No procedure'}</span></span><span class="pending-chevron">${expanded?'⌃':'⌄'}</span></button><div class="pending-details" ${expanded?'':'hidden'}><div class="pending-tags">${procedures.map(p=>`<span class="tag">${esc(p)}</span>`).join('')}</div><p class="pending-calendar-meta">${x.time?`${esc(x.time)} · ${Number(x.durationMinutes)||calculatedPendingDuration(procedures)} min`:'No start time set'}</p>${x.note?`<p class="pending-note">${esc(x.note)}</p>`:''}<div class="pending-actions"><button class="primary-btn compact-btn" type="button" onclick="event.stopPropagation();startPending('${x.id}')">Start</button><button class="icon-btn calendar-btn ${pendingCalendarStatus(x)}" type="button" aria-label="${pendingCalendarStatus(x)==='added'?'Added to calendar':pendingCalendarStatus(x)==='update'?'Update calendar':'Add to calendar'}" title="${pendingCalendarStatus(x)==='added'?'Added to calendar':pendingCalendarStatus(x)==='update'?'Update calendar':'Add to calendar'}" onclick="event.stopPropagation();addPendingToCalendar('${x.id}')">${pendingCalendarStatus(x)==='added'?'✓':pendingCalendarStatus(x)==='update'?'↻':'📅'}</button><button class="icon-btn" type="button" onclick="event.stopPropagation();editPending('${x.id}')">Edit</button><button class="icon-btn delete pending-delete-btn" type="button" aria-label="Delete pending case" title="Delete" onclick="event.stopPropagation();deletePending('${x.id}')">🗑️</button></div></div></article>`)})
+  list.forEach((x,i)=>{const expanded=String(pendingState.expandedId)===String(x.id),procedures=(x.procedures||[]),isOverdue=Boolean(x.date&&x.date<today());$('pendingList').insertAdjacentHTML('beforeend',`<article class="pending-item compact ${expanded?'expanded':''} ${isOverdue?'overdue':''}" data-pending-id="${esc(x.id)}"><button class="pending-row" type="button" onclick="togglePendingDetails('${x.id}')" aria-expanded="${expanded}"><span class="pending-order">${i+1}</span><span class="pending-row-main"><span class="pending-row-top"><strong>MRN ${esc(x.mrn)}</strong><span class="pending-date-badge ${x.date===today()?'today':''} ${isOverdue?'overdue':''}">${isOverdue?'Overdue · ':''}${esc(pendingDateLabel(x.date))}${x.time?` · ${esc(x.time)}`:''}</span></span><span class="pending-row-procedures">${procedures.map(esc).join(' · ')||'No procedure'}</span></span><span class="pending-chevron">${expanded?'⌃':'⌄'}</span></button><div class="pending-details" ${expanded?'':'hidden'}><div class="pending-tags">${procedures.map(p=>`<span class="tag">${esc(p)}</span>`).join('')}</div><p class="pending-calendar-meta">${x.time?`${esc(x.time)} · ${Number(x.durationMinutes)||calculatedPendingDuration(procedures)} min`:'No start time set'}</p>${x.note?`<p class="pending-note">${esc(x.note)}</p>`:''}<div class="pending-actions"><button class="primary-btn compact-btn" type="button" onclick="event.stopPropagation();startPending('${x.id}')">Start</button><button class="icon-btn calendar-btn ${pendingCalendarStatus(x)}" type="button" aria-label="${pendingCalendarStatus(x)==='added'?'Added to calendar':pendingCalendarStatus(x)==='update'?'Update calendar':'Add to calendar'}" title="${pendingCalendarStatus(x)==='added'?'Added to calendar':pendingCalendarStatus(x)==='update'?'Update calendar':'Add to calendar'}" onclick="event.stopPropagation();addPendingToCalendar('${x.id}')">${pendingCalendarStatus(x)==='added'?'✓':pendingCalendarStatus(x)==='update'?'↻':'📅'}</button><button class="icon-btn" type="button" aria-label="Edit pending case" title="Edit" onclick="event.stopPropagation();editPending('${x.id}')">✏️</button><button class="icon-btn delete pending-delete-btn" type="button" aria-label="Delete pending case" title="Delete" onclick="event.stopPropagation();deletePending('${x.id}')">🗑️</button></div></div></article>`)})
 }
 window.editPending=editPending;window.deletePending=deletePending;window.startPending=startPending;window.addPendingToCalendar=addPendingToCalendar;window.togglePendingDetails=togglePendingDetails;
 
 // Endoscopy module
 const endoForm=$('endoscopyForm');
 function selectEndoscopyHospital(value){$('hospital').value=value||'';document.querySelectorAll('[data-endoscopy-hospital]').forEach(btn=>btn.classList.toggle('active',btn.dataset.endoscopyHospital===value))}
-function initEndo(){$('endoscopyDate').value=today();updateDay('endoscopyDate','endoscopyDay');const last=localStorage.getItem(LAST_ENDO_HOSPITAL_KEY)||'HMG Fayhaa';selectEndoscopyHospital(last);document.querySelectorAll('[data-endoscopy-hospital]').forEach(btn=>btn.onclick=()=>selectEndoscopyHospital(btn.dataset.endoscopyHospital));document.querySelectorAll('.quick-procedure-btn').forEach(btn=>btn.onclick=()=>applyQuickProcedure(btn.dataset.procedures));document.querySelectorAll('.quick-count-group').forEach(group=>group.querySelectorAll('button').forEach(btn=>btn.onclick=()=>setQuickInterventionCount(group.dataset.target,Number(btn.dataset.count||0))));renderEndo();renderQuickInterventionCounts()}
-$('endoscopyDate').onchange=()=>updateDay('endoscopyDate','endoscopyDay'); endoForm.onsubmit=saveEndo; $('fromPendingBtn').onclick=chooseFromPending; $('resetEndoscopyBtn').onclick=resetEndo;$('exportEndoscopyBtn').onclick=exportEndo;$('clearEndoscopyBtn').onclick=clearEndo;$('endoscopySearch').oninput=e=>{endoState.search=e.target.value.toLowerCase();renderEndoRows()};$('hospitalFilter').onchange=e=>{endoState.filter=e.target.value;renderEndoRows()};
+function initEndo(){$('endoscopyDate').value=today();updateDay('endoscopyDate','endoscopyDay');const last=localStorage.getItem(LAST_ENDO_HOSPITAL_KEY)||'HMG Fayhaa';selectEndoscopyHospital(last);document.querySelectorAll('[data-endoscopy-hospital]').forEach(btn=>btn.onclick=()=>selectEndoscopyHospital(btn.dataset.endoscopyHospital));document.querySelectorAll('.quick-procedure-btn').forEach(btn=>btn.onclick=()=>applyQuickProcedure(btn.dataset.procedures));document.querySelectorAll('.additional-procedure-btn').forEach(btn=>btn.onclick=()=>toggleAdditionalProcedureButton(btn));document.querySelectorAll('#procedureChoices input').forEach(input=>input.addEventListener('change',syncQuickProcedureButtons));document.querySelectorAll('.quick-count-group').forEach(group=>group.querySelectorAll('button').forEach(btn=>btn.onclick=()=>setQuickInterventionCount(group.dataset.target,Number(btn.dataset.count||0))));document.querySelectorAll('[data-count-step]').forEach(btn=>btn.onclick=()=>stepQuickInterventionCount(btn.dataset.target,Number(btn.dataset.countStep||0)));['polypectomy','clipping'].forEach(id=>$(id)?.addEventListener('input',()=>{normalizeQuickInterventionCount(id);renderQuickInterventionCounts()}));syncQuickProcedureButtons();syncAdditionalProcedureButtons();renderEndo();renderQuickInterventionCounts()}
+$('endoscopyDate').onchange=()=>updateDay('endoscopyDate','endoscopyDay'); endoForm.onsubmit=saveEndo; $('fromPendingBtn').onclick=chooseFromPending; $('resetEndoscopyBtn').onclick=resetEndo;$('exportEndoscopyBtn').onclick=exportEndo;$('clearEndoscopyBtn').onclick=clearEndo;$('endoscopySearch').oninput=e=>{endoState.search=e.target.value.toLowerCase();renderEndoRows()};$('hospitalFilter').onchange=e=>{endoState.filter=e.target.value;renderEndoRows()};$('showAllEndoscopyBtn').onclick=()=>setEndoscopyFlagFilter(false);$('showFlaggedEndoscopyBtn').onclick=()=>setEndoscopyFlagFilter(true);
 function validProcedures(entry){return (Array.isArray(entry?.procedures)?entry.procedures:[]).filter(value=>value&&value!=='on')}
 function selectedProcedures(){return [...document.querySelectorAll('#procedureChoices input:checked, #additionalProcedureChoices input[type="checkbox"][value]:checked')].map(x=>x.value)}
 function extrasFromForm(){return{polypectomy:Number($('polypectomy').value||0),clipping:Number($('clipping').value||0),sclerotherapy:$('sclerotherapy').checked,varicealBanding:$('varicealBanding').checked,duodenalStenting:$('duodenalStenting').checked,esophagealStenting:$('esophagealStenting').checked,colonicStenting:$('colonicStenting').checked,metallicBiliaryStenting:$('metallicBiliaryStenting').checked}}
-function setQuickInterventionCount(target,count){const input=$(target);if(!input)return;input.value=count;renderQuickInterventionCounts();if(navigator.vibrate)navigator.vibrate(15)}
-function renderQuickInterventionCounts(){document.querySelectorAll('.quick-count-group').forEach(group=>{const value=Math.max(0,Number($(group.dataset.target)?.value||0));group.querySelectorAll('button').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.count)===Math.min(value,4)))})}
+function normalizeQuickInterventionCount(target){const input=$(target);if(!input)return 0;const value=Math.max(0,Math.floor(Number(input.value||0)));input.value=value;return value}
+function setQuickInterventionCount(target,count){const input=$(target);if(!input)return;input.value=Math.max(0,Math.floor(Number(count||0)));renderQuickInterventionCounts();if(navigator.vibrate)navigator.vibrate(15)}
+function stepQuickInterventionCount(target,step){const input=$(target);if(!input)return;input.value=Math.max(0,normalizeQuickInterventionCount(target)+Number(step||0));renderQuickInterventionCounts();if(navigator.vibrate)navigator.vibrate(15)}
+function renderQuickInterventionCounts(){document.querySelectorAll('.quick-count-group').forEach(group=>{const value=Math.max(0,Number($(group.dataset.target)?.value||0));group.querySelectorAll('button').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.count)===value)) });syncAdditionalProcedureButtons()}
 function saveEndo(e){
   e.preventDefault();$('endoscopyMessage').textContent='';const procedures=selectedProcedures();
   if(!$('endoscopyDate').value||!$('mrn').value.trim()||!$('hospital').value)return validationMessage('endoscopyMessage','Please complete date, MRN, and hospital.');
   if(!procedures.length)return validationMessage('endoscopyMessage','Select at least one procedure.');
   const button=e.submitter||endoForm.querySelector('button[type="submit"]'),label=$('endoscopySubmitLabel');beginSave(button,label);
-  try{const item={id:$('endoscopyEditingId').value||uid(),date:$('endoscopyDate').value,day:getDay($('endoscopyDate').value),mrn:$('mrn').value.trim(),hospital:$('hospital').value,procedures,extras:extrasFromForm(),note:$('endoscopyNote').value.trim(),updatedAt:new Date().toISOString()};upsert(endoState.entries,item);persist(ENDO_KEY,endoState.entries);localStorage.setItem(LAST_ENDO_HOSPITAL_KEY,item.hospital);const completedPending=Boolean(activePendingId);if(activePendingId){pendingState.entries=pendingState.entries.filter(x=>String(x.id)!==String(activePendingId));persist(PENDING_KEY,pendingState.entries);activePendingId='';renderPending()}resetEndo();renderEndo();finishSave(button,label,completedPending?'Pending procedure completed':'Procedure saved');if(completedPending)setTimeout(()=>activateModule('pendingModule'),250)}
+  try{const editingId=$('endoscopyEditingId').value||'',existing=endoState.entries.find(x=>String(x.id)===String(editingId));const item={id:editingId||uid(),date:$('endoscopyDate').value,day:getDay($('endoscopyDate').value),mrn:$('mrn').value.trim(),hospital:$('hospital').value,procedures,extras:extrasFromForm(),note:$('endoscopyNote').value.trim(),flagged:Boolean(existing?.flagged),updatedAt:new Date().toISOString()};upsert(endoState.entries,item);persist(ENDO_KEY,endoState.entries);localStorage.setItem(LAST_ENDO_HOSPITAL_KEY,item.hospital);const completedPending=Boolean(activePendingId);if(activePendingId){pendingState.entries=pendingState.entries.filter(x=>String(x.id)!==String(activePendingId));persist(PENDING_KEY,pendingState.entries);activePendingId='';renderPending()}resetEndo();renderEndo();finishSave(button,label,completedPending?'Pending procedure completed':'Procedure saved');if(completedPending)setTimeout(()=>activateModule('pendingModule'),250)}
   catch(err){console.error(err);failSave(button,label,'Unable to save procedure. Your entry is still on screen.','endoscopyMessage')}
 }
-function resetEndo(){activePendingId='';endoForm.reset();$('endoscopyEditingId').value='';$('endoscopyDate').value=today();updateDay('endoscopyDate','endoscopyDay');const last=localStorage.getItem(LAST_ENDO_HOSPITAL_KEY);selectEndoscopyHospital(last||'HMG Fayhaa');$('polypectomy').value=0;$('clipping').value=0;$('endoscopyNote').value='';$('endoscopySubmitLabel').textContent='Save procedure';$('endoscopyMessage').textContent='';$('endoscopyMoreDetails')?.removeAttribute('open');document.querySelectorAll('.quick-procedure-btn').forEach(x=>x.classList.remove('active'));renderQuickInterventionCounts()}
-function editEndo(id){const e=endoState.entries.find(x=>x.id===id);if(!e)return;$('endoscopyEditingId').value=e.id;$('endoscopyDate').value=e.date;updateDay('endoscopyDate','endoscopyDay');$('mrn').value=e.mrn;selectEndoscopyHospital(e.hospital);$('endoscopyNote').value=e.note||'';document.querySelectorAll('#procedureChoices input, #additionalProcedureChoices input[type="checkbox"]').forEach(x=>x.checked=validProcedures(e).includes(x.value));Object.entries(e.extras||{}).forEach(([k,v])=>{if($(k))$(k).type==='checkbox'?$(k).checked=!!v:$(k).value=v});$('endoscopySubmitLabel').textContent='Update procedure';if((e.note||'')||extrasText(e).length)$('endoscopyMoreDetails')?.setAttribute('open','');document.querySelector('[data-module="endoscopyModule"]').click();scrollTo(0,0)}
+function resetEndo(){activePendingId='';endoForm.reset();$('endoscopyEditingId').value='';$('endoscopyDate').value=today();updateDay('endoscopyDate','endoscopyDay');const last=localStorage.getItem(LAST_ENDO_HOSPITAL_KEY);selectEndoscopyHospital(last||'HMG Fayhaa');$('polypectomy').value=0;$('clipping').value=0;$('endoscopyNote').value='';$('endoscopySubmitLabel').textContent='Save procedure';$('endoscopyMessage').textContent='';$('endoscopyMoreDetails')?.removeAttribute('open');document.querySelectorAll('.quick-procedure-btn').forEach(x=>x.classList.remove('active'));syncQuickProcedureButtons();syncAdditionalProcedureButtons();renderQuickInterventionCounts()}
+function editEndo(id){const e=endoState.entries.find(x=>x.id===id);if(!e)return;$('endoscopyEditingId').value=e.id;$('endoscopyDate').value=e.date;updateDay('endoscopyDate','endoscopyDay');$('mrn').value=e.mrn;selectEndoscopyHospital(e.hospital);$('endoscopyNote').value=e.note||'';document.querySelectorAll('#procedureChoices input, #additionalProcedureChoices input[type="checkbox"]').forEach(x=>x.checked=validProcedures(e).includes(x.value));Object.entries(e.extras||{}).forEach(([k,v])=>{if($(k))$(k).type==='checkbox'?$(k).checked=!!v:$(k).value=v});$('endoscopySubmitLabel').textContent='Update procedure';if((e.note||'')||extrasText(e).length)$('endoscopyMoreDetails')?.setAttribute('open','');syncQuickProcedureButtons();syncAdditionalProcedureButtons();renderQuickInterventionCounts();document.querySelector('[data-module="endoscopyModule"]').click();scrollTo(0,0)}
 function extrasText(e){const x=e.extras||{},arr=[];if(x.polypectomy)arr.push(`Polypectomy ×${x.polypectomy}`);if(x.clipping)arr.push(`Clipping ×${x.clipping}`);if(x.sclerotherapy)arr.push('Sclerotherapy');if(x.varicealBanding)arr.push('Variceal banding');if(x.duodenalStenting)arr.push('Duodenal stenting');if(x.esophagealStenting)arr.push('Esophageal stenting');if(x.colonicStenting)arr.push('Colonic stenting');if(x.metallicBiliaryStenting)arr.push('Metallic biliary stenting');return arr}
 function renderEndo(){
   renderEndoRows();
@@ -365,11 +395,21 @@ function renderHospitalEndoscopyStats(source=filteredEndoStats()){
   });
 }
 function toggleEndoDetails(id){endoState.expandedId=String(endoState.expandedId)===String(id)?'':String(id);renderEndoRows()}
+function setEndoscopyFlagFilter(flaggedOnly){
+  endoState.flaggedOnly=Boolean(flaggedOnly);
+  $('showAllEndoscopyBtn')?.classList.toggle('active',!endoState.flaggedOnly);
+  $('showFlaggedEndoscopyBtn')?.classList.toggle('active',endoState.flaggedOnly);
+  renderEndoRows();
+}
+function toggleEndoFlag(id){
+  const item=endoState.entries.find(x=>String(x.id)===String(id));if(!item)return;
+  item.flagged=!item.flagged;item.updatedAt=new Date().toISOString();persist(ENDO_KEY,endoState.entries);renderEndoRows();showToast(item.flagged?'Endoscopy case flagged':'Flag removed');
+}
 function renderEndoRows(){
   const list=[...endoState.entries]
-    .filter(e=>(!endoState.filter||e.hospital===endoState.filter)&&(!endoState.search||`${e.date} ${e.mrn} ${e.hospital} ${validProcedures(e).join(' ')} ${extrasText(e).join(' ')} ${e.note||''}`.toLowerCase().includes(endoState.search)))
+    .filter(e=>(!endoState.flaggedOnly||e.flagged)&&(!endoState.filter||e.hospital===endoState.filter)&&(!endoState.search||`${e.date} ${e.mrn} ${e.hospital} ${validProcedures(e).join(' ')} ${extrasText(e).join(' ')} ${e.note||''}`.toLowerCase().includes(endoState.search)))
     .sort(sortDesc);
-  if($('endoscopyActivityLogCount'))$('endoscopyActivityLogCount').textContent=list.length;
+  const flaggedCount=endoState.entries.filter(e=>e.flagged).length;if($('endoscopyActivityLogCount'))$('endoscopyActivityLogCount').textContent=list.length;if($('flaggedEndoscopyCount'))$('flaggedEndoscopyCount').textContent=flaggedCount;
   $('endoscopyBody').innerHTML='';
   $('endoscopyEmptyState').classList.toggle('hidden',list.length>0);
   list.forEach(e=>{
@@ -384,6 +424,7 @@ function renderEndoRows(){
             <div class="endo-card-header" onclick="toggleEndoDetails('${e.id}')">
               <div class="endo-card-date">${fmtDate(e.date)}</div>
               <div class="endo-card-actions">
+                <button type="button" class="icon-btn log-icon-btn endo-flag-btn ${e.flagged?'active':''}" aria-label="${e.flagged?'Remove flag':'Flag endoscopy case'}" title="${e.flagged?'Remove flag':'Flag'}" onclick="event.stopPropagation();toggleEndoFlag('${e.id}')">🚩</button>
                 <button type="button" class="icon-btn log-icon-btn" aria-label="Edit endoscopy entry" title="Edit" onclick="event.stopPropagation();editEndo('${e.id}')">✏️</button>
                 <button type="button" class="icon-btn delete log-icon-btn" aria-label="Delete endoscopy entry" title="Delete" onclick="event.stopPropagation();deleteEndo('${e.id}')">🗑️</button>
               </div>
@@ -409,7 +450,7 @@ function renderEndoRows(){
       </tr>`);
   });
 }
-window.editEndo=editEndo;window.deleteEndo=id=>{const key=String(id),e=endoState.entries.find(x=>String(x.id)===key);if(e&&confirm(`Delete endoscopy record for MRN ${e.mrn}?`)){createAutomaticLocalBackup('Before deleting endoscopy entry');endoState.entries=endoState.entries.filter(x=>String(x.id)!==key);persist(ENDO_KEY,endoState.entries);renderEndo();alert('Endoscopy record deleted.')}};
+window.editEndo=editEndo;window.toggleEndoFlag=toggleEndoFlag;window.deleteEndo=id=>{const key=String(id),e=endoState.entries.find(x=>String(x.id)===key);if(e&&confirm(`Delete endoscopy record for MRN ${e.mrn}?`)){createAutomaticLocalBackup('Before deleting endoscopy entry');endoState.entries=endoState.entries.filter(x=>String(x.id)!==key);persist(ENDO_KEY,endoState.entries);renderEndo();alert('Endoscopy record deleted.')}};
 function clearEndo(){if(!endoState.entries.length)return alert('There are no endoscopy records to clear.');if(confirm(`Delete all ${endoState.entries.length} endoscopy records? This cannot be undone.`)){createAutomaticLocalBackup('Before clearing endoscopy log');endoState.entries=[];persist(ENDO_KEY,[]);renderEndo();alert('Endoscopy log cleared.')}}
 function exportEndo(){downloadCsv('endoscopy-procedure-log',['Date','Day','MRN','Hospital','Procedures','Polypectomy count','Clipping count','Sclerotherapy','Variceal banding','Duodenal stenting','Esophageal stenting','Colonic stenting','Metallic biliary stenting','Note'],endoState.entries.sort((a,b)=>a.date.localeCompare(b.date)).map(e=>{const x=e.extras||{};return[e.date,e.day||getDay(e.date),e.mrn,e.hospital,validProcedures(e).join('; '),x.polypectomy||0,x.clipping||0,yes(x.sclerotherapy),yes(x.varicealBanding),yes(x.duodenalStenting),yes(x.esophagealStenting),yes(x.colonicStenting),yes(x.metallicBiliaryStenting),e.note||'']}))}
 

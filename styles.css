@@ -1277,3 +1277,76 @@ body.dark #themeToggle .sun-icon{display:block}
   .endo-card-summary{padding:9px 10px 10px;gap:7px}
   .endo-card-actions .log-icon-btn{width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important}
 }
+
+/* Lightweight endoscopy flagging */
+.endo-view-filter{display:inline-flex;gap:6px;padding:4px;margin-bottom:10px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2)}
+.endo-view-btn{min-height:36px;padding:6px 12px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:800}
+.endo-view-btn.active{background:var(--surface);color:var(--primary);box-shadow:0 2px 8px rgba(18,46,80,.08)}
+.endo-flag-btn{filter:grayscale(1);opacity:.48}
+.endo-flag-btn.active{filter:none;opacity:1;background:rgba(220,38,38,.10)!important;border-color:rgba(220,38,38,.28)!important}
+@media(max-width:760px){.endo-view-filter{display:grid;grid-template-columns:1fr 1fr;width:100%}.endo-view-btn{width:100%}}
+
+/* v1.4.7 — uniform Pending action buttons */
+.pending-item.compact .pending-actions{
+  display:grid!important;
+  grid-template-columns:minmax(78px,1fr) repeat(3,40px)!important;
+  gap:7px!important;
+  align-items:center!important;
+}
+.pending-item.compact .pending-actions > .icon-btn,
+.pending-item.compact .pending-actions > .calendar-btn,
+.pending-item.compact .pending-actions > .pending-delete-btn{
+  width:40px!important;
+  min-width:40px!important;
+  max-width:40px!important;
+  height:40px!important;
+  min-height:40px!important;
+  padding:0!important;
+  margin:0!important;
+  display:inline-grid!important;
+  place-items:center!important;
+  justify-content:center!important;
+  align-items:center!important;
+  border-radius:10px!important;
+  font-size:1rem!important;
+  line-height:1!important;
+  flex:0 0 40px!important;
+}
+.pending-item.compact .pending-actions > .primary-btn{
+  width:100%!important;
+  min-width:0!important;
+  height:40px!important;
+  min-height:40px!important;
+  padding:0 12px!important;
+  margin:0!important;
+  border-radius:10px!important;
+}
+@media(max-width:600px){
+  .pending-actions .calendar-btn{flex:0 0 40px!important}
+  .pending-item.compact .pending-actions{grid-template-columns:minmax(78px,1fr) repeat(3,40px)!important}
+}
+
+/* v1.4.9 — unified endoscopy procedure selectors */
+.endo-entry-section{margin:14px 0;padding:14px;border:1px solid var(--border);border-radius:16px;background:var(--surface-2)}
+.main-procedure-buttons,.additional-procedure-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.main-procedure-buttons .quick-procedure-btn,.additional-procedure-btn{width:100%;min-height:48px;padding:9px 10px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-size:.84rem;font-weight:850;line-height:1.15;text-align:center;display:flex;align-items:center;justify-content:center}
+.main-procedure-buttons .quick-procedure-btn.active,.additional-procedure-btn.active{border-color:var(--primary);background:var(--primary-soft);color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+.visually-hidden-procedure-inputs{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important}
+.selected-count-panels{display:grid;gap:9px;margin-top:10px}
+.selected-count-panel{padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+.selected-count-panel>span{display:block;margin-bottom:8px;color:var(--muted);font-size:.78rem;font-weight:800}
+.selected-count-panel .quick-count-group{grid-template-columns:repeat(4,1fr)}
+@media(min-width:700px){.main-procedure-buttons{grid-template-columns:repeat(3,minmax(0,1fr))}.additional-procedure-buttons{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* v1.5.0 restored quick interventions with unrestricted counts */
+.quick-intervention-panel{margin-top:14px}
+.quick-intervention-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.quick-intervention-card{padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--surface);display:grid;gap:10px;min-width:0}
+.quick-intervention-label{font-weight:900;color:var(--text)}
+.quick-intervention-card .quick-count-group{grid-template-columns:repeat(4,1fr)}
+.custom-count-stepper{display:grid;grid-template-columns:42px minmax(0,1fr) 42px;gap:8px;align-items:center}
+.custom-count-stepper button{min-height:42px;border:1px solid var(--border);border-radius:11px;background:var(--surface-2);color:var(--text);font-size:1.25rem;font-weight:900}
+.custom-count-stepper input{min-width:0;min-height:42px;text-align:center;font-size:1.05rem;font-weight:900;padding:6px;border:1px solid var(--border);border-radius:11px;background:var(--surface-2);color:var(--text)}
+.custom-count-stepper input::-webkit-outer-spin-button,.custom-count-stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.custom-count-stepper input[type=number]{-moz-appearance:textfield}
+@media(max-width:640px){.quick-intervention-grid{grid-template-columns:1fr}.quick-intervention-card{padding:11px}.custom-count-stepper{grid-template-columns:46px minmax(0,1fr) 46px}.custom-count-stepper button,.custom-count-stepper input{min-height:46px}}
