@@ -160,11 +160,24 @@
 <input type="checkbox" value="EGD"/><input type="checkbox" value="Colonoscopy"/><input type="checkbox" value="Flex Sig"/><input type="checkbox" value="EUS"/><input type="checkbox" value="ERCP"/><input type="checkbox" value="Fibroscan"/>
 </div>
 </section>
+<section class="endo-entry-section quick-intervention-panel" aria-labelledby="quickInterventionHeading">
+<div class="quick-entry-heading"><strong id="quickInterventionHeading">Quick Interventions</strong><span></span></div>
+<div class="quick-intervention-grid">
+<div class="quick-intervention-card">
+<span class="quick-intervention-label">Polypectomy</span>
+<div aria-label="Polypectomy quick count" class="quick-count-group" data-target="polypectomy" role="group"><button data-count="1" type="button">1</button><button data-count="2" type="button">2</button><button data-count="3" type="button">3</button><button data-count="4" type="button">4</button></div>
+<div class="custom-count-stepper"><button data-count-step="-1" data-target="polypectomy" type="button" aria-label="Decrease polypectomy count">−</button><input id="polypectomy" min="0" step="1" inputmode="numeric" type="number" value="0" aria-label="Polypectomy count"/><button data-count-step="1" data-target="polypectomy" type="button" aria-label="Increase polypectomy count">+</button></div>
+</div>
+<div class="quick-intervention-card">
+<span class="quick-intervention-label">Clips</span>
+<div aria-label="Clip quick count" class="quick-count-group" data-target="clipping" role="group"><button data-count="1" type="button">1</button><button data-count="2" type="button">2</button><button data-count="3" type="button">3</button><button data-count="4" type="button">4</button></div>
+<div class="custom-count-stepper"><button data-count-step="-1" data-target="clipping" type="button" aria-label="Decrease clip count">−</button><input id="clipping" min="0" step="1" inputmode="numeric" type="number" value="0" aria-label="Clip count"/><button data-count-step="1" data-target="clipping" type="button" aria-label="Increase clip count">+</button></div>
+</div>
+</div>
+</section>
 <section class="endo-entry-section additional-procedure-section" aria-labelledby="additionalProcedureHeading">
-<div class="quick-entry-heading"><strong id="additionalProcedureHeading">Additional Procedures</strong><span>Tap to select. Tap again to remove.</span></div>
+<div class="quick-entry-heading"><strong id="additionalProcedureHeading">Additional Procedures</strong><span></span></div>
 <div class="additional-procedure-buttons" id="additionalProcedureButtons">
-<button class="additional-procedure-btn count-option" data-count-target="polypectomy" type="button">Polypectomy</button>
-<button class="additional-procedure-btn count-option" data-count-target="clipping" type="button">Clip</button>
 <button class="additional-procedure-btn" data-checkbox-target="varicealBanding" type="button">Variceal banding</button>
 <button class="additional-procedure-btn" data-checkbox-target="sclerotherapy" type="button">Sclerotherapy</button>
 <button class="additional-procedure-btn" data-value-target="Foreign Body Removal" type="button">Foreign body removal</button>
@@ -177,17 +190,7 @@
 <button class="additional-procedure-btn" data-value-target="pH Monitoring" type="button">pH monitoring</button>
 <button class="additional-procedure-btn" data-value-target="SIBO Breath Test" type="button">SIBO breath test</button>
 </div>
-<div class="selected-count-panels">
-<div class="selected-count-panel" data-count-panel="polypectomy" hidden>
-<span>Polypectomy count</span><div aria-label="Polypectomy count" class="quick-count-group" data-target="polypectomy" role="group"><button data-count="1" type="button">1</button><button data-count="2" type="button">2</button><button data-count="3" type="button">3</button><button data-count="4" type="button">4+</button></div>
-</div>
-<div class="selected-count-panel" data-count-panel="clipping" hidden>
-<span>Clip count</span><div aria-label="Clip count" class="quick-count-group" data-target="clipping" role="group"><button data-count="1" type="button">1</button><button data-count="2" type="button">2</button><button data-count="3" type="button">3</button><button data-count="4" type="button">4+</button></div>
-</div>
-</div>
 <div id="additionalProcedureChoices" class="visually-hidden-procedure-inputs" aria-hidden="true">
-<input id="polypectomy" min="0" step="1" type="number" value="0"/>
-<input id="clipping" min="0" step="1" type="number" value="0"/>
 <input id="sclerotherapy" type="checkbox"/>
 <input id="varicealBanding" type="checkbox"/>
 <input type="checkbox" value="pH Monitoring"/>
