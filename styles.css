@@ -1501,3 +1501,24 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     gap:3px;
   }
 }
+
+/* v1.5.8 — keep Pending tab labels fully inside equal tab boxes */
+.pending-view-tabs .pending-view-btn{
+  overflow:hidden;
+  white-space:normal;
+  text-wrap:balance;
+  word-break:normal;
+  line-height:1.15;
+}
+.pending-view-tabs .pending-view-btn span{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:18px;
+}
+@media(max-width:390px){
+  .pending-view-tabs .pending-view-btn{
+    font-size:.7rem;
+    padding:7px 2px;
+  }
+}

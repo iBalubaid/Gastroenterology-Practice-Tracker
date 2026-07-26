@@ -1,5 +1,5 @@
-# HMG GI Tracker v1.5.7
+# Version 1.5.8
 
-- Made Queue, Today, Week, and To schedule tabs equal in width and height.
-- Standardized spacing, alignment, typography, and count positioning across all Pending view tabs.
-- Preserved all existing data, storage keys, and Pending behavior.
+- Keeps Queue, Today, Week, and To schedule labels fully inside equal tab boxes.
+- Removes the extra Pending views label and the descriptive summary text outside the tab row.
+- Preserves all Pending data, counters, filters, and storage keys.

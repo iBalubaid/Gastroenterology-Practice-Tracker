@@ -290,7 +290,7 @@ function renderPending(){
   $('pendingTodayCount').textContent=hospitalEntries.filter(x=>x.date===todayDate).length;
   $('pendingWeekCount').textContent=hospitalEntries.filter(x=>!x.toBeScheduled&&x.date>=week.start&&x.date<=week.end).length;$('pendingToScheduleCount').textContent=hospitalEntries.filter(x=>x.toBeScheduled).length;
   const viewLabels={queue:'Full queue',today:`Today · ${fmtDate(todayDate)}`,week:`This week · ${fmtDate(week.start)}–${fmtDate(week.end)}`,toschedule:'Cases waiting to be scheduled'};
-  $('pendingViewSummary').textContent=viewLabels[pendingState.view];
+  if($('pendingViewSummary'))$('pendingViewSummary').textContent=viewLabels[pendingState.view];
   const emptyLabels={queue:'Add a planned patient above.',today:'No patients are scheduled for today.',week:'No patients are scheduled for this week.',toschedule:'No cases are waiting to be scheduled.'};
   $('pendingEmptyText').textContent=emptyLabels[pendingState.view];
   const q=pendingState.search,list=hospitalEntries.filter(x=>pendingMatchesView(x)&&(!q||`${x.mrn} ${(x.procedures||[]).join(' ')} ${x.note||''}`.toLowerCase().includes(q))).sort((a,b)=>{

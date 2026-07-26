@@ -118,14 +118,13 @@
 </form>
 </section>
 <section class="card">
-<div class="section-heading filters-heading"><div><p class="eyebrow">Pending views</p><h2 id="pendingQueueTitle">Pending – Fayhaa</h2></div><div class="toolbar"><input id="pendingSearch" placeholder="Search MRN or procedure" type="search"/><button class="danger-btn" id="clearPendingBtn" type="button">Clear queue</button></div></div>
+<div class="section-heading filters-heading"><div><h2 id="pendingQueueTitle">Pending – Fayhaa</h2></div><div class="toolbar"><input id="pendingSearch" placeholder="Search MRN or procedure" type="search"/><button class="danger-btn" id="clearPendingBtn" type="button">Clear queue</button></div></div>
 <div aria-label="Pending date view" class="pending-view-tabs" role="tablist">
 <button aria-selected="true" class="pending-view-btn active" data-pending-view="queue" type="button">Queue <span id="pendingQueueCount">0</span></button>
 <button aria-selected="false" class="pending-view-btn" data-pending-view="today" type="button">Today <span id="pendingTodayCount">0</span></button>
 <button aria-selected="false" class="pending-view-btn" data-pending-view="week" type="button">Week <span id="pendingWeekCount">0</span></button>
 <button aria-selected="false" class="pending-view-btn" data-pending-view="toschedule" type="button">To schedule <span id="pendingToScheduleCount">0</span></button>
 </div>
-<div class="pending-view-summary" id="pendingViewSummary"></div>
 <div class="pending-list" id="pendingList"></div><div class="empty-state" id="pendingEmptyState"><strong>No pending patients</strong><span id="pendingEmptyText">Add a planned patient above.</span></div>
 </section>
 <button aria-label="Add pending patient" class="pending-fab" id="openPendingComposerBtn" type="button">+</button>
