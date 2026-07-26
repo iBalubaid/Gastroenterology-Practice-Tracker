@@ -1,3 +1,7 @@
+# v1.6.5
+- Replaced the inline Book action with delegated click handling for reliable local iPhone use.
+- Forces the quick booking sheet to display and updates its accessibility state.
+
 # HMG GI Tracker Phone v1.6.3
 
 - Rebuilt the four Pending tabs with equal widths and an integrated label/count flex layout.
