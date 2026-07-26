@@ -1789,3 +1789,23 @@ body.pending-book-open{overflow:hidden}
   .pending-view-tabs .pending-view-btn{min-height:56px !important;padding:6px 2px !important;}
   .pending-view-tabs .pending-view-btn .pending-view-label{font-size:11px !important;}
 }
+
+/* v1.6.7 — reliable inline booking editor for local iPhone webpages */
+.inline-book-panel{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:12px;
+  margin:10px 0 2px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--surface-soft,#f7f9fc);
+}
+.inline-book-panel label{display:grid;gap:6px;min-width:0}
+.inline-book-panel label span{font-size:.78rem;font-weight:800;color:var(--muted)}
+.inline-book-panel label:nth-child(3){grid-column:1/-1}
+.inline-book-panel input,.inline-book-panel select{width:100%;min-width:0;box-sizing:border-box}
+.inline-book-panel .form-message{grid-column:1/-1;margin:0}
+.inline-book-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.inline-book-actions button{width:100%}
+@media(max-width:420px){.inline-book-panel{grid-template-columns:1fr}.inline-book-panel label:nth-child(3),.inline-book-panel .form-message,.inline-book-actions{grid-column:auto}}
