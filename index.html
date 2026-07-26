@@ -120,10 +120,10 @@
 <section class="card">
 <div class="section-heading filters-heading"><div><h2 id="pendingQueueTitle">Pending – Fayhaa</h2></div><div class="toolbar"><input id="pendingSearch" placeholder="Search MRN or procedure" type="search"/><button class="danger-btn" id="clearPendingBtn" type="button">Clear queue</button></div></div>
 <div aria-label="Pending date view" class="pending-view-tabs" role="tablist">
-<button aria-selected="true" class="pending-view-btn active" data-pending-view="queue" type="button">Queue <span id="pendingQueueCount">0</span></button>
-<button aria-selected="false" class="pending-view-btn" data-pending-view="today" type="button">Today <span id="pendingTodayCount">0</span></button>
-<button aria-selected="false" class="pending-view-btn" data-pending-view="week" type="button">Week <span id="pendingWeekCount">0</span></button>
-<button aria-selected="false" class="pending-view-btn" data-pending-view="toschedule" type="button">Booking <span id="pendingToScheduleCount">0</span></button>
+<button aria-selected="true" class="pending-view-btn active" data-pending-view="queue" type="button"><span class="pending-view-label">Queue</span><span id="pendingQueueCount">0</span></button>
+<button aria-selected="false" class="pending-view-btn" data-pending-view="today" type="button"><span class="pending-view-label">Today</span><span id="pendingTodayCount">0</span></button>
+<button aria-selected="false" class="pending-view-btn" data-pending-view="week" type="button"><span class="pending-view-label">Week</span><span id="pendingWeekCount">0</span></button>
+<button aria-selected="false" class="pending-view-btn" data-pending-view="toschedule" type="button"><span class="pending-view-label">Booking</span><span id="pendingToScheduleCount">0</span></button>
 </div>
 <div class="pending-list" id="pendingList"></div><div class="empty-state" id="pendingEmptyState"><strong>No pending patients</strong><span id="pendingEmptyText">Add a planned patient above.</span></div>
 </section>

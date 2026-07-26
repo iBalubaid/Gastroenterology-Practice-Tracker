@@ -1,3 +1,8 @@
+# v1.6.2
+- Kept Queue, Today, Week, and Booking tabs equal in size.
+- Made count badges adaptive pills that remain fully visible for multi-digit counts.
+- Standardized badge size, position, weight, and contrast across all Pending tabs.
+
 # HMG GI Tracker Phone v1.6.1
 
 - Booking cases can now be opened with the normal Edit/Set date action.
