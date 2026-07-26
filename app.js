@@ -192,7 +192,7 @@ window.toggleAdmission=toggleAdmission;window.editAdmission=editAdmission;window
 
 // Pending endoscopy module
 const pendingForm=$('pendingForm');
-function initPending(){$('pendingDate').value=today();$('pendingDuration').value='30';$('pendingToBeScheduled').addEventListener('change',syncPendingScheduleFields);pendingForm.addEventListener('submit',savePending);$('resetPendingBtn').onclick=()=>resetPending();$('clearPendingBtn').onclick=clearPending;$('openPendingComposerBtn').onclick=()=>togglePendingComposer(true);$('addPendingInlineBtn').onclick=()=>togglePendingComposer(true);$('closePendingComposerBtn').onclick=()=>togglePendingComposer(false);$('pendingSearch').oninput=e=>{pendingState.search=e.target.value.toLowerCase();syncPendingScheduleFields();renderPending()};document.querySelectorAll('[data-pending-hospital]').forEach(btn=>btn.onclick=()=>setPendingHospital(btn.dataset.pendingHospital));document.querySelectorAll('[data-pending-view]').forEach(btn=>btn.onclick=()=>setPendingView(btn.dataset.pendingView));document.querySelectorAll('#pendingProcedureChoices input').forEach(input=>input.addEventListener('change',updatePendingDuration));renderPending()}
+function initPending(){$('pendingDate').value=today();$('pendingDuration').value='30';$('pendingToBeScheduled').addEventListener('change',syncPendingScheduleFields);pendingForm.addEventListener('submit',savePending);$('resetPendingBtn').onclick=()=>resetPending();$('clearPendingBtn').onclick=clearPending;$('openPendingComposerBtn').onclick=()=>togglePendingComposer(true);$('addPendingInlineBtn').onclick=()=>togglePendingComposer(true);$('closePendingComposerBtn').onclick=()=>togglePendingComposer(false);$('pendingSearch').oninput=e=>{pendingState.search=e.target.value.toLowerCase();syncPendingScheduleFields();renderPending()};document.querySelectorAll('[data-pending-hospital]').forEach(btn=>btn.onclick=()=>setPendingHospital(btn.dataset.pendingHospital));document.querySelectorAll('[data-pending-view]').forEach(btn=>btn.onclick=()=>setPendingView(btn.dataset.pendingView));document.querySelectorAll('#pendingProcedureChoices input').forEach(input=>input.addEventListener('change',updatePendingDuration));initPendingBookModal();renderPending()}
 
 function syncPendingScheduleFields(){
   const unscheduled=Boolean($('pendingToBeScheduled')?.checked),date=$('pendingDate'),time=$('pendingTime'),duration=$('pendingDuration');
@@ -252,6 +252,48 @@ async function addPendingToCalendar(id){
 }
 
 function pendingWeekRange(){const now=new Date(`${today()}T00:00:00`),day=now.getDay(),start=new Date(now);start.setDate(now.getDate()-day);const end=new Date(start);end.setDate(start.getDate()+6);const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;return{start:iso(start),end:iso(end)}}
+
+function initPendingBookModal(){
+  const timeSelect=$('pendingBookTime');
+  if(timeSelect&&timeSelect.options.length<=1){
+    [...$('pendingTime').options].slice(1).forEach(option=>timeSelect.add(option.cloneNode(true)));
+  }
+  $('pendingBookForm').addEventListener('submit',savePendingBook);
+  $('closePendingBookBtn').onclick=closePendingBook;
+  $('cancelPendingBookBtn').onclick=closePendingBook;
+  document.querySelectorAll('[data-close-book-modal]').forEach(el=>el.onclick=closePendingBook);
+}
+function openPendingBook(id){
+  const item=pendingState.entries.find(x=>String(x.id)===String(id));if(!item)return;
+  $('pendingBookId').value=item.id;
+  $('pendingBookPatient').textContent=`MRN ${item.mrn} · ${(item.procedures||[]).join(' + ')||'No procedure'} · ${shortHospital(item.hospital)}`;
+  $('pendingBookDate').value=item.date||today();
+  $('pendingBookTime').value=item.time||'';
+  $('pendingBookDuration').value=Number(item.durationMinutes)||calculatedPendingDuration(item.procedures||[]);
+  $('pendingBookMessage').textContent='';
+  $('pendingBookModal').hidden=false;document.body.classList.add('pending-book-open');
+  setTimeout(()=>$('pendingBookDate').focus(),50);
+}
+function closePendingBook(){
+  $('pendingBookModal').hidden=true;document.body.classList.remove('pending-book-open');
+}
+function savePendingBook(event){
+  event.preventDefault();
+  const item=pendingState.entries.find(x=>String(x.id)===String($('pendingBookId').value));if(!item)return closePendingBook();
+  const date=$('pendingBookDate').value,time=$('pendingBookTime').value,duration=Number($('pendingBookDuration').value||0);
+  if(!date||!time||duration<5)return validationMessage('pendingBookMessage','Please select a date, start time, and duration.');
+  item.date=date;item.time=time;item.durationMinutes=duration;item.toBeScheduled=false;item.calendarAddedAt='';item.calendarFingerprint='';item.updatedAt=new Date().toISOString();
+  persist(PENDING_KEY,pendingState.entries);createAutomaticLocalBackup('Pending patient booked');closePendingBook();renderPending();showToast('Patient booked');
+}
+function editPendingDetails(id){
+  editPending(id);
+  const item=pendingState.entries.find(x=>String(x.id)===String(id));
+  if(item?.toBeScheduled){
+    $('pendingComposer').classList.add('case-details-only');
+    $('pendingDate').required=false;
+    $('pendingSubmitLabel').textContent='Save details';
+  }
+}
 function setPendingView(view){pendingState.view=['queue','today','week','toschedule'].includes(view)?view:'queue';document.querySelectorAll('[data-pending-view]').forEach(btn=>{const selected=btn.dataset.pendingView===pendingState.view;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',String(selected))});renderPending()}
 function pendingMatchesView(entry){if(pendingState.view==='toschedule')return Boolean(entry.toBeScheduled);if(pendingState.view==='today')return !entry.toBeScheduled&&entry.date===today();if(pendingState.view==='week'){const range=pendingWeekRange();return !entry.toBeScheduled&&entry.date>=range.start&&entry.date<=range.end}return true}
 
@@ -319,9 +361,9 @@ function renderPending(){
     return(a.createdAt||'').localeCompare(b.createdAt||'');
   });
   $('pendingList').innerHTML='';$('pendingEmptyState').classList.toggle('hidden',list.length>0);
-  list.forEach((x,i)=>{const expanded=String(pendingState.expandedId)===String(x.id),procedures=(x.procedures||[]),isUnscheduled=Boolean(x.toBeScheduled),isOverdue=Boolean(!isUnscheduled&&x.date&&x.date<today());$('pendingList').insertAdjacentHTML('beforeend',`<article class="pending-item compact ${expanded?'expanded':''} ${isOverdue?'overdue':''}" data-pending-id="${esc(x.id)}"><button class="pending-row" type="button" onclick="togglePendingDetails('${x.id}')" aria-expanded="${expanded}"><span class="pending-order">${i+1}</span><span class="pending-row-main"><span class="pending-row-top"><strong>MRN ${esc(x.mrn)}</strong><span class="pending-date-badge ${x.date===today()?'today':''} ${isOverdue?'overdue':''}">${isUnscheduled?'To be booked':`${isOverdue?'Overdue · ':''}${esc(pendingDateLabel(x.date))}${x.time?` · ${esc(x.time)}`:''}`}</span></span><span class="pending-row-procedures">${procedures.map(esc).join(' · ')||'No procedure'}</span></span><span class="pending-chevron">${expanded?'⌃':'⌄'}</span></button><div class="pending-details" ${expanded?'':'hidden'}><div class="pending-tags">${procedures.map(p=>`<span class="tag">${esc(p)}</span>`).join('')}</div><p class="pending-calendar-meta">${isUnscheduled?'Waiting for booking date and time':(x.time?`${esc(x.time)} · ${Number(x.durationMinutes)||calculatedPendingDuration(procedures)} min`:'No start time set')}</p>${x.note?`<p class="pending-note">${esc(x.note)}</p>`:''}<div class="pending-actions">${isUnscheduled?`<button class="primary-btn compact-btn" type="button" onclick="event.stopPropagation();editPending('${x.id}')">Set date</button>`:`<button class="primary-btn compact-btn" type="button" onclick="event.stopPropagation();startPending('${x.id}')">Start</button><button class="icon-btn calendar-btn ${pendingCalendarStatus(x)}" type="button" aria-label="${pendingCalendarStatus(x)==='added'?'Added to calendar':pendingCalendarStatus(x)==='update'?'Update calendar':'Add to calendar'}" title="${pendingCalendarStatus(x)==='added'?'Added to calendar':pendingCalendarStatus(x)==='update'?'Update calendar':'Add to calendar'}" onclick="event.stopPropagation();addPendingToCalendar('${x.id}')">${pendingCalendarStatus(x)==='added'?'✓':pendingCalendarStatus(x)==='update'?'↻':'📅'}</button>${isOverdue?`<button class="secondary-btn compact-btn move-schedule-btn move-booking-btn" type="button" onclick="event.stopPropagation();movePendingToSchedule('${x.id}')">Move to Booking</button>`:''}` }<button class="icon-btn" type="button" aria-label="Edit pending case" title="Edit" onclick="event.stopPropagation();editPending('${x.id}')">✏️</button><button class="icon-btn delete pending-delete-btn" type="button" aria-label="Delete pending case" title="Delete" onclick="event.stopPropagation();deletePending('${x.id}')">🗑️</button></div></div></article>`)})
+  list.forEach((x,i)=>{const expanded=String(pendingState.expandedId)===String(x.id),procedures=(x.procedures||[]),isUnscheduled=Boolean(x.toBeScheduled),isOverdue=Boolean(!isUnscheduled&&x.date&&x.date<today());$('pendingList').insertAdjacentHTML('beforeend',`<article class="pending-item compact ${expanded?'expanded':''} ${isOverdue?'overdue':''}" data-pending-id="${esc(x.id)}"><button class="pending-row" type="button" onclick="togglePendingDetails('${x.id}')" aria-expanded="${expanded}"><span class="pending-order">${i+1}</span><span class="pending-row-main"><span class="pending-row-top"><strong>MRN ${esc(x.mrn)}</strong><span class="pending-date-badge ${x.date===today()?'today':''} ${isOverdue?'overdue':''}">${isUnscheduled?'To be booked':`${isOverdue?'Overdue · ':''}${esc(pendingDateLabel(x.date))}${x.time?` · ${esc(x.time)}`:''}`}</span></span><span class="pending-row-procedures">${procedures.map(esc).join(' · ')||'No procedure'}</span></span><span class="pending-chevron">${expanded?'⌃':'⌄'}</span></button><div class="pending-details" ${expanded?'':'hidden'}><div class="pending-tags">${procedures.map(p=>`<span class="tag">${esc(p)}</span>`).join('')}</div><p class="pending-calendar-meta">${isUnscheduled?'Waiting for booking date and time':(x.time?`${esc(x.time)} · ${Number(x.durationMinutes)||calculatedPendingDuration(procedures)} min`:'No start time set')}</p>${x.note?`<p class="pending-note">${esc(x.note)}</p>`:''}<div class="pending-actions">${isUnscheduled?`<button class="primary-btn compact-btn" type="button" onclick="event.stopPropagation();openPendingBook('${x.id}')">Book</button>`:`<button class="primary-btn compact-btn" type="button" onclick="event.stopPropagation();startPending('${x.id}')">Start</button><button class="icon-btn calendar-btn ${pendingCalendarStatus(x)}" type="button" aria-label="${pendingCalendarStatus(x)==='added'?'Added to calendar':pendingCalendarStatus(x)==='update'?'Update calendar':'Add to calendar'}" title="${pendingCalendarStatus(x)==='added'?'Added to calendar':pendingCalendarStatus(x)==='update'?'Update calendar':'Add to calendar'}" onclick="event.stopPropagation();addPendingToCalendar('${x.id}')">${pendingCalendarStatus(x)==='added'?'✓':pendingCalendarStatus(x)==='update'?'↻':'📅'}</button>${isOverdue?`<button class="secondary-btn compact-btn move-schedule-btn move-booking-btn" type="button" onclick="event.stopPropagation();movePendingToSchedule('${x.id}')">Move to Booking</button>`:''}` }<button class="icon-btn" type="button" aria-label="Edit pending case" title="Edit" onclick="event.stopPropagation();${isUnscheduled?'editPendingDetails':'editPending'}('${x.id}')">✏️</button><button class="icon-btn delete pending-delete-btn" type="button" aria-label="Delete pending case" title="Delete" onclick="event.stopPropagation();deletePending('${x.id}')">🗑️</button></div></div></article>`)})
 }
-window.editPending=editPending;window.deletePending=deletePending;window.movePendingToSchedule=movePendingToSchedule;window.startPending=startPending;window.addPendingToCalendar=addPendingToCalendar;window.togglePendingDetails=togglePendingDetails;
+window.editPending=editPending;window.editPendingDetails=editPendingDetails;window.openPendingBook=openPendingBook;window.deletePending=deletePending;window.movePendingToSchedule=movePendingToSchedule;window.startPending=startPending;window.addPendingToCalendar=addPendingToCalendar;window.togglePendingDetails=togglePendingDetails;
 
 // Endoscopy module
 const endoForm=$('endoscopyForm');

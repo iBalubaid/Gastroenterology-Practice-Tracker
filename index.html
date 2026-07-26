@@ -486,5 +486,26 @@
 <script async="" defer="" src="https://accounts.google.com/gsi/client"></script>
 <script src="app.js"></script>
 <div aria-label="Application version" class="version-stamp">v3.10.12 Private Statistics Dashboard</div>
+
+<div class="pending-book-modal" id="pendingBookModal" hidden>
+  <div class="pending-book-backdrop" data-close-book-modal></div>
+  <section class="pending-book-sheet" role="dialog" aria-modal="true" aria-labelledby="pendingBookTitle">
+    <div class="pending-book-header">
+      <div><p class="eyebrow">Quick booking</p><h2 id="pendingBookTitle">Book pending patient</h2><p id="pendingBookPatient" class="pending-book-patient"></p></div>
+      <button class="icon-btn" id="closePendingBookBtn" type="button" aria-label="Close">×</button>
+    </div>
+    <form id="pendingBookForm">
+      <input id="pendingBookId" type="hidden"/>
+      <div class="form-grid pending-book-grid">
+        <label><span>Date</span><input id="pendingBookDate" type="date" required/></label>
+        <label><span>Start time</span><select id="pendingBookTime" required><option value="">Select time</option></select></label>
+        <label><span>Duration (minutes)</span><input id="pendingBookDuration" type="number" min="5" step="5" required/></label>
+      </div>
+      <div class="form-message" id="pendingBookMessage"></div>
+      <div class="form-actions pending-book-actions"><button class="secondary-btn" id="cancelPendingBookBtn" type="button">Cancel</button><button class="primary-btn" type="submit">Book</button></div>
+    </form>
+  </section>
+</div>
+
 </body>
 </html>
