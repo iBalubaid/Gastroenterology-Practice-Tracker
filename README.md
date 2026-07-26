@@ -1,3 +1,3 @@
-# HMG GI Tracker Phone v1.5.7
+# HMG GI Tracker Phone v1.7.0
 
-Open `index.html` in a browser. Pending view tabs are now displayed as one uniform four-tab row.
+Open `index.html` in your browser. Pending Edit now always provides full scheduling fields, including optional start time.
