@@ -1522,3 +1522,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     padding:7px 2px;
   }
 }
+
+
+/* v1.5.9 — concise Schedule tab and overdue rescheduling action */
+.move-schedule-btn{white-space:nowrap}
+@media(max-width:390px){.move-schedule-btn{min-width:68px;padding-inline:9px}}

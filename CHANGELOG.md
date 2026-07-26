@@ -1,5 +1,5 @@
-# Version 1.5.8
+# v1.5.9
 
-- Keeps Queue, Today, Week, and To schedule labels fully inside equal tab boxes.
-- Removes the extra Pending views label and the descriptive summary text outside the tab row.
-- Preserves all Pending data, counters, filters, and storage keys.
+- Renamed the Pending `To schedule` tab to `Schedule`.
+- Added `Schedule` action for overdue cases.
+- Moving an overdue case clears date/time/calendar status while preserving MRN, hospital, procedures, and notes.
