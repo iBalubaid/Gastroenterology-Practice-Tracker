@@ -1,3 +1,3 @@
-# HMG GI Tracker Phone v1.5.5
+# HMG GI Tracker Phone v1.5.7
 
-Open `index.html` in a browser. Existing browser-stored data and backup files remain compatible.
+Open `index.html` in a browser. Pending view tabs are now displayed as one uniform four-tab row.

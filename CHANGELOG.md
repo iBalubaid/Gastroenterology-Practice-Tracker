@@ -1,7 +1,5 @@
-# HMG GI Tracker v1.5.6
+# HMG GI Tracker v1.5.7
 
-- Added a lightweight **To be scheduled** option to Pending cases.
-- Added a separate **To schedule** Pending view and live count.
-- Cases marked To be scheduled do not require a date or time.
-- Scheduling a case is done by editing it, assigning a date/time, and clearing the option.
-- Existing Pending records and storage keys remain compatible.
+- Made Queue, Today, Week, and To schedule tabs equal in width and height.
+- Standardized spacing, alignment, typography, and count positioning across all Pending view tabs.
+- Preserved all existing data, storage keys, and Pending behavior.

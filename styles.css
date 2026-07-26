@@ -1468,3 +1468,36 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 .pending-view-tabs{flex-wrap:wrap}
 .pending-item .pending-date-badge:has(+ *){}
 @media(max-width:640px){.pending-schedule-toggle{padding:11px 12px}.pending-view-btn{min-width:calc(50% - 5px)}}
+
+/* v1.5.7 — uniform Pending view tabs */
+.pending-view-tabs{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:8px !important;
+  align-items:stretch;
+}
+.pending-view-tabs .pending-view-btn{
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  padding:9px 6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  text-align:center;
+  line-height:1.1;
+  white-space:nowrap;
+}
+.pending-view-tabs .pending-view-btn span{
+  flex:0 0 auto;
+}
+@media(max-width:390px){
+  .pending-view-tabs{gap:6px !important;}
+  .pending-view-tabs .pending-view-btn{
+    min-height:42px;
+    padding:8px 3px;
+    font-size:.72rem;
+    gap:3px;
+  }
+}
