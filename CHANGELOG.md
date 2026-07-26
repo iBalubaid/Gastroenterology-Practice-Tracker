@@ -6,3 +6,8 @@
 - Kept **Edit** separate for case details; scheduling fields are hidden when editing a Booking case.
 - Booking a patient automatically returns the case to Queue, Today, or Week.
 - Preserved all existing records, storage keys, calendar export, and Pending workflow.
+
+## v1.6.4
+- Fixed the Booking Book button by loading app.js after the quick-booking modal markup.
+- The Book sheet now initializes correctly and opens with Date, Start time, and Duration.
+- No layout, storage-key, or workflow changes.
