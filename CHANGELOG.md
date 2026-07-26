@@ -1,5 +1,7 @@
-# v1.5.9
+# HMG GI Tracker Phone v1.6.1
 
-- Renamed the Pending `To schedule` tab to `Schedule`.
-- Added `Schedule` action for overdue cases.
-- Moving an overdue case clears date/time/calendar status while preserving MRN, hospital, procedures, and notes.
+- Booking cases can now be opened with the normal Edit/Set date action.
+- Date, time, duration, hospital, procedures, and notes are editable.
+- Saving with a date automatically moves the case out of Booking into Queue, Today, or Week.
+- Saving without a date keeps the case in Booking.
+- Existing data and storage keys remain unchanged.
