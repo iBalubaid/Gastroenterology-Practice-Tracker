@@ -1458,3 +1458,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   -webkit-touch-callout:none;
   touch-action:manipulation;
 }
+
+
+/* Pending: lightweight To be scheduled workflow */
+.pending-schedule-toggle{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;margin:10px 0 14px;border:1px solid var(--border);border-radius:14px;background:var(--surface-soft);cursor:pointer}
+.pending-schedule-toggle input{width:20px;height:20px;margin-top:2px;accent-color:var(--primary)}
+.pending-schedule-toggle span{display:flex;flex-direction:column;gap:2px}
+.pending-schedule-toggle small{color:var(--muted);line-height:1.35}
+.pending-view-tabs{flex-wrap:wrap}
+.pending-item .pending-date-badge:has(+ *){}
+@media(max-width:640px){.pending-schedule-toggle{padding:11px 12px}.pending-view-btn{min-width:calc(50% - 5px)}}

@@ -1,6 +1,7 @@
-# HMG GI Tracker Phone v1.5.5
+# HMG GI Tracker v1.5.6
 
-- Restored the dedicated Quick Interventions section for Polypectomy and Clips.
-- Preserved quick counts 1–4 plus unrestricted direct numeric entry and −/+ controls.
-- Removed Polypectomy and Clip from the Additional Procedures grid to avoid duplication.
-- Preserved the current Main Procedure layout, date-field normalization, iPhone tap handling, flags, Pending calendar, and all storage keys.
+- Added a lightweight **To be scheduled** option to Pending cases.
+- Added a separate **To schedule** Pending view and live count.
+- Cases marked To be scheduled do not require a date or time.
+- Scheduling a case is done by editing it, assigning a date/time, and clearing the option.
+- Existing Pending records and storage keys remain compatible.
