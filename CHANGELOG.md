@@ -1,5 +1,7 @@
-# HMG GI Tracker Phone v1.7.3
+# HMG GI Tracker Phone v1.7.4
 
-- Private Dashboard estimated income now separates Clinic and Endoscopy income for Fayhaa and Mohammadiyah.
-- Added hospital subtotals and combined Clinic, Endoscopy, and Grand Total values for Today, This Week, and This Month.
-- Income remains visible only after unlocking the Private Dashboard.
+- Counts FibroScan and SIBO breath testing as Clinic income in private financial summaries.
+- Adds Clinic average income per recorded clinic hour for Today, This Week, and This Month.
+- Shows Fayhaa, Mohammadiyah, and combined clinic SAR/hour.
+- Displays — when no clinic duration is recorded.
+- Preserves existing records and storage keys.

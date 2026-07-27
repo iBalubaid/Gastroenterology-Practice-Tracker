@@ -603,7 +603,7 @@ function renderPerformanceDashboard(){if(!incomeUnlocked||!$('perfSessions'))ret
 const DEFAULT_FEES={
   'Inpatient Initial Consultation':110,
   'Inpatient Follow-up':110,
-  'New Consultation':110,'Follow-up Consultation':110,'EGD':700,'Colonoscopy':680,'Flex Sig':300,'Fibroscan':264,'ERCP':2000,'EUS':4800,
+  'New Consultation':110,'Follow-up Consultation':110,'EGD':700,'Colonoscopy':680,'Flex Sig':300,'Fibroscan':264,'SIBO Breath Test':0,'ERCP':2000,'EUS':4800,
   'Polypectomy':214,'Clip':56,'pH Monitoring':800,'Sclerotherapy':357,'Variceal Banding':611,
   'PEG Tube Insertion':1575,'PEG Tube Replacement':1680,'Foreign Body Removal':0,'Metallic Biliary Stenting':3200,
   'Duodenal Stenting':0,'Esophageal Stenting':0,'Colonic Stenting':0,'On-call Night':500
@@ -763,14 +763,14 @@ function incomeItemsForMonth(month,hospital='all'){
   const followUpCount=clinicRows.reduce((s,e)=>s+Number(e.followUps||0),0);
   items.push({name:'Follow-up Consultation',category:'clinic',count:followUpCount,fee:fees['Follow-up Consultation']??fees['New Consultation']??0});
   const endoRows=endoState.entries.filter(e=>e.date?.slice(0,7)===month&&(hospital==='all'||e.hospital===hospital));
-  const procNames=['EGD','Colonoscopy','Flex Sig','Fibroscan','ERCP','EUS','PEG Tube Insertion','PEG Tube Replacement','Foreign Body Removal','pH Monitoring'];
+  const procNames=['EGD','Colonoscopy','Flex Sig','Fibroscan','SIBO Breath Test','ERCP','EUS','PEG Tube Insertion','PEG Tube Replacement','Foreign Body Removal','pH Monitoring'];
   const counts=Object.fromEntries(procNames.map(n=>[n,0]));
   let polypectomy=0,clips=0,sclerotherapy=0,banding=0,metallic=0,duodenal=0,esophageal=0,colonic=0;
   endoRows.forEach(e=>{
     validProcedures(e).forEach(raw=>{const n=raw==='PEG Tube'?'PEG Tube Insertion':raw;if(n in counts)counts[n]++});
     const x=e.extras||{};polypectomy+=Number(x.polypectomy||0);clips+=Number(x.clipping||0);sclerotherapy+=x.sclerotherapy?1:0;banding+=x.varicealBanding?1:0;metallic+=x.metallicBiliaryStenting?1:0;duodenal+=x.duodenalStenting?1:0;esophageal+=x.esophagealStenting?1:0;colonic+=x.colonicStenting?1:0;
   });
-  procNames.forEach(name=>items.push({name,category:'procedure',count:counts[name],fee:fees[name]||0}));
+  procNames.forEach(name=>items.push({name,category:(name==='Fibroscan'||name==='SIBO Breath Test')?'clinic':'procedure',count:counts[name],fee:fees[name]||0}));
   [['Polypectomy',polypectomy],['Clip',clips],['Sclerotherapy',sclerotherapy],['Variceal Banding',banding],['Metallic Biliary Stenting',metallic],['Duodenal Stenting',duodenal],['Esophageal Stenting',esophageal],['Colonic Stenting',colonic]].forEach(([name,count])=>items.push({name,category:'procedure',count,fee:fees[name]||0}));
   return items.map(x=>({...x,total:x.count*x.fee}));
 }
@@ -855,10 +855,16 @@ function incomeSummaryForRange(startDate,endDate,hospital='all'){
   const endoscopy=endoState.entries.filter(e=>inRange(e.date)&&(hospital==='all'||e.hospital===hospital));
   const newCount=clinics.reduce((s,e)=>s+Number(e.newConsultations||0),0);
   const followCount=clinics.reduce((s,e)=>s+Number(e.followUps||0),0);
-  const clinicIncome=newCount*Number(fees['New Consultation']||0)+followCount*Number(fees['Follow-up Consultation']??fees['New Consultation']??0);
+  const clinicHours=clinics.reduce((s,e)=>s+Math.max(0,Number(e.duration||0)),0);
+  let clinicIncome=newCount*Number(fees['New Consultation']||0)+followCount*Number(fees['Follow-up Consultation']??fees['New Consultation']??0);
   let endoscopyIncome=0;
   endoscopy.forEach(e=>{
-    validProcedures(e).forEach(raw=>{const name=raw==='PEG Tube'?'PEG Tube Insertion':raw;endoscopyIncome+=Number(fees[name]||0)});
+    validProcedures(e).forEach(raw=>{
+      const name=raw==='PEG Tube'?'PEG Tube Insertion':raw;
+      const amount=Number(fees[name]||0);
+      if(name==='Fibroscan'||name==='SIBO Breath Test')clinicIncome+=amount;
+      else endoscopyIncome+=amount;
+    });
     const x=e.extras||{};
     endoscopyIncome+=Number(x.polypectomy||0)*Number(fees['Polypectomy']||0);
     endoscopyIncome+=Number(x.clipping||0)*Number(fees['Clip']||0);
@@ -869,7 +875,7 @@ function incomeSummaryForRange(startDate,endDate,hospital='all'){
     if(x.esophagealStenting)endoscopyIncome+=Number(fees['Esophageal Stenting']||0);
     if(x.colonicStenting)endoscopyIncome+=Number(fees['Colonic Stenting']||0);
   });
-  return {clinic:clinicIncome,endoscopy:endoscopyIncome,total:clinicIncome+endoscopyIncome};
+  return {clinic:clinicIncome,endoscopy:endoscopyIncome,total:clinicIncome+endoscopyIncome,clinicHours,clinicPerHour:clinicHours?clinicIncome/clinicHours:null};
 }
 function renderPrivateIncomePeriods(){
   if(!incomeUnlocked||!$('privateIncomeTodayTotal'))return;
@@ -885,8 +891,10 @@ function renderPrivateIncomePeriods(){
     const combined={
       clinic:fayhaa.clinic+mohammadiya.clinic,
       endoscopy:fayhaa.endoscopy+mohammadiya.endoscopy,
-      total:fayhaa.total+mohammadiya.total
+      total:fayhaa.total+mohammadiya.total,
+      clinicHours:fayhaa.clinicHours+mohammadiya.clinicHours
     };
+    combined.clinicPerHour=combined.clinicHours?combined.clinic/combined.clinicHours:null;
     const values={
       [`privateIncome${period}FayhaaClinic`]:fayhaa.clinic,
       [`privateIncome${period}FayhaaEndoscopy`]:fayhaa.endoscopy,
@@ -899,6 +907,12 @@ function renderPrivateIncomePeriods(){
       [`privateIncome${period}Total`]:combined.total
     };
     Object.entries(values).forEach(([id,value])=>{const el=$(id);if(el)el.textContent=money(value)});
+    const hourlyValues={
+      [`privateIncome${period}FayhaaClinicPerHour`]:fayhaa.clinicPerHour,
+      [`privateIncome${period}MohammadiyaClinicPerHour`]:mohammadiya.clinicPerHour,
+      [`privateIncome${period}CombinedClinicPerHour`]:combined.clinicPerHour
+    };
+    Object.entries(hourlyValues).forEach(([id,value])=>{const el=$(id);if(el)el.textContent=value==null?'—':`${money(value)}/hr`});
   });
 }
 
