@@ -603,7 +603,7 @@ function renderPerformanceDashboard(){if(!incomeUnlocked||!$('perfSessions'))ret
 const DEFAULT_FEES={
   'Inpatient Initial Consultation':110,
   'Inpatient Follow-up':110,
-  'New Consultation':110,'EGD':700,'Colonoscopy':680,'Flex Sig':300,'Fibroscan':264,'ERCP':2000,'EUS':4800,
+  'New Consultation':110,'Follow-up Consultation':110,'EGD':700,'Colonoscopy':680,'Flex Sig':300,'Fibroscan':264,'ERCP':2000,'EUS':4800,
   'Polypectomy':214,'Clip':56,'pH Monitoring':800,'Sclerotherapy':357,'Variceal Banding':611,
   'PEG Tube Insertion':1575,'PEG Tube Replacement':1680,'Foreign Body Removal':0,'Metallic Biliary Stenting':3200,
   'Duodenal Stenting':0,'Esophageal Stenting':0,'Colonic Stenting':0,'On-call Night':500
@@ -760,6 +760,8 @@ function incomeItemsForMonth(month,hospital='all'){
   const clinicRows=clinicState.entries.filter(e=>e.date?.slice(0,7)===month&&(hospital==='all'||clinicHospital(e)===hospital));
   const newCount=clinicRows.reduce((s,e)=>s+Number(e.newConsultations||0),0);
   items.push({name:'New Consultation',category:'clinic',count:newCount,fee:fees['New Consultation']||0});
+  const followUpCount=clinicRows.reduce((s,e)=>s+Number(e.followUps||0),0);
+  items.push({name:'Follow-up Consultation',category:'clinic',count:followUpCount,fee:fees['Follow-up Consultation']??fees['New Consultation']??0});
   const endoRows=endoState.entries.filter(e=>e.date?.slice(0,7)===month&&(hospital==='all'||e.hospital===hospital));
   const procNames=['EGD','Colonoscopy','Flex Sig','Fibroscan','ERCP','EUS','PEG Tube Insertion','PEG Tube Replacement','Foreign Body Removal','pH Monitoring'];
   const counts=Object.fromEntries(procNames.map(n=>[n,0]));
@@ -845,12 +847,51 @@ function privateMonthMetrics(month,hospital='all'){
     income
   };
 }
+function localDateKey(date){const d=new Date(date.getTime()-date.getTimezoneOffset()*60000);return d.toISOString().slice(0,10)}
+function incomeSummaryForRange(startDate,endDate,hospital='all'){
+  const fees=incomeSettings.fees||{};
+  const inRange=date=>date&&date>=startDate&&date<=endDate;
+  const clinics=clinicState.entries.filter(e=>inRange(e.date)&&!isInpatient(e.clinic)&&(hospital==='all'||clinicHospital(e)===hospital));
+  const endoscopy=endoState.entries.filter(e=>inRange(e.date)&&(hospital==='all'||e.hospital===hospital));
+  const newCount=clinics.reduce((s,e)=>s+Number(e.newConsultations||0),0);
+  const followCount=clinics.reduce((s,e)=>s+Number(e.followUps||0),0);
+  const clinicIncome=newCount*Number(fees['New Consultation']||0)+followCount*Number(fees['Follow-up Consultation']??fees['New Consultation']??0);
+  let endoscopyIncome=0;
+  endoscopy.forEach(e=>{
+    validProcedures(e).forEach(raw=>{const name=raw==='PEG Tube'?'PEG Tube Insertion':raw;endoscopyIncome+=Number(fees[name]||0)});
+    const x=e.extras||{};
+    endoscopyIncome+=Number(x.polypectomy||0)*Number(fees['Polypectomy']||0);
+    endoscopyIncome+=Number(x.clipping||0)*Number(fees['Clip']||0);
+    if(x.sclerotherapy)endoscopyIncome+=Number(fees['Sclerotherapy']||0);
+    if(x.varicealBanding)endoscopyIncome+=Number(fees['Variceal Banding']||0);
+    if(x.metallicBiliaryStenting)endoscopyIncome+=Number(fees['Metallic Biliary Stenting']||0);
+    if(x.duodenalStenting)endoscopyIncome+=Number(fees['Duodenal Stenting']||0);
+    if(x.esophagealStenting)endoscopyIncome+=Number(fees['Esophageal Stenting']||0);
+    if(x.colonicStenting)endoscopyIncome+=Number(fees['Colonic Stenting']||0);
+  });
+  return {clinic:clinicIncome,endoscopy:endoscopyIncome,total:clinicIncome+endoscopyIncome};
+}
+function renderPrivateIncomePeriods(){
+  if(!incomeUnlocked||!$('privateIncomeTodayTotal'))return;
+  const now=new Date(),todayKey=localDateKey(now);
+  const monday=new Date(now);const day=(monday.getDay()+6)%7;monday.setDate(monday.getDate()-day);
+  const sunday=new Date(monday);sunday.setDate(sunday.getDate()+6);
+  const monthStart=`${todayKey.slice(0,7)}-01`;
+  const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0);
+  const data={Today:incomeSummaryForRange(todayKey,todayKey),Week:incomeSummaryForRange(localDateKey(monday),localDateKey(sunday)),Month:incomeSummaryForRange(monthStart,localDateKey(monthEnd))};
+  Object.entries(data).forEach(([period,x])=>{
+    const c=$(`privateIncome${period}Clinic`),e=$(`privateIncome${period}Endoscopy`),t=$(`privateIncome${period}Total`);
+    if(c)c.textContent=money(x.clinic);if(e)e.textContent=money(x.endoscopy);if(t)t.textContent=money(x.total);
+  });
+}
+
 function renderPrivateOverview(){
   if(!incomeUnlocked||!$('privateOverviewTarget'))return;
   const month=$('incomeMonth')?.value||currentMonthKey(),m=privateMonthMetrics(month),target=Number(incomeSettings.target||0),pct=target?m.income/target*100:0;
   $('privateOverviewTarget').textContent=money(target);$('privateOverviewIncome').textContent=money(m.income);$('privateOverviewPatients').textContent=m.patients;$('privateOverviewProcedures').textContent=m.procedures;
   $('privateOverviewProgress').style.width=`${Math.min(100,pct)}%`;
   $('privateOverviewStatus').textContent=target?`${pct.toFixed(1)}% of the monthly target achieved. ${money(Math.max(0,target-m.income))} remaining.`:'Set a monthly income target in the Fees section.';
+  renderPrivateIncomePeriods();
 }
 function renderPrivateHospitalCards(){
   if(!incomeUnlocked||!$('privateHospitalCards'))return;
