@@ -882,11 +882,23 @@ function renderPrivateIncomePeriods(){
   Object.entries(ranges).forEach(([period,[start,end]])=>{
     const fayhaa=incomeSummaryForRange(start,end,'HMG Fayhaa');
     const mohammadiya=incomeSummaryForRange(start,end,'HMG Mohammadiya');
-    const total=fayhaa.total+mohammadiya.total;
-    const f=$(`privateIncome${period}Fayhaa`),m=$(`privateIncome${period}Mohammadiya`),t=$(`privateIncome${period}Total`);
-    if(f)f.textContent=money(fayhaa.total);
-    if(m)m.textContent=money(mohammadiya.total);
-    if(t)t.textContent=money(total);
+    const combined={
+      clinic:fayhaa.clinic+mohammadiya.clinic,
+      endoscopy:fayhaa.endoscopy+mohammadiya.endoscopy,
+      total:fayhaa.total+mohammadiya.total
+    };
+    const values={
+      [`privateIncome${period}FayhaaClinic`]:fayhaa.clinic,
+      [`privateIncome${period}FayhaaEndoscopy`]:fayhaa.endoscopy,
+      [`privateIncome${period}FayhaaTotal`]:fayhaa.total,
+      [`privateIncome${period}MohammadiyaClinic`]:mohammadiya.clinic,
+      [`privateIncome${period}MohammadiyaEndoscopy`]:mohammadiya.endoscopy,
+      [`privateIncome${period}MohammadiyaTotal`]:mohammadiya.total,
+      [`privateIncome${period}CombinedClinic`]:combined.clinic,
+      [`privateIncome${period}CombinedEndoscopy`]:combined.endoscopy,
+      [`privateIncome${period}Total`]:combined.total
+    };
+    Object.entries(values).forEach(([id,value])=>{const el=$(id);if(el)el.textContent=money(value)});
   });
 }
 

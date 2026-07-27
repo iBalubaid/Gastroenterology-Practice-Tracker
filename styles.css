@@ -1845,3 +1845,12 @@ body.pending-book-open{overflow:hidden}
 /* v1.7.2: private income hospital breakdown */
 .private-income-period small{min-width:0;overflow-wrap:anywhere}
 @media(max-width:390px){.private-income-period>div{gap:8px}.private-income-period small{font-size:.78rem}.private-income-period strong{font-size:.94rem}}
+
+/* Private income breakdown by hospital and activity */
+.private-income-hospital-block,.private-income-combined-block{padding:10px 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface);display:grid;gap:0}
+.private-income-hospital-block h3,.private-income-combined-block h3{margin:0 0 4px;font-size:.9rem;color:var(--text)}
+.private-income-hospital-block>div,.private-income-combined-block>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--border)}
+.private-income-hospital-block>div:last-child,.private-income-combined-block>div:last-child{border-bottom:0}
+.private-income-subtotal strong{color:var(--primary)}
+.private-income-combined-block{background:color-mix(in srgb,var(--primary) 7%,var(--surface))}
+.private-income-combined-block h3{color:var(--primary)}
