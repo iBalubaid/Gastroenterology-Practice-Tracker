@@ -878,10 +878,15 @@ function renderPrivateIncomePeriods(){
   const sunday=new Date(monday);sunday.setDate(sunday.getDate()+6);
   const monthStart=`${todayKey.slice(0,7)}-01`;
   const monthEnd=new Date(now.getFullYear(),now.getMonth()+1,0);
-  const data={Today:incomeSummaryForRange(todayKey,todayKey),Week:incomeSummaryForRange(localDateKey(monday),localDateKey(sunday)),Month:incomeSummaryForRange(monthStart,localDateKey(monthEnd))};
-  Object.entries(data).forEach(([period,x])=>{
-    const c=$(`privateIncome${period}Clinic`),e=$(`privateIncome${period}Endoscopy`),t=$(`privateIncome${period}Total`);
-    if(c)c.textContent=money(x.clinic);if(e)e.textContent=money(x.endoscopy);if(t)t.textContent=money(x.total);
+  const ranges={Today:[todayKey,todayKey],Week:[localDateKey(monday),localDateKey(sunday)],Month:[monthStart,localDateKey(monthEnd)]};
+  Object.entries(ranges).forEach(([period,[start,end]])=>{
+    const fayhaa=incomeSummaryForRange(start,end,'HMG Fayhaa');
+    const mohammadiya=incomeSummaryForRange(start,end,'HMG Mohammadiya');
+    const total=fayhaa.total+mohammadiya.total;
+    const f=$(`privateIncome${period}Fayhaa`),m=$(`privateIncome${period}Mohammadiya`),t=$(`privateIncome${period}Total`);
+    if(f)f.textContent=money(fayhaa.total);
+    if(m)m.textContent=money(mohammadiya.total);
+    if(t)t.textContent=money(total);
   });
 }
 

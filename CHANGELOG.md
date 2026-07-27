@@ -1,7 +1,6 @@
-# HMG GI Tracker Phone v1.7.1
+# Changelog
 
-- Added private-only Estimated Income summary to the unlocked Private Dashboard.
-- Shows Clinic, Endoscopy, and Total estimated income for Today, This week, and This month.
-- No income figures appear in Clinic or Endoscopy entry forms.
-- Added follow-up consultation estimation using the configured follow-up fee (default SAR 110).
-- Existing storage keys and records remain compatible.
+## v1.7.2
+- Private Dashboard estimated income now shows Fayhaa, Mohammadiyah, and combined total for Today, This Week, and This Month.
+- Income remains hidden outside the unlocked Private Dashboard.
+- Preserved existing storage keys and fee calculations.

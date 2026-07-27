@@ -1841,3 +1841,7 @@ body.pending-book-open{overflow:hidden}
 .private-income-period strong{font-size:1rem;white-space:nowrap}
 .private-income-period-total strong{font-size:1.16rem;color:var(--primary)}
 @media(max-width:760px){.private-income-period-grid{grid-template-columns:1fr}.private-income-period{padding:15px}}
+
+/* v1.7.2: private income hospital breakdown */
+.private-income-period small{min-width:0;overflow-wrap:anywhere}
+@media(max-width:390px){.private-income-period>div{gap:8px}.private-income-period small{font-size:.78rem}.private-income-period strong{font-size:.94rem}}
