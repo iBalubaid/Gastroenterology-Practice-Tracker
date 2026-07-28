@@ -1,7 +1,3 @@
-# HMG GI Tracker Phone v1.7.0
+HMG GI Tracker Phone v1.7.5
 
-Open `index.html` in your browser. Pending Edit now always provides full scheduling fields, including optional start time.
-
-
-## v1.7.2
-The Private Dashboard income summary is grouped by Fayhaa, Mohammadiyah, and total.
+Adds an Outpatient Clinic overview to the unlocked Private Dashboard. The overview uses outpatient consultation income plus FibroScan and SIBO income, divided by total recorded outpatient clinic hours for the current month.

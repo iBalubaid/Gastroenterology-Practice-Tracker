@@ -919,6 +919,13 @@ function renderPrivateIncomePeriods(){
 function renderPrivateOverview(){
   if(!incomeUnlocked||!$('privateOverviewTarget'))return;
   const month=$('incomeMonth')?.value||currentMonthKey(),m=privateMonthMetrics(month),target=Number(incomeSettings.target||0),pct=target?m.income/target*100:0;
+  const monthStart=`${month}-01`;
+  const [monthYear,monthNumber]=month.split('-').map(Number);
+  const monthEnd=localDateKey(new Date(monthYear,monthNumber,0));
+  const outpatient=incomeSummaryForRange(monthStart,monthEnd,'all');
+  if($('outpatientOverviewIncome'))$('outpatientOverviewIncome').textContent=money(outpatient.clinic);
+  if($('outpatientOverviewHours'))$('outpatientOverviewHours').textContent=`${Number(outpatient.clinicHours||0).toLocaleString(undefined,{maximumFractionDigits:2})} h`;
+  if($('outpatientOverviewPerHour'))$('outpatientOverviewPerHour').textContent=outpatient.clinicPerHour==null?'—':`${money(outpatient.clinicPerHour)}/hr`;
   $('privateOverviewTarget').textContent=money(target);$('privateOverviewIncome').textContent=money(m.income);$('privateOverviewPatients').textContent=m.patients;$('privateOverviewProcedures').textContent=m.procedures;
   $('privateOverviewProgress').style.width=`${Math.min(100,pct)}%`;
   $('privateOverviewStatus').textContent=target?`${pct.toFixed(1)}% of the monthly target achieved. ${money(Math.max(0,target-m.income))} remaining.`:'Set a monthly income target in the Fees section.';
