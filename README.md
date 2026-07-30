@@ -1,3 +1,3 @@
-HMG GI Tracker Phone v1.7.5
+# HMG GI Tracker Phone v1.7.6
 
-Adds an Outpatient Clinic overview to the unlocked Private Dashboard. The overview uses outpatient consultation income plus FibroScan and SIBO income, divided by total recorded outpatient clinic hours for the current month.
+Open `index.html` in Safari or another modern browser. In the unlocked Private Dashboard, choose a month and tap **Generate Monthly PDF**. Use the system print sheet and select **Save as PDF** or share the PDF.

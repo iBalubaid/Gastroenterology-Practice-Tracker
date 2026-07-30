@@ -1864,3 +1864,10 @@ body.pending-book-open{overflow:hidden}
 .outpatient-overview-average{background:var(--primary-soft,#eef4ff)!important;border-color:rgba(23,92,211,.22)!important}
 .outpatient-overview-average strong{color:var(--primary,#175cd3);font-size:1.18rem}
 @media(max-width:430px){.outpatient-overview-grid{grid-template-columns:1fr 1fr}.outpatient-overview-average{grid-column:1/-1}.outpatient-overview-grid article{padding:12px}}
+
+/* Monthly PDF report */
+.monthly-report-panel{margin-top:18px;padding:16px;border:1px solid var(--border);border-radius:18px;background:var(--surface-soft,rgba(36,99,235,.05));display:grid;gap:14px}
+.monthly-report-panel h3{margin:2px 0 4px}.monthly-report-panel .section-help{margin:0}
+.monthly-report-controls{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-items:end}
+.monthly-report-controls label{margin:0}.monthly-report-controls .primary-btn{width:100%;justify-content:center}
+@media(min-width:700px){.monthly-report-controls{grid-template-columns:minmax(180px,240px) auto}.monthly-report-controls .primary-btn{width:auto}}

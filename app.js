@@ -1111,3 +1111,95 @@ if (pendingProcedureChoicePanel) {
     if (event.target.closest('.check-card')) event.preventDefault();
   }, { passive: false });
 }
+
+function monthlyReportMonthLabel(month){
+  if(!/^\d{4}-\d{2}$/.test(month||''))return month||'';
+  const [year,number]=month.split('-').map(Number);
+  return new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric'}).format(new Date(year,number-1,1));
+}
+function monthlyReportProcedureName(raw){return raw==='PEG Tube'?'PEG Tube Insertion':raw}
+function monthlyReportData(month){
+  const hospitals=['HMG Fayhaa','HMG Mohammadiya'];
+  const fees=incomeSettings.fees||{};
+  const clinicRows=privateMonthClinicRows(month,'all');
+  const endoscopyRows=privateMonthProcedureRows(month,'all');
+  const hospitalRows=hospitals.map(hospital=>{
+    const clinics=privateMonthClinicRows(month,hospital);
+    const procedures=privateMonthProcedureRows(month,hospital);
+    const newConsultations=clinics.reduce((s,e)=>s+Number(e.newConsultations||0),0);
+    const followUps=clinics.reduce((s,e)=>s+Number(e.followUps||0),0);
+    const totalPatients=clinics.reduce((s,e)=>s+Number(e.totalPatients??(Number(e.newConsultations||0)+Number(e.followUps||0))),0);
+    const clinicHours=clinics.reduce((s,e)=>s+Math.max(0,Number(e.duration||0)),0);
+    let fibroscan=0,sibo=0,endoscopyIncome=0,interventions=0;
+    procedures.forEach(entry=>{
+      validProcedures(entry).forEach(raw=>{
+        const name=monthlyReportProcedureName(raw),amount=Number(fees[name]||0);
+        if(name==='Fibroscan')fibroscan+=1;
+        else if(name==='SIBO Breath Test')sibo+=1;
+        else endoscopyIncome+=amount;
+      });
+      const x=entry.extras||{};
+      interventions+=Number(x.polypectomy||0)+Number(x.clipping||0)+['sclerotherapy','varicealBanding','metallicBiliaryStenting','duodenalStenting','esophagealStenting','colonicStenting'].filter(k=>x[k]).length;
+      endoscopyIncome+=Number(x.polypectomy||0)*Number(fees['Polypectomy']||0)+Number(x.clipping||0)*Number(fees['Clip']||0);
+      if(x.sclerotherapy)endoscopyIncome+=Number(fees['Sclerotherapy']||0);
+      if(x.varicealBanding)endoscopyIncome+=Number(fees['Variceal Banding']||0);
+      if(x.metallicBiliaryStenting)endoscopyIncome+=Number(fees['Metallic Biliary Stenting']||0);
+      if(x.duodenalStenting)endoscopyIncome+=Number(fees['Duodenal Stenting']||0);
+      if(x.esophagealStenting)endoscopyIncome+=Number(fees['Esophageal Stenting']||0);
+      if(x.colonicStenting)endoscopyIncome+=Number(fees['Colonic Stenting']||0);
+    });
+    const clinicIncome=newConsultations*Number(fees['New Consultation']||0)+fibroscan*Number(fees['Fibroscan']||0)+sibo*Number(fees['SIBO Breath Test']||0);
+    return {hospital,newConsultations,followUps,totalPatients,clinicHours,fibroscan,sibo,clinicIncome,endoscopyIncome,totalIncome:clinicIncome+endoscopyIncome,clinicIncomePerHour:clinicHours?clinicIncome/clinicHours:null,procedureEntries:procedures.length,interventions};
+  });
+  const procedureCounts={};
+  const interventionCounts={Polypectomy:0,Clips:0,'Variceal banding':0,Sclerotherapy:0,'Metallic biliary stenting':0,'Duodenal stenting':0,'Esophageal stenting':0,'Colonic stenting':0};
+  endoscopyRows.forEach(entry=>{
+    validProcedures(entry).forEach(raw=>{const name=monthlyReportProcedureName(raw);procedureCounts[name]=(procedureCounts[name]||0)+1});
+    const x=entry.extras||{};
+    interventionCounts.Polypectomy+=Number(x.polypectomy||0);interventionCounts.Clips+=Number(x.clipping||0);
+    if(x.varicealBanding)interventionCounts['Variceal banding']++;
+    if(x.sclerotherapy)interventionCounts.Sclerotherapy++;
+    if(x.metallicBiliaryStenting)interventionCounts['Metallic biliary stenting']++;
+    if(x.duodenalStenting)interventionCounts['Duodenal stenting']++;
+    if(x.esophagealStenting)interventionCounts['Esophageal stenting']++;
+    if(x.colonicStenting)interventionCounts['Colonic stenting']++;
+  });
+  const combined=hospitalRows.reduce((a,x)=>({newConsultations:a.newConsultations+x.newConsultations,followUps:a.followUps+x.followUps,totalPatients:a.totalPatients+x.totalPatients,clinicHours:a.clinicHours+x.clinicHours,fibroscan:a.fibroscan+x.fibroscan,sibo:a.sibo+x.sibo,clinicIncome:a.clinicIncome+x.clinicIncome,endoscopyIncome:a.endoscopyIncome+x.endoscopyIncome,totalIncome:a.totalIncome+x.totalIncome,procedureEntries:a.procedureEntries+x.procedureEntries,interventions:a.interventions+x.interventions}),{newConsultations:0,followUps:0,totalPatients:0,clinicHours:0,fibroscan:0,sibo:0,clinicIncome:0,endoscopyIncome:0,totalIncome:0,procedureEntries:0,interventions:0});
+  combined.clinicIncomePerHour=combined.clinicHours?combined.clinicIncome/combined.clinicHours:null;
+  return {month,label:monthlyReportMonthLabel(month),hospitalRows,combined,procedureCounts,interventionCounts,clinicSessions:clinicRows.length};
+}
+function monthlyReportHtml(data){
+  const n=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:2});
+  const m=v=>money(Number(v||0));
+  const ratio=(x)=>x.totalPatients?`${x.newConsultations} / ${x.totalPatients} (${(x.newConsultations/x.totalPatients*100).toFixed(1)}%)`:`0 / 0 (0%)`;
+  const hospitalTable=data.hospitalRows.map(x=>`<tr><td>${esc(x.hospital.replace('HMG ',''))}</td><td>${x.newConsultations}</td><td>${x.totalPatients}</td><td>${ratio(x)}</td><td>${x.fibroscan}</td><td>${x.sibo}</td><td>${n(x.clinicHours)}</td><td>${x.clinicIncomePerHour==null?'—':m(x.clinicIncomePerHour)}</td></tr>`).join('');
+  const procedureRows=Object.entries(data.procedureCounts).sort((a,b)=>b[1]-a[1]).map(([name,count])=>`<tr><td>${esc(name)}</td><td>${count}</td></tr>`).join('')||'<tr><td colspan="2">No procedures recorded</td></tr>';
+  const interventionRows=Object.entries(data.interventionCounts).filter(([,count])=>count>0).sort((a,b)=>b[1]-a[1]).map(([name,count])=>`<tr><td>${esc(name)}</td><td>${count}</td></tr>`).join('')||'<tr><td colspan="2">No therapeutic interventions recorded</td></tr>';
+  const incomeRows=data.hospitalRows.map(x=>`<tr><td>${esc(x.hospital.replace('HMG ',''))}</td><td>${m(x.clinicIncome)}</td><td>${m(x.endoscopyIncome)}</td><td>${m(x.totalIncome)}</td></tr>`).join('');
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HMG GI Monthly Report - ${esc(data.label)}</title><style>
+  @page{size:A4;margin:12mm}*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#14213d;margin:0;font-size:10.5pt;line-height:1.35}header{border-bottom:3px solid #2463eb;padding-bottom:10px;margin-bottom:14px}h1{font-size:21pt;margin:0 0 3px}h2{font-size:13pt;margin:18px 0 7px;color:#1746a2}p{margin:3px 0}.sub{color:#64748b}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.kpi{border:1px solid #dbe4f0;border-radius:9px;padding:9px}.kpi span{display:block;color:#64748b;font-size:8.5pt}.kpi strong{display:block;font-size:14pt;margin-top:2px}table{width:100%;border-collapse:collapse;margin:5px 0 12px}th,td{border:1px solid #dbe4f0;padding:6px;text-align:left;vertical-align:top}th{background:#eef4ff;font-size:8.5pt}td:not(:first-child),th:not(:first-child){text-align:right}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.note{padding:8px 10px;background:#f5f8fd;border-left:3px solid #2463eb;color:#475569;font-size:9pt}.footer{margin-top:15px;padding-top:7px;border-top:1px solid #dbe4f0;color:#64748b;font-size:8pt;text-align:center}.no-print{position:fixed;right:12px;top:12px;background:#2463eb;color:#fff;border:0;border-radius:8px;padding:9px 13px;font-weight:700}@media print{.no-print{display:none}.page-break{break-before:page}}@media(max-width:700px){.kpis,.two{grid-template-columns:1fr}.no-print{position:static;display:block;margin:10px auto}}
+  </style></head><body><button class="no-print" onclick="window.print()">Print / Save PDF</button><header><h1>HMG Gastroenterology Practice Summary</h1><p><strong>Dr. Ibrahim Balubaid</strong></p><p class="sub">${esc(data.label)}</p></header>
+  <section class="kpis"><div class="kpi"><span>Total income</span><strong>${m(data.combined.totalIncome)}</strong></div><div class="kpi"><span>Clinic income</span><strong>${m(data.combined.clinicIncome)}</strong></div><div class="kpi"><span>Endoscopy income</span><strong>${m(data.combined.endoscopyIncome)}</strong></div><div class="kpi"><span>Clinic sessions</span><strong>${data.clinicSessions}</strong></div><div class="kpi"><span>Endoscopy cases</span><strong>${data.combined.procedureEntries}</strong></div><div class="kpi"><span>Clinic income/hour</span><strong>${data.combined.clinicIncomePerHour==null?'—':m(data.combined.clinicIncomePerHour)}</strong></div></section>
+  <h2>Outpatient performance by hospital</h2><table><thead><tr><th>Hospital</th><th>New</th><th>Total patients</th><th>New / total</th><th>FibroScan</th><th>SIBO</th><th>Clinic hours</th><th>Income/hour</th></tr></thead><tbody>${hospitalTable}<tr><th>Combined</th><th>${data.combined.newConsultations}</th><th>${data.combined.totalPatients}</th><th>${ratio(data.combined)}</th><th>${data.combined.fibroscan}</th><th>${data.combined.sibo}</th><th>${n(data.combined.clinicHours)}</th><th>${data.combined.clinicIncomePerHour==null?'—':m(data.combined.clinicIncomePerHour)}</th></tr></tbody></table>
+  <div class="note"><strong>Clinic income/hour:</strong> income from new outpatient consultations, FibroScan, and SIBO only, divided by total outpatient clinic hours. Follow-up and inpatient consultations are excluded.</div>
+  <h2>Income summary</h2><table><thead><tr><th>Hospital</th><th>Clinic</th><th>Endoscopy</th><th>Total</th></tr></thead><tbody>${incomeRows}<tr><th>Combined</th><th>${m(data.combined.clinicIncome)}</th><th>${m(data.combined.endoscopyIncome)}</th><th>${m(data.combined.totalIncome)}</th></tr></tbody></table>
+  <div class="two"><section><h2>Procedure breakdown</h2><table><thead><tr><th>Procedure</th><th>Count</th></tr></thead><tbody>${procedureRows}</tbody></table></section><section><h2>Therapeutic interventions</h2><table><thead><tr><th>Intervention</th><th>Count</th></tr></thead><tbody>${interventionRows}</tbody></table></section></div>
+  <div class="footer">Generated by HMG GI Tracker · ${new Date().toLocaleDateString('en-GB')}</div><script>setTimeout(()=>window.print(),500)<\/script></body></html>`;
+}
+function generateMonthlyPdf(){
+  const month=$('monthlyReportMonth')?.value||$('incomeMonth')?.value||currentMonthKey();
+  if(!/^\d{4}-\d{2}$/.test(month))return msg('monthlyPdfMessage','Select a valid report month.');
+  const data=monthlyReportData(month),report=window.open('','_blank');
+  if(!report)return msg('monthlyPdfMessage','Allow pop-ups for this page, then try again.');
+  report.document.open();report.document.write(monthlyReportHtml(data));report.document.close();
+  msg('monthlyPdfMessage',`Monthly report prepared for ${data.label}. Choose Print, then Save as PDF.`);
+}
+function initMonthlyPdfReport(){
+  const month=$('monthlyReportMonth'),button=$('generateMonthlyPdfBtn');
+  if(!month||!button)return;
+  month.value=$('incomeMonth')?.value||currentMonthKey();
+  month.addEventListener('change',()=>{if($('incomeMonth'))$('incomeMonth').value=month.value});
+  button.addEventListener('click',generateMonthlyPdf);
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initMonthlyPdfReport);else initMonthlyPdfReport();
