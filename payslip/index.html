@@ -1,1 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Desktop reconciliation companion for the Gastroenterology Practice Tracker">
+<title>HMG GI Payslip Review</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <p class="eyebrow">HMG Gastroenterology</p>
+    <h1>HMG GI Payslip Review</h1>
+    <p class="subtitle">Correlate recorded consultation counts and endoscopy procedures with Fayhaa and Mohammadiya payslips.</p>
+  </div>
+  <div class="status-pill" id="workspaceStatus">No backup imported</div>
+</header>
 
+<main class="shell">
+  <aside class="sidebar">
+    <button class="nav active" data-view="setup">1. Monthly Setup</button>
+    <button class="nav" data-view="overview">2. Overview</button>
+    <button class="nav" data-view="consultations">3. Consultations</button>
+    <button class="nav" data-view="procedures">4. Procedures</button>
+    <button class="nav" data-view="review">5. Needs Review</button>
+    <button class="nav" data-view="final">6. Summary</button>
+    <button class="nav" data-view="outstanding">7. Unpaid / Follow-up</button>
+    <button class="nav" data-view="mappings">8. Code Mappings</button>
+    <button class="nav" data-view="export">9. Export</button>
+  </aside>
+
+  <section class="content">
+    <section class="view active" id="setupView">
+      <div class="page-head"><div><p class="eyebrow">Monthly workflow</p><h2>Import and reconcile</h2></div></div>
+      <div class="grid two">
+        <article class="card">
+          <h3>1. Import iPhone tracker backup</h3>
+          <p>Use the JSON backup downloaded from your daily iPhone tracker.</p>
+          <label class="drop"><span>Choose tracker backup (.json)</span><input id="backupFile" type="file" accept="application/json,.json">
+<button id="useCurrentDataBtn" type="button" class="secondary">Read Tracker Directly</button></label>
+          <div class="file-note" id="backupFileNote">No file selected</div>
+          <div class="summary-strip" id="backupSummary"></div>
+          <div class="import-check" id="backupCheck"><span class="check-dot"></span><div><strong>Backup check</strong><small>Waiting for a JSON backup.</small></div></div>
+        </article>
+        <article class="card">
+          <h3>2. Select month</h3>
+          <label><span>Reconciliation month</span><input id="monthInput" type="month"></label>
+          <p class="hint">Only tracker entries in this month are compared.</p>
+        </article>
+      </div>
+
+      <div class="grid two">
+        <article class="card hospital-card">
+          <div class="hospital-title"><span class="dot"></span><h3>HMG Fayhaa payslip</h3></div>
+          <label class="drop"><span>Upload PDF, Excel, or CSV</span><input id="fayhaaFile" type="file" accept="application/pdf,.pdf,.xlsx,.xls,.csv,.txt,text/csv,text/plain"></label>
+          <div class="file-note" id="fayhaaNote">No file selected</div>
+          <div class="import-check" id="fayhaaCheck"><span class="check-dot"></span><div><strong>Import check</strong><small>Waiting for a payslip.</small></div></div>
+          <details><summary>Paste payslip text manually (offline fallback)</summary><textarea id="fayhaaText" rows="7" placeholder="Paste Fayhaa payslip text here"></textarea></details>
+        </article>
+        <article class="card hospital-card">
+          <div class="hospital-title"><span class="dot"></span><h3>HMG Mohammadiya payslip</h3></div>
+          <label class="drop"><span>Upload PDF, Excel, or CSV</span><input id="mohFile" type="file" accept="application/pdf,.pdf,.xlsx,.xls,.csv,.txt,text/csv,text/plain"></label>
+          <div class="file-note" id="mohNote">No file selected</div>
+          <div class="import-check" id="mohCheck"><span class="check-dot"></span><div><strong>Import check</strong><small>Waiting for a payslip.</small></div></div>
+          <details><summary>Paste payslip text manually (offline fallback)</summary><textarea id="mohText" rows="7" placeholder="Paste Mohammadiya payslip text here"></textarea></details>
+        </article>
+      </div>
+
+      <article class="card compact">
+        <div class="settings-row">
+          <label><span>Minimum MRN digits</span><input id="minMrn" type="number" min="3" max="15" value="5"></label>
+          <label><span>Maximum MRN digits</span><input id="maxMrn" type="number" min="4" max="20" value="12"></label>
+          <label class="check"><input id="ignoreZeros" type="checkbox" checked><span>Ignore leading zeros</span></label>
+          <label class="check"><input id="ignoreSeparators" type="checkbox" checked><span>Ignore spaces and hyphens</span></label>
+        </div>
+      </article>
+
+      <div class="ready-strip" id="readyStrip"><strong>Ready check</strong><span>Import the tracker backup and readable payslip data for both hospitals.</span></div>
+      <div class="monthly-flow"><span>1 Select month</span><b>→</b><span>2 Load tracker</span><b>→</b><span>3 Upload payslips</span><b>→</b><span>4 Reconcile</span></div>
+      <div class="actions"><button class="primary" id="reconcileBtn">Run Reconciliation</button><button class="secondary" id="clearBtn">Clear workspace</button></div>
+      <div class="message" id="setupMessage"></div>
+    </section>
+
+    <section class="view" id="overviewView">
+      <div class="page-head"><div><p class="eyebrow">Monthly result</p><h2>Reconciliation overview</h2></div><div class="filter-label" id="overviewMonth">—</div></div>
+      <div class="kpi-grid" id="overviewKpis"></div>
+      <div class="grid two">
+        <article class="card"><h3>Fayhaa</h3><div id="fayhaaOverview"></div></article>
+        <article class="card"><h3>Mohammadiya</h3><div id="mohOverview"></div></article>
+      </div>
+      <article class="card"><h3>Priority findings</h3><div id="priorityFindings" class="list"></div></article>
+    </section>
+
+    <section class="view" id="consultationsView">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow">Separate consultation streams</p>
+          <h2>Consultation reconciliation</h2>
+          <p>Outpatient new consultations and inpatient consultations are reconciled separately. Follow-up outpatient visits are not included in the outpatient reconciliation count.</p>
+        </div>
+      </div>
+
+      <article class="card consult-stream-card">
+        <div class="stream-head">
+          <div><p class="eyebrow">Outpatient</p><h3>New Consultations Only</h3></div>
+          <span class="stream-code">01002003</span>
+        </div>
+        <p class="hint">Tracker: new outpatient consultations only. Payslip: Consultation Fee - 4 (01002003). Follow-ups are excluded.</p>
+        <div class="grid two" id="outpatientConsultationCards"></div>
+      </article>
+
+      <article class="card consult-stream-card">
+        <div class="stream-head">
+          <div><p class="eyebrow">Inpatient</p><h3>Inpatient Consultations</h3></div>
+          <span class="stream-code">01002043 / 01002052</span>
+        </div>
+        <p class="hint">Tracker: inpatient consultation entries only. Payslip: mapped inpatient consultation codes, kept separate from outpatient consultations.</p>
+        <div class="grid two" id="inpatientConsultationCards"></div>
+      </article>
+
+      <article class="card">
+        <h3>Consultation rules</h3>
+        <div class="consult-rules">
+          <div><b>Outpatient tracker count</b><span>New consultations only</span></div>
+          <div><b>Outpatient payslip</b><span>01002003 only</span></div>
+          <div><b>Inpatient tracker count</b><span>Inpatient Consultation clinic entries</span></div>
+          <div><b>Inpatient payslip</b><span>01002043 + 01002052 family</span></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="view" id="proceduresView">
+      <div class="page-head"><div><p class="eyebrow">MRN + service correlation</p><h2>Procedure and intervention reconciliation</h2></div>
+        <div class="segmented"><button class="seg active" data-proc-filter="all">All</button><button class="seg" data-proc-filter="missingPayslip">Missing from payslip</button><button class="seg" data-proc-filter="missingTracker">Missing from tracker</button><button class="seg" data-proc-filter="mismatch">Differences</button><button class="seg" data-proc-filter="matched">Matched</button></div>
+      </div>
+      <div id="procedureResults" class="result-table"></div>
+    </section>
+
+    <section class="view" id="reviewView">
+      <div class="page-head"><div><p class="eyebrow">Manual review</p><h2>Needs Review</h2><p>Uncertain MRN matches, grouped payments, incomplete amounts, and sedation lines appear here.</p></div></div>
+      <div id="reviewResults" class="list"></div>
+    </section>
+
+    <section class="view" id="finalView">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow">End-of-month outcome</p>
+          <h2>Reconciliation Summary</h2>
+          <p>Exactly what is missing from the payslip, what is missing from the tracker, and what still needs review. Manual decisions and follow-up status are saved locally.</p>
+        </div>
+        <div class="filter-label" id="finalMonth">—</div>
+      </div>
+
+      <article class="card quick-workspace">
+        <div class="quick-head">
+          <div><p class="eyebrow">Work unresolved cases first</p><h3>What needs attention?</h3></div>
+          <span id="reviewProgress" class="filter-label">—</span>
+        </div>
+        <div class="quick-tabs">
+          <button class="quick-tab active" data-quick-bucket="missingPayslip">Missing from Payslip <b id="quickMissingPay">0</b></button>
+          <button class="quick-tab" data-quick-bucket="missingTracker">Missing from Tracker <b id="quickMissingTracker">0</b></button>
+          <button class="quick-tab" data-quick-bucket="review">Needs Review <b id="quickReview">0</b></button>
+          <button class="quick-tab" data-quick-bucket="matched">Matched <b id="quickMatched">0</b></button>
+        </div>
+        <div id="quickCaseWorkspace"></div>
+      </article>
+
+      <div class="kpi-grid" id="finalKpis"></div>
+
+      <div class="grid two">
+        <article class="card final-summary-card">
+          <h3>Consultation reconciliation</h3>
+          <div id="finalConsultations"></div>
+        </article>
+        <article class="card final-summary-card">
+          <h3>Follow-up status</h3>
+          <div id="followupSummary"></div>
+        </article>
+      </div>
+
+      <article class="card bucket-card missing-payslip">
+        <div class="bucket-head"><div><p class="eyebrow">Tracker → Payslip</p><h3>Missing from Payslip</h3></div><span class="bucket-count" id="missingPayslipCount">0</span></div>
+        <p class="hint">Recorded in the tracker but not found, or only partially found, on the payslip. This is your billing follow-up list.</p>
+        <div id="finalMissingPayslip" class="final-list"></div>
+      </article>
+
+      <article class="card bucket-card missing-tracker">
+        <div class="bucket-head"><div><p class="eyebrow">Payslip → Tracker</p><h3>Missing from Tracker</h3></div><span class="bucket-count" id="missingTrackerCount">0</span></div>
+        <p class="hint">Appears on the payslip but no corresponding tracker procedure was found. Review whether it was omitted from the tracker, already recorded differently, or is not yours.</p>
+        <div id="finalMissingTracker" class="final-list"></div>
+      </article>
+
+      <article class="card bucket-card needs-review">
+        <div class="bucket-head"><div><p class="eyebrow">Manual decision</p><h3>Needs Review</h3></div><span class="bucket-count" id="needsReviewCount">0</span></div>
+        <p class="hint">Ambiguous code families, quantity differences, grouped charges, or uncertain matches. Correct the code mapping or classify the case manually.</p>
+        <div id="finalNeedsReview" class="final-list"></div>
+      </article>
+
+      <details class="card bucket-card matched-bucket">
+        <summary><span>Matched</span><span class="bucket-count" id="matchedCount">0</span></summary>
+        <p class="hint">Fully matched items are collapsed by default so the unresolved work stays visible.</p>
+        <div id="finalMatched" class="final-list"></div>
+      </details>
+
+      <div class="actions final-actions">
+        <button class="primary" id="exportFinalMissingBtn">Export Open / Missing CSV</button>
+        <button class="secondary" id="exportFinalAllBtn">Export Final Reconciliation CSV</button>
+      </div>
+    </section>
+
+    <section class="view" id="outstandingView">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow">Carry forward across months</p>
+          <h2>Unpaid / Follow-up</h2>
+          <p>Unpaid procedures and individual missing intervention units stay here until they are found on a later payslip or manually resolved.</p>
+        </div>
+        <div class="filter-label" id="outstandingTotalAmount">0 SAR outstanding</div>
+      </div>
+
+      <div class="kpi-grid" id="outstandingKpis"></div>
+
+      <article class="card">
+        <div class="outstanding-toolbar">
+          <div class="segmented">
+            <button class="outstanding-filter active" data-outstanding-filter="open">Open</button>
+            <button class="outstanding-filter" data-outstanding-filter="laterPaid">Found Later</button>
+            <button class="outstanding-filter" data-outstanding-filter="resolved">Resolved</button>
+            <button class="outstanding-filter" data-outstanding-filter="all">All</button>
+          </div>
+          <div class="export-button-group">
+            <button class="primary" id="exportUnpaidPdfBtn">Export Unpaid PDF</button>
+            <button class="secondary" id="exportOutstandingBtn">Export Outstanding CSV</button>
+          </div>
+        </div>
+        <div id="outstandingList" class="final-list"></div>
+      </article>
+
+      <article class="card">
+        <h3>How carry-forward works</h3>
+        <div class="consult-rules">
+          <div><b>Main procedures</b><span>Remain outstanding until the same MRN + procedure family is found on a later payslip.</span></div>
+          <div><b>Polypectomy / Clips</b><span>Only the unpaid quantity is carried forward. Grouped payslip amounts can satisfy multiple units.</span></div>
+          <div><b>Later payslip</b><span>When a carried item is found, it is marked Found Later and records the payslip month.</span></div>
+          <div><b>Persistence</b><span>Outstanding records, manual decisions, notes, and code mappings are stored locally and can be exported as a reconciliation backup.</span></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="view" id="mappingsView">
+      <div class="page-head"><div><p class="eyebrow">Simple code setup</p><h2>Billing Code Settings</h2><p>Most codes are already known. You only need to review new or uncertain codes.</p></div></div>
+      <article class="card code-review-card"><div class="code-section-head"><div><p class="eyebrow">Needs attention</p><h3>Unknown Codes</h3><p class="hint">Only unknown or unconfirmed codes appear here.</p></div><span class="bucket-count" id="unmappedCodeCount">0</span></div><div id="unmappedCodeList" class="code-review-list"></div></article>
+      <article class="card"><details><summary><b>Known Codes</b> <span class="hint-inline">View or edit confirmed mappings</span></summary><div id="knownCodeList" class="known-code-list"></div></details></article>
+      <article class="card"><details><summary><b>Advanced</b> <span class="hint-inline">Only needed for unusual billing rules</span></summary><div class="mapping-form advanced-mapping-form"><label><span>Billing code</span><input id="mapCode" placeholder="e.g. 05060074"></label><label><span>What is this code?</span><select id="mapService"></select></label><label><span>Advanced rule</span><select id="mapMode"><option value="base">Single procedure</option><option value="grouped">May include multiple units</option><option value="bundle">May include several services</option><option value="associated">Associated only</option><option value="consultation">Outpatient consultation</option><option value="inpatient">Inpatient consultation</option><option value="exclude">Ignore</option></select></label><button class="primary" id="addMappingBtn">Save Code</button></div></details></article>
+    </section>
+
+    <section class="view" id="exportView">
+      <div class="page-head"><div><p class="eyebrow">Reports</p><h2>Export reconciliation</h2></div></div>
+      <article class="card encrypted-backup-card">
+        <div><p class="eyebrow">Private local sync</p><h3>Encrypted Reconciliation Backup</h3><p>Move reconciliation settings, unpaid follow-up, manual corrections, and learned billing codes between devices without storing readable data in the file.</p></div>
+        <div class="encrypted-backup-grid">
+          <label><span>Password</span><input id="encryptedReconPassword" type="password" autocomplete="new-password" placeholder="Enter backup password"></label>
+          <button class="primary" id="exportEncryptedReconBtn">Export Encrypted Backup</button>
+          <label class="mini-import"><span>Import encrypted backup</span><input id="importEncryptedReconFile" type="file" accept=".hmgenc,.bin,application/octet-stream"></label>
+        </div>
+        <div class="message" id="encryptedReconMessage"></div>
+      </article>
+<div class="grid three">
+        <article class="card export-card"><h3>Full reconciliation CSV</h3><p>All matched and unmatched MRNs, procedures, grouped-payment assessments, and review notes.</p><button class="primary" id="exportFullBtn">Download CSV</button></article>
+        <article class="card export-card"><h3>Missing items CSV</h3><p>Only missing MRNs, procedures, and interventions for follow-up.</p><button class="primary" id="exportMissingBtn">Download CSV</button></article>
+        <article class="card export-card"><h3>Consultation summary CSV</h3><p>Monthly outpatient-new and inpatient consultation counts by hospital.</p><button class="primary" id="exportConsultBtn">Download CSV</button></article>
+        <article class="card export-card"><h3>Reconciliation backup</h3><p>Save code mappings, manual decisions, follow-up notes, and all outstanding payment records.</p><button class="primary" id="exportReconBackupBtn">Download JSON</button><label class="mini-import"><span>Restore reconciliation backup</span><input id="importReconBackupFile" type="file" accept=".json,application/json"></label></article>
+      </div>
+    </section>
+  </section>
+</main>
+<footer>HMG GI Payslip Review · Desktop v3.0</footer>
+<script src="app.js"></script>
+</body>
+</html>
