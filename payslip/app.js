@@ -1010,3 +1010,13 @@ $('importEncryptedReconFile')?.addEventListener('change',async e=>{
   }catch(err){encMsg(err.message||'Unable to restore encrypted backup.',true)}
   finally{e.target.value=''}
 });
+
+// Improved month selector
+function monthLabelV32(v){if(!/^\d{4}-\d{2}$/.test(v||''))return 'Choose month';const [y,m]=v.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString(undefined,{month:'long',year:'numeric'})}
+function syncMonthV32(){if($('monthDisplayLabel')&&$('monthInput'))$('monthDisplayLabel').textContent=monthLabelV32($('monthInput').value)}
+function shiftMonthV32(delta){const i=$('monthInput');if(!i)return;const v=/^\d{4}-\d{2}$/.test(i.value)?i.value:monthNow();let [y,m]=v.split('-').map(Number);const d=new Date(y,m-1+delta,1);i.value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;i.dispatchEvent(new Event('change',{bubbles:true}));syncMonthV32()}
+$('prevMonthBtn')?.addEventListener('click',()=>shiftMonthV32(-1));
+$('nextMonthBtn')?.addEventListener('click',()=>shiftMonthV32(1));
+$('currentMonthBtn')?.addEventListener('click',()=>{if($('monthInput')){$('monthInput').value=monthNow();$('monthInput').dispatchEvent(new Event('change',{bubbles:true}));syncMonthV32()}});
+$('monthDisplayBtn')?.addEventListener('click',()=>{const i=$('monthInput');if(!i)return;if(typeof i.showPicker==='function'){try{i.showPicker()}catch{i.focus()}}else i.focus()});
+$('monthInput')?.addEventListener('change',syncMonthV32);syncMonthV32();

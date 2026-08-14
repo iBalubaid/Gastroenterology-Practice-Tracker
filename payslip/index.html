@@ -9,7 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#087f5b">
+<meta name="theme-color" content="#1746a2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HMG Payslip">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -52,7 +52,16 @@
         </article>
         <article class="card">
           <h3>2. Select month</h3>
-          <label><span>Reconciliation month</span><input id="monthInput" type="month"></label>
+          <div class="month-picker-card">
+<span class="month-picker-label">Reconciliation month</span>
+<div class="month-picker-row">
+<button class="month-nav-btn" id="prevMonthBtn" type="button">‹</button>
+<button class="month-display-btn" id="monthDisplayBtn" type="button"><strong id="monthDisplayLabel">—</strong><small>Choose month</small></button>
+<button class="month-nav-btn" id="nextMonthBtn" type="button">›</button>
+</div>
+<input id="monthInput" class="native-month-input" type="month">
+<button class="current-month-btn" id="currentMonthBtn" type="button">Current Month</button>
+</div>
           <p class="hint">Only tracker entries in this month are compared.</p>
         </article>
       </div>
@@ -282,7 +291,7 @@
     </section>
   </section>
 </main>
-<footer>HMG GI Payslip Review · Desktop v3.0</footer>
+<footer>HMG GI Payslip Review · Desktop v3.2</footer>
 <script src="app.js"></script>
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}
