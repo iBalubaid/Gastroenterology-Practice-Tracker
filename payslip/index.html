@@ -8,6 +8,11 @@
 <link rel="stylesheet" href="styles.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#087f5b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HMG Payslip">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
 <header class="topbar">
@@ -16,7 +21,7 @@
     <h1>HMG GI Payslip Review</h1>
     <p class="subtitle">Correlate recorded consultation counts and endoscopy procedures with Fayhaa and Mohammadiya payslips.</p>
   </div>
-  <div class="status-pill" id="workspaceStatus">No backup imported</div>
+  <div class="topbar-actions"><button id="installPwaBtn" class="install-app-btn" type="button" hidden>Install App</button><div class="status-pill" id="workspaceStatus">No backup imported</div></div>
 </header>
 
 <main class="shell">
@@ -279,5 +284,11 @@
 </main>
 <footer>HMG GI Payslip Review · Desktop v3.0</footer>
 <script src="app.js"></script>
-</body>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}
+let deferredPwaPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPwaPrompt=e;const b=document.getElementById('installPwaBtn');if(b)b.hidden=false;});
+document.getElementById('installPwaBtn')?.addEventListener('click',async()=>{if(!deferredPwaPrompt)return;deferredPwaPrompt.prompt();try{await deferredPwaPrompt.userChoice}catch{}deferredPwaPrompt=null;const b=document.getElementById('installPwaBtn');if(b)b.hidden=true;});
+window.addEventListener('appinstalled',()=>{const b=document.getElementById('installPwaBtn');if(b)b.hidden=true;});
+</script></body>
 </html>

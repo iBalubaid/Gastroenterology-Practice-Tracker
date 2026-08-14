@@ -163,3 +163,24 @@ label span{display:block;font-size:.78rem;font-weight:850;margin-bottom:7px;colo
 .encrypted-backup-grid label{display:grid;gap:5px;font-size:.76rem;color:var(--muted)}
 .encrypted-backup-grid input{height:40px}
 @media(max-width:760px){.encrypted-backup-grid{grid-template-columns:1fr}.monthly-flow{align-items:flex-start}}
+
+.topbar-actions{display:flex;align-items:center;gap:10px}.install-app-btn{border:1px solid rgba(255,255,255,.35);background:white;color:#1746a2;border-radius:10px;padding:9px 13px;font-weight:800;cursor:pointer}
+@media(max-width:760px){.topbar-actions{width:100%;justify-content:space-between}}
+
+/* HMG Green theme */
+:root{
+  --primary:#087f5b;
+  --primary-dark:#056b4c;
+  --primary-soft:#e8f7f1;
+  --green:#087f5b;
+}
+body{background:#f2f8f5}
+.topbar{background:linear-gradient(135deg,#075f46,#0a8f68)}
+.sidebar{background:#064f3b}
+.nav-item.active,.nav-item:hover{background:#087f5b;color:#fff}
+.primary{background:#087f5b!important;border-color:#087f5b!important}
+.primary:hover{background:#056b4c!important}
+.quick-tab.active{background:#087f5b!important;border-color:#087f5b!important}
+.quick-workspace{border-top-color:#087f5b}
+.install-app-btn{color:#087f5b}
+a{color:#087f5b}
